@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone *)",
+      "Bash(where git *)",
+      "PowerShell(git clone *)",
+      "Bash(Get-Content -Wait \"C:\\\\Users\\\\ONECLICK\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--dev-lunomi-pos-lunomi\\\\8cd4d49e-e14e-4171-8eb5-c6efa26e58a9\\\\tasks\\\\bxl8kb62l.output\")",
+      "Bash(Select-String -Pattern \"audited|error|ERR|done|vulnerabilities\" --SimpleMatch)"
+    ]
+  }
+}
