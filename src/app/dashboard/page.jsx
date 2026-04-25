@@ -12,6 +12,7 @@ import {
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard Owner', active: true },
+  { icon: ShoppingCart, label: 'Kasir (POS)' },
   { icon: FileText, label: 'Ringkasan Bisnis' },
   { icon: Building2, label: 'Outlet & Cabang' },
   { icon: Wallet, label: 'Keuangan', hasChild: true },
@@ -64,102 +65,136 @@ export default function Dashboard() {
     <div className="flex h-screen overflow-hidden bg-[#F1F5F9]" style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>
 
       {/* SIDEBAR */}
-      <div className="flex flex-col w-56 flex-shrink-0 overflow-y-auto shadow-2xl z-50" style={{ background: '#0F172A', color: 'white' }}>
-        <div className="p-6 border-b border-white/10">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center font-black text-xl shadow-lg">L</div>
-            <div>
-              <div className="font-black text-lg leading-none">Lunomi</div>
-              <div className="text-[10px] font-bold text-orange-400 tracking-widest uppercase">POS PINTAR</div>
-            </div>
+      <div className="flex flex-col flex-shrink-0 overflow-y-auto z-50" style={{ width: '248px', background: '#FFFFFF', color: '#0F172A', borderRight: '1px solid #E5E7EB', position: 'sticky', top: 0, height: '100vh' }}>
+        {/* Brand */}
+        <div className="flex items-center gap-2.5" style={{ padding: '18px 18px 14px' }}>
+          <div className="flex-none rounded-lg flex items-center justify-center" style={{ width: 32, height: 32, background: '#2563EB', boxShadow: '0 6px 14px rgba(37,99,235,.35)' }}>
+            <span className="font-black text-white text-sm">L</span>
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', color: '#0F172A' }}>Lunomi</div>
+            <div style={{ fontSize: 10, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600 }}>POS Pintar</div>
           </div>
         </div>
 
-        <div className="p-4 border-b border-white/10 bg-white/5">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-full border-2 border-green-400 p-0.5 shadow-lg">
-              <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Andi" className="w-full h-full rounded-full bg-slate-800" alt="avatar" />
-            </div>
-            <div>
-              <div className="font-black text-sm">Andi Setiawan</div>
-              <div className="text-[10px] text-slate-400 font-bold">Owner / CEO</div>
-            </div>
+        {/* User Card */}
+        <div style={{ margin: '6px 14px 14px', padding: 12, border: '1px solid #E5E7EB', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#2563EB', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0, boxShadow: 'inset 0 0 0 2px #fff' }}>AS</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: 12.5 }}>Andi Setiawan</div>
+            <div style={{ fontSize: 11, color: '#64748B' }}>Owner / CEO</div>
+            <div style={{ fontSize: 10.5, color: '#64748B', marginTop: 4, fontFamily: "'JetBrains Mono', monospace" }}>Shift #SR24050101<br />09:00 – 21:00</div>
           </div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
-            <span className="text-[10px] font-black text-green-400 uppercase">Online</span>
-          </div>
-          <div className="text-[10px] text-slate-500 font-medium">Shift #SR24050101</div>
-          <div className="text-[10px] text-slate-500 font-medium">09:00 - 21:00</div>
         </div>
 
-        <nav className="flex-1 py-4">
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto" style={{ padding: '6px 10px' }}>
           {menuItems.map((item, i) => (
-            <div key={i} className={`flex items-center justify-between px-6 py-3 cursor-pointer transition-all ${item.active ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-white/5'}`}
-              style={{ borderRadius: item.active ? '0 30px 30px 0' : '0', marginRight: item.active ? '15px' : '0' }}>
-              <div className="flex items-center gap-4">
-                <item.icon size={18} className={item.active ? 'text-white' : 'text-slate-500'} />
-                <span className="text-xs font-black uppercase tracking-wide">{item.label}</span>
+            <div key={i} className="flex items-center justify-between cursor-pointer transition-all"
+              style={{
+                gap: 10, padding: '9px 12px', borderRadius: 10,
+                background: item.active ? '#2563EB' : 'transparent',
+                color: item.active ? '#fff' : '#334155',
+                fontWeight: 500, fontSize: 12.5,
+                boxShadow: item.active ? '0 6px 14px rgba(37,99,235,.35)' : 'none',
+                marginBottom: 1,
+              }}
+              onMouseEnter={e => { if (!item.active) e.currentTarget.style.background = '#F1F5F9' }}
+              onMouseLeave={e => { if (!item.active) e.currentTarget.style.background = 'transparent' }}
+            >
+              <div className="flex items-center" style={{ gap: 10 }}>
+                <item.icon size={16} style={{ color: item.active ? '#fff' : '#64748B', flexShrink: 0 }} />
+                <span>{item.label}</span>
               </div>
-              {item.badge && <span className="bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg">{item.badge}</span>}
+              <div className="flex items-center" style={{ gap: 6 }}>
+                {item.badge && <span style={{ background: '#FF4757', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 999, fontFamily: "'JetBrains Mono', monospace" }}>{item.badge}</span>}
+                {item.hasChild && <span style={{ color: '#94A3B8', fontSize: 11 }}>▾</span>}
+              </div>
             </div>
           ))}
         </nav>
 
-        <div className="p-4 space-y-3 border-t border-white/10">
-          <div className="bg-indigo-600/20 border border-indigo-500/30 rounded-2xl p-4 cursor-pointer hover:bg-indigo-600/30 transition-all group">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"><Brain size={16} /></div>
-              <span className="font-black text-xs">Tanya CEO</span>
+        {/* Side CTAs */}
+        <div style={{ padding: '0 14px', marginBottom: 6 }}>
+          <div className="flex items-center gap-2.5 cursor-pointer transition-all" style={{ padding: 12, borderRadius: 12, background: '#EEF2FF', border: '1px solid #C7D2FE', marginBottom: 8 }}>
+            <div className="flex-none rounded-lg flex items-center justify-center" style={{ width: 32, height: 32, background: '#fff', boxShadow: '0 1px 2px rgba(15,23,42,.05)', color: '#2563EB' }}>
+              <Brain size={14} />
             </div>
-            <p className="text-[10px] text-slate-400 font-bold">Chat dengan AI Assistant</p>
-          </div>
-          <div className="bg-slate-800/50 border border-white/5 rounded-2xl p-4 cursor-pointer hover:bg-slate-800/80 transition-all group">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"><Zap size={16} /></div>
-              <span className="font-black text-xs">Instruksi Cepat</span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 12.5 }}>Tanya CEO</div>
+              <div style={{ fontSize: 11, color: '#64748B' }}>Chat dengan AI</div>
             </div>
-            <p className="text-[10px] text-slate-400 font-bold">Beri Tugas ke AI / Tim</p>
           </div>
-          <div className="flex justify-between text-[10px] text-slate-600 font-bold px-2">
-            <span>Lunomi POS Pintar</span>
-            <span>v1.0.0</span>
+          <div className="flex items-center gap-2.5 cursor-pointer transition-all" style={{ padding: 12, borderRadius: 12, background: '#FEF3C7', border: '1px solid #FDE68A' }}>
+            <div className="flex-none rounded-lg flex items-center justify-center" style={{ width: 32, height: 32, background: '#fff', boxShadow: '0 1px 2px rgba(15,23,42,.05)', color: '#F0A500' }}>
+              <Zap size={14} />
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 12.5 }}>Instruksi Cepat</div>
+              <div style={{ fontSize: 11, color: '#64748B' }}>Beri Tugas ke AI / Tim</div>
+            </div>
           </div>
+        </div>
+
+        {/* Side Footer */}
+        <div className="flex justify-between" style={{ padding: '10px 18px 14px', fontSize: 10.5, color: '#94A3B8', borderTop: '1px solid #E5E7EB' }}>
+          <span>Lunomi POS Pintar</span>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>v1.0.0</span>
         </div>
       </div>
 
       {/* MAIN */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* HEADER */}
-        <div className="h-20 bg-white border-b-2 border-slate-200 flex items-center justify-between px-8 shadow-sm z-40">
-          <div>
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">👑</span>
-              <h1 className="font-black text-2xl text-slate-900 tracking-tight">DASHBOARD OWNER</h1>
+        <div className="flex items-center bg-white border-b border-slate-200 z-40" style={{ gap: 14, padding: '14px 22px' }}>
+          {/* Page Title */}
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex-none flex items-center justify-center rounded-lg text-white" style={{ width: 36, height: 36, background: '#2563EB', boxShadow: '0 8px 18px rgba(37,99,235,.35)', fontSize: 16 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l4 4 5-7 5 7 4-4-2 12H5L3 7zm2 14h14v2H5z"/></svg>
             </div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pusat Kendali & Pengambilan Keputusan Bisnis - Lunomi Group</p>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3 bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-2.5 cursor-pointer hover:bg-slate-100 transition-all">
-              <Building2 size={18} className="text-blue-600" />
-              <span className="font-black text-sm text-slate-900">Lunomi Coffee Senopati</span>
-              <ChevronDown size={18} className="text-slate-400" />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]"></div>
-              <span className="font-black text-sm text-green-600 uppercase">Online</span>
-            </div>
-            <div className="relative cursor-pointer group">
-              <div className="p-3 bg-slate-50 rounded-2xl border-2 border-slate-200 group-hover:bg-slate-100 transition-all">
-                <Bell size={22} className="text-slate-600" />
-              </div>
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white shadow-lg">8</div>
-            </div>
-            <div className="text-right border-l-2 border-slate-200 pl-6">
-              <div className="font-black text-sm text-slate-900">Rabu, 1 Mei 2024</div>
-              <div className="font-bold text-xs text-slate-500">10:30:45</div>
+            <div>
+              <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, letterSpacing: '-0.02em', lineHeight: 1, color: '#0F172A' }}>Dashboard Owner</div>
+              <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>Pusat Kendali &amp; Pengambilan Keputusan Bisnis — Lunomi Group</div>
             </div>
           </div>
+
+          {/* Outlet Picker */}
+          <button className="flex items-center gap-2.5 cursor-pointer hover:border-slate-400 transition-all" style={{ padding: '7px 14px', border: '1px solid #E5E7EB', borderRadius: 999, background: '#fff', fontSize: 12, fontWeight: 600 }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2563EB', display: 'inline-block' }}></span>
+            <span>Lunomi Group (All Outlets)</span>
+            <ChevronDown size={12} />
+          </button>
+
+          {/* Online chip */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ fontSize: 11.5, fontWeight: 600, background: 'oklch(0.96 0.05 152)', border: '1px solid oklch(0.88 0.08 152)', color: 'oklch(0.35 0.12 152)' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }}></span>
+            Online
+          </div>
+
+          {/* Bell */}
+          <div className="relative cursor-pointer">
+            <div className="flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-all" style={{ width: 36, height: 36, color: '#334155' }}>
+              <Bell size={16} />
+            </div>
+            <span className="absolute flex items-center justify-center text-white font-black" style={{ top: -4, right: -4, background: '#FF4757', fontSize: 9, minWidth: 16, height: 16, borderRadius: 999, padding: '0 4px', border: '2px solid #fff' }}>9</span>
+          </div>
+
+          {/* Date */}
+          <div style={{ textAlign: 'right', fontSize: 11.5, color: '#334155' }}>
+            <div style={{ fontWeight: 700, color: '#0F172A' }}>Rabu, 1 Mei 2026</div>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", color: '#64748B' }}>10:30:45</div>
+          </div>
+
+          {/* AI Pill */}
+          <button className="flex items-center gap-2 cursor-pointer" style={{ padding: '6px 10px 6px 6px', borderRadius: 999, background: '#EEF2FF', border: '1px solid #C7D2FE' }}>
+            <span className="flex items-center justify-center rounded-full text-white" style={{ width: 28, height: 28, background: '#7C6BFF', fontSize: 12 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 2l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>
+            </span>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontWeight: 700, fontSize: 12 }}>Tanya CEO</div>
+              <div style={{ fontSize: 10, color: '#64748B' }}>AI Assistant</div>
+            </div>
+          </button>
         </div>
 
         {/* CONTENT */}
