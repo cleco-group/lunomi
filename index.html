@@ -10,48 +10,50 @@
             background: linear-gradient(135deg, #f0f4f8 0%, #d9e8f5 50%, #c1d9f0 100%);
             min-height: 100vh;
         }
-        
         .gradient-orb {
             position: fixed;
             border-radius: 50%;
             opacity: 0.08;
             pointer-events: none;
         }
-        
         .orb-1 {
-            width: 500px;
-            height: 500px;
+            width: 500px; height: 500px;
             background: linear-gradient(135deg, #2563eb, #1e40af);
-            top: -250px;
-            right: -250px;
+            top: -250px; right: -250px;
             animation: float 8s ease-in-out infinite;
         }
-        
         .orb-2 {
-            width: 400px;
-            height: 400px;
+            width: 400px; height: 400px;
             background: linear-gradient(135deg, #10b981, #047857);
-            bottom: -200px;
-            left: -200px;
+            bottom: -200px; left: -200px;
             animation: float 10s ease-in-out infinite;
             animation-delay: 2s;
         }
-        
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(30px); }
         }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
     </style>
 </head>
 <body class="relative">
-    <!-- Gradient orbs -->
     <div class="gradient-orb orb-1"></div>
     <div class="gradient-orb orb-2"></div>
 
-    <!-- Main container -->
     <div class="min-h-screen flex items-center justify-center p-4 relative z-10">
         <div class="w-full max-w-md">
-            <!-- Card -->
             <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
                 <!-- Header -->
                 <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-12 text-center">
@@ -67,12 +69,15 @@
                 <!-- Body -->
                 <div class="p-8">
                     <!-- Error message -->
-                    <div id="errorMsg" class="hidden mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
+                    <div id="errorMsg" class="hidden mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
+                        <span>⚠️</span>
+                        <span id="errorText"></span>
+                    </div>
 
                     <!-- Role selector -->
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-gray-700 mb-3">Pilih Role Akses</label>
-                        <div class="grid grid-cols-4 gap-2">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                             <label class="relative">
                                 <input type="radio" name="role" value="owner" class="hidden peer" checked onchange="updateRole()">
                                 <div class="p-3 text-center rounded-lg border-2 border-gray-300 peer-checked:border-blue-600 peer-checked:bg-blue-50 cursor-pointer transition">
@@ -107,13 +112,16 @@
                     <!-- Email input -->
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-2" for="email">Email</label>
-                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="email" type="email" placeholder="staff@lunomi.local">
+                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="email" type="email" placeholder="staff@lunomi.local" oninput="clearError()">
                     </div>
 
                     <!-- Password input -->
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-gray-700 mb-2" for="password">Password</label>
-                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="password" type="password" placeholder="••••••••">
+                        <div class="relative">
+                            <input class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="password" type="password" placeholder="••••••••" oninput="clearError()">
+                            <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg" id="eyeBtn" title="Tampilkan password">👁️</button>
+                        </div>
                     </div>
 
                     <!-- Login button -->
@@ -123,12 +131,12 @@
 
                     <!-- Demo info -->
                     <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg text-xs">
-                        <div class="font-semibold text-amber-900 mb-2">Akun Demo Tersedia:</div>
+                        <div class="font-semibold text-amber-900 mb-2">Akun Demo — klik role untuk auto-isi:</div>
                         <div class="space-y-1 text-amber-800">
-                            <div>👤 owner@lunomi.local - demo123</div>
-                            <div>📋 manager@lunomi.local - demo123</div>
-                            <div>💳 kasir@lunomi.local - demo123</div>
-                            <div>👨‍🍳 kitchen@lunomi.local - demo123</div>
+                            <div>👤 owner@lunomi.local · demo123</div>
+                            <div>📋 manager@lunomi.local · demo123</div>
+                            <div>💳 kasir@lunomi.local · demo123</div>
+                            <div>👨‍🍳 kitchen@lunomi.local · demo123</div>
                         </div>
                     </div>
                 </div>
@@ -138,29 +146,64 @@
 
     <script>
         const DEMO_ACCOUNTS = {
-            owner: { email: 'owner@lunomi.local', password: 'demo123', role: 'owner' },
-            manager: { email: 'manager@lunomi.local', password: 'demo123', role: 'manager' },
-            cashier: { email: 'kasir@lunomi.local', password: 'demo123', role: 'cashier' },
-            kitchen: { email: 'kitchen@lunomi.local', password: 'demo123', role: 'kitchen' }
+            owner:   { email: 'owner@lunomi.local',   password: 'demo123' },
+            manager: { email: 'manager@lunomi.local',  password: 'demo123' },
+            cashier: { email: 'kasir@lunomi.local',    password: 'demo123' },
+            kitchen: { email: 'kitchen@lunomi.local',  password: 'demo123' }
         };
+
+        const DASHBOARDS = {
+            owner:   'dashboard.html',
+            manager: 'dashboard.html?role=manager',
+            cashier: 'pos.html',
+            kitchen: 'kitchen.html'
+        };
+
+        let errorTimer = null;
 
         function updateRole() {
             const role = document.querySelector('input[name="role"]:checked').value;
             const account = DEMO_ACCOUNTS[role];
             document.getElementById('email').value = account.email;
             document.getElementById('password').value = account.password;
+            clearError();
+        }
+
+        function showError(msg) {
+            clearTimeout(errorTimer);
+            const box = document.getElementById('errorMsg');
+            document.getElementById('errorText').textContent = msg;
+            box.classList.remove('hidden');
+            errorTimer = setTimeout(clearError, 5000);
+        }
+
+        function clearError() {
+            clearTimeout(errorTimer);
+            document.getElementById('errorMsg').classList.add('hidden');
+        }
+
+        function togglePassword() {
+            const pw = document.getElementById('password');
+            const btn = document.getElementById('eyeBtn');
+            if (pw.type === 'password') {
+                pw.type = 'text';
+                btn.textContent = '🙈';
+                btn.title = 'Sembunyikan password';
+            } else {
+                pw.type = 'password';
+                btn.textContent = '👁️';
+                btn.title = 'Tampilkan password';
+            }
         }
 
         function handleLogin() {
-            const email = document.getElementById('email').value.trim();
+            const email    = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const role = document.querySelector('input[name="role"]:checked').value;
-            const errorMsg = document.getElementById('errorMsg');
+            const role     = document.querySelector('input[name="role"]:checked').value;
             const loginBtn = document.getElementById('loginBtn');
 
             if (!email || !password) {
-                errorMsg.textContent = 'Email dan password harus diisi';
-                errorMsg.classList.remove('hidden');
+                showError('Email dan password harus diisi');
                 return;
             }
 
@@ -168,56 +211,41 @@
             if (email === account.email && password === account.password) {
                 const session = {
                     user: {
-                        email: email,
+                        email,
                         id: `user_${role}_${Date.now()}`,
-                        role: role,
-                        name: role.charAt(0).toUpperCase() + role.slice(1)
+                        role,
+                        name: role === 'cashier' ? 'Kasir' : role.charAt(0).toUpperCase() + role.slice(1)
                     },
                     loginTime: new Date().toISOString(),
                     outlet_id: 'outlet_demo_001'
                 };
-
                 localStorage.setItem('lunomi_session', JSON.stringify(session));
                 loginBtn.disabled = true;
-                loginBtn.textContent = 'Sedang membuka...';
-
-                const dashboards = {
-                    owner: 'dashboard.html',
-                    manager: 'dashboard.html?role=manager',
-                    cashier: 'pos.html',
-                    kitchen: 'kitchen.html'
-                };
-
-                setTimeout(() => {
-                    window.location.href = dashboards[role];
-                }, 600);
+                loginBtn.innerHTML = '<span class="spinner"></span>Membuka...';
+                setTimeout(() => { window.location.href = DASHBOARDS[role]; }, 600);
             } else {
-                errorMsg.textContent = 'Email atau password salah. Gunakan akun demo yang tersedia.';
-                errorMsg.classList.remove('hidden');
+                showError('Email atau password salah. Gunakan akun demo yang tersedia.');
             }
         }
 
-        // Initialize on load
         document.addEventListener('DOMContentLoaded', () => {
             updateRole();
-            
             document.getElementById('password').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleLogin();
             });
         });
 
-        // Check if already logged in
         window.addEventListener('load', () => {
-            const session = localStorage.getItem('lunomi_session');
-            if (session) {
-                const data = JSON.parse(session);
-                const dashboards = {
-                    owner: 'dashboard.html',
-                    manager: 'dashboard.html?role=manager',
-                    cashier: 'pos.html',
-                    kitchen: 'kitchen.html'
-                };
-                window.location.href = dashboards[data.user.role];
+            try {
+                const session = localStorage.getItem('lunomi_session');
+                if (session) {
+                    const data = JSON.parse(session);
+                    if (DASHBOARDS[data.user.role]) {
+                        window.location.href = DASHBOARDS[data.user.role];
+                    }
+                }
+            } catch (e) {
+                localStorage.removeItem('lunomi_session');
             }
         });
     </script>

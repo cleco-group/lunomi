@@ -8,45 +8,65 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .order-card { transition: all 0.3s; }
-        .order-card.urgent { border-left: 4px solid #ef4444; background: #fef2f2; }
-        .order-card.ready { border-left: 4px solid #10b981; background: #f0fdf4; }
-        .order-card.cooking { border-left: 4px solid #f59e0b; background: #fffbeb; }
-        .timer { font-weight: 700; font-size: 1.25rem; }
-        .timer.urgent { color: #ef4444; animation: pulse 1s infinite; }
+        .order-card { transition: all 0.3s; border-radius: 0.75rem; }
+        .order-card.urgent  { border-left: 4px solid #ef4444; background: #1f0a0a; }
+        .order-card.cooking { border-left: 4px solid #f59e0b; background: #1a1200; }
+        .order-card.ready   { border-left: 4px solid #10b981; background: #0a1f14; }
+        .order-card.pending { border-left: 4px solid #6b7280; background: #111827; }
+        .timer { font-weight: 700; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+        .timer.urgent  { color: #ef4444; animation: blink 1s infinite; }
         .timer.warning { color: #f59e0b; }
-        .timer.ok { color: #10b981; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .timer.ok      { color: #10b981; }
+        @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        @keyframes spin   { to { transform: rotate(360deg); } }
+        .spin { animation: spin 0.5s linear; }
+        #toast { transition: opacity 0.3s; pointer-events: none; }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] hidden">
+        <div id="toastInner" class="px-5 py-3 rounded-lg shadow-lg text-sm font-semibold text-white flex items-center gap-2"></div>
+    </div>
+
     <!-- Header -->
     <div class="bg-gray-800 border-b border-gray-700 px-6 py-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div>
                 <h1 class="text-2xl font-bold">🍳 Kitchen Display System</h1>
-                <p class="text-sm text-gray-400">Lunomi KDS - Outlet Jl. Sudirman</p>
+                <p class="text-sm text-gray-400">Lunomi KDS · Outlet Jl. Sudirman</p>
             </div>
-            <div class="text-right">
-                <p class="text-sm text-gray-400" id="timeNow">--:--</p>
-                <p class="text-xs text-gray-500">Status: <span id="kdsStatus" class="text-green-400">ONLINE</span></p>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-sm text-gray-300 font-mono" id="timeNow">--:--</p>
+                    <p class="text-xs text-gray-500">Status: <span id="kdsStatus" class="text-green-400">ONLINE</span></p>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <button onclick="window.location.href='dashboard.html'" class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-semibold rounded-lg transition">Dashboard</button>
+                    <button onclick="logout()" class="px-3 py-1.5 bg-red-900 hover:bg-red-800 text-red-300 text-xs font-semibold rounded-lg transition">Logout</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Stats Bar -->
     <div class="bg-gray-800 border-b border-gray-700 px-6 py-3">
-        <div class="max-w-7xl mx-auto flex gap-8 text-sm">
+        <div class="max-w-7xl mx-auto flex flex-wrap gap-6 text-sm">
             <div class="flex items-center gap-2">
-                <span class="text-gray-400">📋 Total Order:</span>
+                <span class="text-gray-400">📋 Total:</span>
                 <span class="font-bold text-lg" id="totalOrder">0</span>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-gray-400">👨‍🍳 Sedang Masak:</span>
+                <span class="text-gray-400">⏳ Antrian:</span>
+                <span class="font-bold text-lg text-gray-300" id="pendingOrder">0</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-gray-400">👨‍🍳 Masak:</span>
                 <span class="font-bold text-lg text-amber-400" id="cookingOrder">0</span>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-gray-400">✓ Selesai:</span>
+                <span class="text-gray-400">✓ Siap:</span>
                 <span class="font-bold text-lg text-green-400" id="readyOrder">0</span>
             </div>
             <div class="flex items-center gap-2">
@@ -57,48 +77,78 @@
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-6 py-6 h-[calc(100vh-200px)] overflow-y-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Incoming Orders -->
+    <div class="max-w-7xl mx-auto px-4 py-5 overflow-y-auto" style="height:calc(100vh - 148px)">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
-                <h2 class="text-lg font-bold mb-4 text-yellow-400">📥 Order Masuk</h2>
-                <div id="incomingOrders" class="space-y-4"></div>
+                <h2 class="text-base font-bold mb-3 text-yellow-400 flex items-center gap-2">
+                    <span>📥 Order Masuk</span>
+                    <span id="pendingBadge" class="text-xs bg-yellow-900 text-yellow-300 px-2 py-0.5 rounded-full"></span>
+                </h2>
+                <div id="incomingOrders" class="space-y-3"></div>
             </div>
-
-            <!-- Cooking Orders -->
             <div>
-                <h2 class="text-lg font-bold mb-4 text-orange-400">👨‍🍳 Sedang Dimasak</h2>
-                <div id="cookingOrders" class="space-y-4"></div>
+                <h2 class="text-base font-bold mb-3 text-orange-400 flex items-center gap-2">
+                    <span>👨‍🍳 Sedang Dimasak</span>
+                    <span id="cookingBadge" class="text-xs bg-orange-900 text-orange-300 px-2 py-0.5 rounded-full"></span>
+                </h2>
+                <div id="cookingOrders" class="space-y-3"></div>
             </div>
-
-            <!-- Ready Orders -->
             <div>
-                <h2 class="text-lg font-bold mb-4 text-green-400">✓ Siap Diambil</h2>
-                <div id="readyOrders" class="space-y-4"></div>
+                <h2 class="text-base font-bold mb-3 text-green-400 flex items-center gap-2">
+                    <span>✓ Siap Diambil</span>
+                    <span id="readyBadge" class="text-xs bg-green-900 text-green-300 px-2 py-0.5 rounded-full"></span>
+                </h2>
+                <div id="readyOrders" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Pickup Modal -->
+    <div id="pickupModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl border border-gray-700">
+            <h3 class="text-lg font-bold text-white mb-2">Konfirmasi Pengambilan</h3>
+            <p class="text-gray-400 text-sm mb-1">Order: <span id="pickupOrderId" class="text-white font-semibold"></span></p>
+            <p class="text-gray-400 text-sm mb-5">Item: <span id="pickupItems" class="text-gray-300"></span></p>
+            <div class="flex gap-3">
+                <button onclick="closePickup()" class="flex-1 border border-gray-600 text-gray-300 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-700 transition">Batal</button>
+                <button onclick="confirmPickup()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition">✓ Konfirmasi Ambil</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Sample orders data
-        const ORDERS = [
-            {id:'ORD-001',time:'09:30',items:'Nasi Goreng x2, Mie Ayam',st:'pending',et:8,min:3},
-            {id:'ORD-002',time:'09:32',items:'Ikan Bakar, Soto Ayam',st:'pending',et:12,min:5},
-            {id:'ORD-003',time:'09:35',items:'Lumpia x3, Es Teh',st:'cooking',et:4,min:2},
-            {id:'ORD-004',time:'09:38',items:'Kue Lapis x2, Kopi',st:'cooking',et:2,min:1},
-            {id:'ORD-005',time:'09:40',items:'Roti Goreng x5',st:'ready',et:0,min:0},
-            {id:'ORD-006',time:'09:42',items:'Nasi Goreng (URGENT)',st:'pending',et:6,min:2,urgent:true},
-            {id:'ORD-007',time:'09:45',items:'Smoothie, Jus',st:'ready',et:0,min:0},
-            {id:'ORD-008',time:'09:48',items:'Bika Ambon',st:'cooking',et:3,min:1}
+        const ORDERS_INIT = [
+            {id:'ORD-001',time:'09:30',items:'Nasi Goreng x2, Mie Ayam',    st:'pending', et:8,  urgent:false},
+            {id:'ORD-002',time:'09:32',items:'Ikan Bakar, Soto Ayam',       st:'pending', et:12, urgent:false},
+            {id:'ORD-003',time:'09:35',items:'Lumpia x3, Es Teh',           st:'cooking', et:4,  urgent:false},
+            {id:'ORD-004',time:'09:38',items:'Kue Lapis x2, Kopi',          st:'cooking', et:2,  urgent:false},
+            {id:'ORD-005',time:'09:40',items:'Roti Goreng x5',              st:'ready',   et:0,  urgent:false},
+            {id:'ORD-006',time:'09:42',items:'Nasi Goreng — URGENT',        st:'pending', et:6,  urgent:true},
+            {id:'ORD-007',time:'09:45',items:'Smoothie, Jus',               st:'ready',   et:0,  urgent:false},
+            {id:'ORD-008',time:'09:48',items:'Bika Ambon',                  st:'cooking', et:3,  urgent:false}
         ];
 
-        let orders = JSON.parse(JSON.stringify(ORDERS));
+        let orders  = JSON.parse(JSON.stringify(ORDERS_INIT));
         let elapsed = {};
+        let intervalId = null;
+        let pickupTargetId = null;
+
+        let toastTimer = null;
+        function showToast(msg, type = 'success') {
+            clearTimeout(toastTimer);
+            const colors = { success:'bg-green-700', info:'bg-blue-700', warning:'bg-amber-600', error:'bg-red-700' };
+            const icons  = { success:'✓', info:'ℹ️', warning:'⚠️', error:'✕' };
+            const inner  = document.getElementById('toastInner');
+            inner.className = `px-5 py-3 rounded-lg shadow-lg text-sm font-semibold text-white flex items-center gap-2 ${colors[type]}`;
+            inner.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            toast.style.opacity = '1';
+            toastTimer = setTimeout(() => { toast.style.opacity='0'; setTimeout(()=>toast.classList.add('hidden'),300); }, 3000);
+        }
 
         function initElapsed() {
-            orders.forEach(o => {
-                elapsed[o.id] = 0;
-            });
+            orders.forEach(o => { elapsed[o.id] = 0; });
         }
 
         function tick() {
@@ -111,99 +161,150 @@
         }
 
         function render() {
-            const incoming = orders.filter(o => o.st === 'pending');
+            const pending = orders.filter(o => o.st === 'pending');
             const cooking = orders.filter(o => o.st === 'cooking');
-            const ready = orders.filter(o => o.st === 'ready');
+            const ready   = orders.filter(o => o.st === 'ready');
+            const urgent  = orders.filter(o => o.urgent && o.st !== 'ready');
 
-            document.getElementById('incomingOrders').innerHTML = incoming.length === 0 
-                ? '<p class="text-gray-500 text-sm">Tidak ada order baru</p>'
-                : incoming.map(o => renderCard(o, 'pending')).join('');
+            document.getElementById('totalOrder').textContent   = orders.length;
+            document.getElementById('pendingOrder').textContent = pending.length;
+            document.getElementById('cookingOrder').textContent = cooking.length;
+            document.getElementById('readyOrder').textContent   = ready.length;
+            document.getElementById('urgentOrder').textContent  = urgent.length;
+
+            document.getElementById('pendingBadge').textContent = pending.length || '';
+            document.getElementById('cookingBadge').textContent = cooking.length || '';
+            document.getElementById('readyBadge').textContent   = ready.length   || '';
+
+            document.getElementById('incomingOrders').innerHTML = pending.length === 0
+                ? '<p class="text-gray-600 text-sm text-center py-6">Tidak ada order baru</p>'
+                : pending.map(o => renderCard(o)).join('');
 
             document.getElementById('cookingOrders').innerHTML = cooking.length === 0
-                ? '<p class="text-gray-500 text-sm">Semua selesai</p>'
-                : cooking.map(o => renderCard(o, 'cooking')).join('');
+                ? '<p class="text-gray-600 text-sm text-center py-6">Semua selesai</p>'
+                : cooking.map(o => renderCard(o)).join('');
 
             document.getElementById('readyOrders').innerHTML = ready.length === 0
-                ? '<p class="text-gray-500 text-sm">Belum ada yang siap</p>'
-                : ready.map(o => renderCard(o, 'ready')).join('');
-
-            document.getElementById('totalOrder').textContent = orders.length;
-            document.getElementById('cookingOrder').textContent = cooking.length;
-            document.getElementById('readyOrder').textContent = ready.length;
-            document.getElementById('urgentOrder').textContent = orders.filter(o => o.urgent).length;
+                ? '<p class="text-gray-600 text-sm text-center py-6">Belum ada yang siap</p>'
+                : ready.map(o => renderCard(o)).join('');
         }
 
-        function renderCard(o, type) {
-            const el = elapsed[o.id] || 0;
-            const timerClass = o.urgent ? 'urgent' : el > 600 ? 'warning' : 'ok';
+        function renderCard(o) {
+            const el  = elapsed[o.id] || 0;
+            const urgentTimer = o.urgent && o.st !== 'ready';
+            const timerClass  = urgentTimer ? 'urgent' : el > 600 ? 'warning' : 'ok';
             const mins = Math.floor(el / 60);
             const secs = el % 60;
-            const timerText = mins + ':' + (secs < 10 ? '0' : '') + secs;
+            const timerText = `${mins}:${String(secs).padStart(2,'0')}`;
 
-            return '<div class="order-card ' + (o.urgent ? 'urgent' : type === 'cooking' ? 'cooking' : type === 'ready' ? 'ready' : '') + ' p-4 rounded-lg">' +
-                '<div class="flex justify-between items-start mb-3">' +
-                '<div>' +
-                '<div class="font-bold text-lg">' + o.id + '</div>' +
-                '<div class="text-xs text-gray-400">' + o.time + '</div>' +
-                '</div>' +
-                '<div class="text-right">' +
-                '<div class="timer ' + timerClass + '">' + timerText + '</div>' +
-                '<div class="text-xs text-gray-400">' + (type === 'ready' ? 'Siap' : 'Est: ' + o.et + 'min') + '</div>' +
-                '</div></div>' +
-                '<div class="text-sm mb-3 border-t border-gray-600 pt-2">' + o.items + '</div>' +
-                '<div class="flex gap-2">' +
-                (type === 'pending' ? 
-                    '<button onclick="startCooking(\'' + o.id + '\')" class="flex-1 bg-orange-600 hover:bg-orange-700 px-3 py-2 rounded text-xs font-semibold">Mulai Masak</button>' :
-                type === 'cooking' ?
-                    '<button onclick="markReady(\'' + o.id + '\')" class="flex-1 bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-xs font-semibold">Selesai</button>' :
-                    '<button onclick="clearOrder(\'' + o.id + '\')" class="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-xs font-semibold">Ambil</button>'
-                ) +
-                (o.urgent ? '<button onclick="toggleUrgent(\'' + o.id + '\')" class="flex-1 bg-red-700 hover:bg-red-800 px-3 py-2 rounded text-xs font-semibold">🚨</button>' : '') +
-                '</div></div>';
+            let cardClass = 'order-card ';
+            if (o.urgent && o.st !== 'ready') cardClass += 'urgent';
+            else if (o.st === 'cooking') cardClass += 'cooking';
+            else if (o.st === 'ready')   cardClass += 'ready';
+            else cardClass += 'pending';
+
+            let actionBtn = '';
+            if (o.st === 'pending') {
+                actionBtn = `<button onclick="startCooking('${o.id}')" class="flex-1 bg-amber-600 hover:bg-amber-700 px-3 py-2 rounded-lg text-xs font-bold transition">▶ Mulai Masak</button>`;
+            } else if (o.st === 'cooking') {
+                actionBtn = `<button onclick="markReady('${o.id}')" class="flex-1 bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg text-xs font-bold transition">✓ Selesai</button>`;
+            } else {
+                actionBtn = `<button onclick="requestPickup('${o.id}')" class="flex-1 bg-gray-600 hover:bg-gray-500 px-3 py-2 rounded-lg text-xs font-bold transition">📦 Ambil</button>`;
+            }
+
+            const urgentToggle = o.st !== 'ready'
+                ? `<button onclick="toggleUrgent('${o.id}')" class="px-3 py-2 rounded-lg text-xs font-bold transition ${o.urgent ? 'bg-red-700 hover:bg-red-800 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}" title="${o.urgent ? 'Hapus urgent' : 'Tandai urgent'}">🚨</button>`
+                : '';
+
+            return `<div class="${cardClass} p-4 border border-gray-700">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <div class="font-bold text-base">${o.id}${o.urgent && o.st !== 'ready' ? ' <span class="text-xs bg-red-600 text-white px-1.5 py-0.5 rounded ml-1">URGENT</span>' : ''}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">${o.time}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="timer ${timerClass}">${timerText}</div>
+                        <div class="text-xs text-gray-500">${o.st === 'ready' ? 'Siap diambil' : 'Est: ' + o.et + ' min'}</div>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-300 mb-3 border-t border-gray-700 pt-2">${o.items}</div>
+                <div class="flex gap-2">${actionBtn}${urgentToggle}</div>
+            </div>`;
         }
 
         function startCooking(id) {
             const o = orders.find(x => x.id === id);
-            if (o) o.st = 'cooking';
-            render();
+            if (o) { o.st = 'cooking'; showToast(`${id} mulai dimasak`, 'info'); render(); }
         }
 
         function markReady(id) {
             const o = orders.find(x => x.id === id);
-            if (o) o.st = 'ready';
-            render();
+            if (o) { o.st = 'ready'; showToast(`${id} siap diambil!`, 'success'); render(); }
         }
 
-        function clearOrder(id) {
-            orders = orders.filter(x => x.id !== id);
+        function requestPickup(id) {
+            const o = orders.find(x => x.id === id);
+            if (!o) return;
+            pickupTargetId = id;
+            document.getElementById('pickupOrderId').textContent = id;
+            document.getElementById('pickupItems').textContent   = o.items;
+            document.getElementById('pickupModal').style.display = 'flex';
+        }
+
+        function closePickup() {
+            pickupTargetId = null;
+            document.getElementById('pickupModal').style.display = 'none';
+        }
+
+        function confirmPickup() {
+            if (!pickupTargetId) return;
+            orders = orders.filter(x => x.id !== pickupTargetId);
+            showToast(`${pickupTargetId} telah diambil`, 'success');
+            closePickup();
             render();
         }
 
         function toggleUrgent(id) {
             const o = orders.find(x => x.id === id);
-            if (o) o.urgent = !o.urgent;
-            render();
+            if (o) {
+                o.urgent = !o.urgent;
+                showToast(o.urgent ? `${id} ditandai URGENT` : `${id} urgent dihapus`, o.urgent ? 'warning' : 'info');
+                render();
+            }
         }
 
         function updateTime() {
             const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('timeNow').textContent = h + ':' + m;
+            document.getElementById('timeNow').textContent =
+                String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+        }
+
+        function logout() {
+            if (!confirm('Yakin ingin logout dari KDS?')) return;
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
         }
 
         function checkSession() {
-            const s = localStorage.getItem('lunomi_session');
-            if (!s) { window.location.href = 'index.html'; return; }
+            try {
+                const s = localStorage.getItem('lunomi_session');
+                if (!s) { window.location.href = 'index.html'; return false; }
+                JSON.parse(s);
+                return true;
+            } catch(e) { window.location.href = 'index.html'; return false; }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            checkSession();
+            if (!checkSession()) return;
             initElapsed();
             render();
             updateTime();
             setInterval(updateTime, 1000);
-            setInterval(tick, 1000);
+            intervalId = setInterval(tick, 1000);
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (intervalId) clearInterval(intervalId);
         });
     </script>
 </body>

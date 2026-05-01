@@ -3,72 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi Dashboard - Owner</title>
+    <title>Lunomi Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        
-        .agent-status {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-        
-        .agent-status.active {
-            background-color: #10b981;
-            animation: pulse 2s infinite;
-        }
-        
-        .agent-status.thinking {
-            background-color: #f59e0b;
-            animation: pulse 1s infinite;
-        }
-        
-        .agent-status.idle {
-            background-color: #6b7280;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .metric-card {
-            background: linear-gradient(135deg, #f0f4f8 0%, #e0ecf7 100%);
-            border-left: 4px solid #2563eb;
-        }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .agent-status { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+        .agent-status.active  { background-color: #10b981; animation: pulse 2s infinite; }
+        .agent-status.thinking { background-color: #f59e0b; animation: pulse 1s infinite; }
+        .agent-status.idle    { background-color: #6b7280; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .metric-card { background: linear-gradient(135deg, #f0f4f8 0%, #e0ecf7 100%); border-left: 4px solid #2563eb; }
+        #toast { transition: opacity 0.3s; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 0.6s linear; }
+        .chat-msg-enter { animation: fadeUp 0.3s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-coming { opacity: 0.6; cursor: default; }
+        .btn-available { cursor: pointer; }
     </style>
 </head>
 <body class="bg-gray-50">
+
+    <!-- Toast notification -->
+    <div id="toast" class="fixed top-4 right-4 z-[100] hidden">
+        <div id="toastInner" class="px-5 py-3 rounded-lg shadow-lg text-sm font-semibold text-white flex items-center gap-2"></div>
+    </div>
+
     <!-- Navbar -->
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                         <span class="text-white text-lg">🏪</span>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-900">Lunomi</h1>
-                        <p class="text-xs text-gray-500">POS Dashboard</p>
+                        <p class="text-xs text-gray-500" id="clockDisplay">POS Dashboard</p>
                     </div>
                 </div>
-
-                <!-- User menu -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <button onclick="openChatAI()" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition text-sm font-semibold">
                         <span>💬</span>
-                        Tanya Lunomi
+                        <span class="hidden sm:inline">Tanya Lunomi</span>
                     </button>
-                    <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">
-                        Logout
-                    </button>
+                    <button onclick="logout()" class="text-gray-600 hover:text-red-600 text-sm font-medium transition">Logout</button>
                 </div>
             </div>
         </div>
@@ -78,7 +58,7 @@
         <!-- Header -->
         <div class="mb-8">
             <h2 class="text-3xl font-bold text-gray-900 mb-2">Dashboard Utama</h2>
-            <p class="text-gray-600">Selamat datang, <span id="userName" class="font-semibold">Owner</span>! Lihat ringkasan bisnis Anda hari ini.</p>
+            <p class="text-gray-600">Selamat datang, <span id="userName" class="font-semibold">Owner</span>! <span id="todayDate" class="text-gray-500"></span></p>
         </div>
 
         <!-- CEO Orchestrator Section -->
@@ -102,19 +82,12 @@
                     </div>
                 </div>
 
-                <!-- AI Chat Preview -->
-                <div class="bg-gray-50 rounded-lg p-4 mb-4 min-h-24">
-                    <div class="space-y-3">
-                        <div class="flex gap-3">
-                            <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center text-xs flex-shrink-0">🤖</div>
-                            <div class="bg-white rounded-lg px-4 py-2 text-sm text-gray-700 max-w-xs">
-                                Pagi! Ada 3 alert penting hari ini. Cek inventory & laporan penjualan kemarin?
-                            </div>
-                        </div>
-                        <div class="flex gap-3 justify-end">
-                            <div class="bg-blue-500 text-white rounded-lg px-4 py-2 text-sm max-w-xs">
-                                Cek status semua outlet sekarang
-                            </div>
+                <!-- AI Chat Area -->
+                <div id="chatArea" class="bg-gray-50 rounded-lg p-4 mb-4 min-h-28 max-h-48 overflow-y-auto space-y-3">
+                    <div class="flex gap-3 chat-msg-enter">
+                        <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center text-xs flex-shrink-0">🤖</div>
+                        <div class="bg-white rounded-lg px-4 py-2 text-sm text-gray-700 max-w-xs shadow-sm">
+                            Halo! Ada 3 alert penting hari ini — stok ayam menipis, 1 outlet offline, dan absensi staff terlambat. Perlu bantuan?
                         </div>
                     </div>
                 </div>
@@ -122,8 +95,8 @@
                 <!-- AI Input -->
                 <div class="flex gap-2">
                     <input type="text" id="aiInput" placeholder="Tanya apapun tentang bisnis Anda..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm" onkeypress="handleAIInput(event)">
-                    <button onclick="sendAIMessage()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition">
-                        <span class="material-symbols-outlined">send</span>
+                    <button onclick="sendAIMessage()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg font-semibold transition flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">send</span>
                     </button>
                 </div>
             </div>
@@ -133,153 +106,88 @@
                 <h4 class="font-bold text-gray-900 mb-4">6 Sub-Agents</h4>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between text-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="agent-status active"></span>
-                            <span class="text-gray-700">FIN AI</span>
-                        </div>
-                        <span class="text-xs text-gray-500">Finance</span>
+                        <div class="flex items-center gap-2"><span class="agent-status active"></span><span class="text-gray-700">FIN AI</span></div>
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Finance</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="agent-status active"></span>
-                            <span class="text-gray-700">HR AI</span>
-                        </div>
-                        <span class="text-xs text-gray-500">Payroll</span>
+                        <div class="flex items-center gap-2"><span class="agent-status active"></span><span class="text-gray-700">HR AI</span></div>
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Payroll</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="agent-status thinking"></span>
-                            <span class="text-gray-700">OPS AI</span>
-                        </div>
-                        <span class="text-xs text-gray-500">Running...</span>
+                        <div class="flex items-center gap-2"><span class="agent-status thinking"></span><span class="text-gray-700">OPS AI</span></div>
+                        <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Running...</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="agent-status active"></span>
-                            <span class="text-gray-700">MKT AI</span>
-                        </div>
-                        <span class="text-xs text-gray-500">Campaign</span>
+                        <div class="flex items-center gap-2"><span class="agent-status active"></span><span class="text-gray-700">MKT AI</span></div>
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Campaign</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="agent-status idle"></span>
-                            <span class="text-gray-700">IT AI</span>
-                        </div>
-                        <span class="text-xs text-gray-500">Standby</span>
+                        <div class="flex items-center gap-2"><span class="agent-status idle"></span><span class="text-gray-700">IT AI</span></div>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Standby</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="agent-status idle"></span>
-                            <span class="text-gray-700">DES AI</span>
-                        </div>
-                        <span class="text-xs text-gray-500">Standby</span>
+                        <div class="flex items-center gap-2"><span class="agent-status idle"></span><span class="text-gray-700">DES AI</span></div>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Standby</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Metrics Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="metric-card rounded-lg p-6 text-gray-900">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="metric-card rounded-lg p-5 text-gray-900">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm text-gray-600 font-medium">Penjualan Hari Ini</p>
-                        <p class="text-3xl font-bold mt-2">Rp 24.5M</p>
-                        <p class="text-xs text-green-600 mt-2">↑ 12% dari kemarin</p>
+                        <p class="text-xs text-gray-600 font-medium">Penjualan Hari Ini</p>
+                        <p class="text-2xl font-bold mt-2">Rp 24.5M</p>
+                        <p class="text-xs text-green-600 mt-1">↑ 12% dari kemarin</p>
                     </div>
-                    <span class="text-3xl">💰</span>
+                    <span class="text-2xl">💰</span>
                 </div>
             </div>
-
-            <div class="metric-card rounded-lg p-6 text-gray-900">
+            <div class="metric-card rounded-lg p-5 text-gray-900">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm text-gray-600 font-medium">Transaksi</p>
-                        <p class="text-3xl font-bold mt-2">128</p>
-                        <p class="text-xs text-green-600 mt-2">↑ 8 dari kemarin</p>
+                        <p class="text-xs text-gray-600 font-medium">Transaksi</p>
+                        <p class="text-2xl font-bold mt-2">128</p>
+                        <p class="text-xs text-green-600 mt-1">↑ 8 dari kemarin</p>
                     </div>
-                    <span class="text-3xl">📊</span>
+                    <span class="text-2xl">📊</span>
                 </div>
             </div>
-
-            <div class="metric-card rounded-lg p-6 text-gray-900">
+            <div class="metric-card rounded-lg p-5 text-gray-900">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm text-gray-600 font-medium">Stok Alert</p>
-                        <p class="text-3xl font-bold mt-2">5</p>
-                        <p class="text-xs text-red-600 mt-2">⚠️ Perlu reorder</p>
+                        <p class="text-xs text-gray-600 font-medium">Stok Alert</p>
+                        <p class="text-2xl font-bold mt-2">5</p>
+                        <p class="text-xs text-red-600 mt-1">⚠️ Perlu reorder</p>
                     </div>
-                    <span class="text-3xl">🚨</span>
+                    <span class="text-2xl">🚨</span>
                 </div>
             </div>
-
-            <div class="metric-card rounded-lg p-6 text-gray-900">
+            <div class="metric-card rounded-lg p-5 text-gray-900">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm text-gray-600 font-medium">Outlet Online</p>
-                        <p class="text-3xl font-bold mt-2">3/4</p>
-                        <p class="text-xs text-yellow-600 mt-2">1 offline</p>
+                        <p class="text-xs text-gray-600 font-medium">Outlet Online</p>
+                        <p class="text-2xl font-bold mt-2">3/4</p>
+                        <p class="text-xs text-yellow-600 mt-1">1 offline</p>
                     </div>
-                    <span class="text-3xl">🏪</span>
+                    <span class="text-2xl">🏪</span>
                 </div>
             </div>
         </div>
 
-        <!-- HO Activity Log -->
+        <!-- HO Activity Log + Quick Actions -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-gray-900">📋 HO Activity Log</h3>
-                    <button onclick="refreshActivityLog()" class="text-gray-500 hover:text-gray-700">
+                    <button id="refreshBtn" onclick="refreshActivityLog()" class="text-gray-500 hover:text-blue-600 transition" title="Refresh">
                         <span class="material-symbols-outlined">refresh</span>
                     </button>
                 </div>
-
-                <div class="space-y-4 max-h-96 overflow-y-auto">
-                    <div class="flex gap-4 pb-4 border-b border-gray-200">
-                        <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900">FIN AI - Laporan Tutup Kas</p>
-                            <p class="text-xs text-gray-600 mt-1">Tutup kas outlet Jl. Sudirman: Rp 12.3M ✓</p>
-                            <p class="text-xs text-gray-500 mt-1">10 menit lalu</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 pb-4 border-b border-gray-200">
-                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900">OPS AI - Stok Bahan Baku Alert</p>
-                            <p class="text-xs text-gray-600 mt-1">Daging ayam kurang 5kg, stok di bawah minimum</p>
-                            <p class="text-xs text-gray-500 mt-1">25 menit lalu</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 pb-4 border-b border-gray-200">
-                        <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900">HR AI - Absensi Alert</p>
-                            <p class="text-xs text-gray-600 mt-1">Staff Roni belum clock-in, shift dimulai 30 menit lalu</p>
-                            <p class="text-xs text-gray-500 mt-1">15 menit lalu</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 pb-4 border-b border-gray-200">
-                        <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900">MKT AI - Promo Campaign Published</p>
-                            <p class="text-xs text-gray-600 mt-1">Promo "Diskon 30% untuk Menu Pilihan" live di semua outlet</p>
-                            <p class="text-xs text-gray-500 mt-1">45 menit lalu</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900">CEO Orchestrator - Daily Brief</p>
-                            <p class="text-xs text-gray-600 mt-1">Ringkasan harian: Penjualan ↑ 12%, Inventory OK, 1 outlet offline</p>
-                            <p class="text-xs text-gray-500 mt-1">2 jam lalu</p>
-                        </div>
-                    </div>
+                <div id="activityLog" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- populated by JS -->
                 </div>
             </div>
 
@@ -287,98 +195,200 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">⚡ Quick Actions</h3>
                 <div class="space-y-2">
-                    <button onclick="navigateTo('pos.html')" class="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-lg transition text-sm font-medium text-gray-900 flex items-center gap-2">
-                        <span class="material-symbols-outlined">point_of_sale</span>
+                    <button onclick="navigateTo('pos.html')" class="btn-available w-full text-left px-4 py-3 hover:bg-blue-50 rounded-lg transition text-sm font-medium text-gray-900 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-600">point_of_sale</span>
                         Buka POS Kasir
                     </button>
-                    <button onclick="navigateTo('inventory.html')" class="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-lg transition text-sm font-medium text-gray-900 flex items-center gap-2">
+                    <button onclick="navigateTo('kitchen.html')" class="btn-available w-full text-left px-4 py-3 hover:bg-blue-50 rounded-lg transition text-sm font-medium text-gray-900 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-orange-500">soup_kitchen</span>
+                        Kitchen Display
+                    </button>
+                    <button onclick="showComingSoon('Cek Inventory')" class="btn-coming w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-400 flex items-center gap-2">
                         <span class="material-symbols-outlined">inventory_2</span>
-                        Cek Inventory
+                        Cek Inventory <span class="ml-auto text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Soon</span>
                     </button>
-                    <button onclick="navigateTo('keuangan.html')" class="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-lg transition text-sm font-medium text-gray-900 flex items-center gap-2">
+                    <button onclick="showComingSoon('Laporan Keuangan')" class="btn-coming w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-400 flex items-center gap-2">
                         <span class="material-symbols-outlined">account_balance</span>
-                        Laporan Keuangan
+                        Laporan Keuangan <span class="ml-auto text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Soon</span>
                     </button>
-                    <button onclick="navigateTo('hr.html')" class="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-lg transition text-sm font-medium text-gray-900 flex items-center gap-2">
+                    <button onclick="showComingSoon('Kelola Karyawan')" class="btn-coming w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-400 flex items-center gap-2">
                         <span class="material-symbols-outlined">group</span>
-                        Kelola Karyawan
+                        Kelola Karyawan <span class="ml-auto text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Soon</span>
                     </button>
-                    <button onclick="navigateTo('menu.html')" class="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-lg transition text-sm font-medium text-gray-900 flex items-center gap-2">
+                    <button onclick="showComingSoon('Master Menu')" class="btn-coming w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-400 flex items-center gap-2">
                         <span class="material-symbols-outlined">restaurant_menu</span>
-                        Master Menu
+                        Master Menu <span class="ml-auto text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Soon</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- AI Chat Modal (akan dikembang lebih lanjut) -->
+    <!-- AI Chat Modal -->
     <div id="aiChatModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
-        <div class="bg-white w-full sm:max-w-2xl sm:rounded-lg sm:shadow-xl h-screen sm:h-auto sm:max-h-96 flex flex-col">
+        <div class="bg-white w-full sm:max-w-2xl sm:rounded-lg sm:shadow-xl h-[70vh] sm:h-auto sm:max-h-[500px] flex flex-col">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-gray-900">Tanya Lunomi</h2>
+                <div class="flex items-center gap-2">
+                    <span class="agent-status active"></span>
+                    <h2 class="text-lg font-bold text-gray-900">Tanya Lunomi</h2>
+                </div>
                 <button onclick="closeChatAI()" class="text-gray-500 hover:text-gray-700">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 text-center text-gray-500">
-                <p>Chat AI akan segera tersedia...</p>
+            <div id="modalChatArea" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center text-xs flex-shrink-0">🤖</div>
+                    <div class="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-700 max-w-sm">
+                        Halo! Saya CEO Orchestrator Lunomi. Apa yang bisa saya bantu hari ini?
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex gap-2">
+                <input type="text" id="modalAiInput" placeholder="Ketik pertanyaan..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm" onkeypress="if(event.key==='Enter') sendModalAI()">
+                <button onclick="sendModalAI()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg font-semibold transition">
+                    <span class="material-symbols-outlined text-base">send</span>
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Check session
-        function checkSession() {
-            const session = localStorage.getItem('lunomi_session');
-            if (!session) {
-                window.location.href = 'index.html';
-                return;
-            }
-            const data = JSON.parse(session);
-            document.getElementById('userName').textContent = data.user.name;
+        const ACTIVITIES = [
+            { color: 'green',  title: 'FIN AI - Laporan Tutup Kas',        desc: 'Tutup kas outlet Jl. Sudirman: Rp 12.3M ✓',                            time: '10 menit lalu' },
+            { color: 'blue',   title: 'OPS AI - Stok Bahan Baku Alert',     desc: 'Daging ayam kurang 5kg, stok di bawah minimum',                         time: '25 menit lalu' },
+            { color: 'yellow', title: 'HR AI - Absensi Alert',              desc: 'Staff Roni belum clock-in, shift dimulai 30 menit lalu',                 time: '15 menit lalu' },
+            { color: 'green',  title: 'MKT AI - Promo Campaign Published',  desc: 'Promo "Diskon 30% untuk Menu Pilihan" live di semua outlet',             time: '45 menit lalu' },
+            { color: 'purple', title: 'CEO Orchestrator - Daily Brief',     desc: 'Ringkasan harian: Penjualan ↑ 12%, Inventory OK, 1 outlet offline',     time: '2 jam lalu'   },
+        ];
+
+        const AI_REPLIES = [
+            'Berdasarkan data hari ini, penjualan sedang di atas rata-rata. Outlet Sudirman perlu perhatian karena stok menipis.',
+            'OPS AI sedang memproses laporan stok. Estimasi selesai 5 menit lagi.',
+            'HR AI mendeteksi 1 keterlambatan shift. Notifikasi sudah dikirim ke supervisor.',
+            'MKT AI melaporkan promo berjalan baik — konversi meningkat 18% dari kemarin.',
+            'Semua sistem berjalan normal. Ada hal lain yang perlu dicek?'
+        ];
+        let aiReplyIdx = 0;
+
+        let toastTimer = null;
+
+        function showToast(msg, type = 'info') {
+            clearTimeout(toastTimer);
+            const colors = { info: 'bg-blue-600', success: 'bg-green-600', warning: 'bg-amber-500', error: 'bg-red-600' };
+            const icons  = { info: 'ℹ️', success: '✓', warning: '⚠️', error: '✕' };
+            const inner = document.getElementById('toastInner');
+            inner.className = `px-5 py-3 rounded-lg shadow-lg text-sm font-semibold text-white flex items-center gap-2 ${colors[type]}`;
+            inner.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            toast.style.opacity = '1';
+            toastTimer = setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.classList.add('hidden'), 300); }, 3000);
         }
 
-        function logout() {
-            localStorage.removeItem('lunomi_session');
-            localStorage.removeItem('lunomi_role');
-            window.location.href = 'index.html';
+        function showComingSoon(name) {
+            showToast(`${name} sedang dalam pengembangan`, 'info');
         }
 
-        function navigateTo(page) {
-            window.location.href = page;
+        function renderActivityLog() {
+            const log = document.getElementById('activityLog');
+            const dotColor = { green: 'bg-green-500', blue: 'bg-blue-500', yellow: 'bg-yellow-500', purple: 'bg-purple-500' };
+            log.innerHTML = ACTIVITIES.map((a, i) =>
+                `<div class="flex gap-4 ${i < ACTIVITIES.length - 1 ? 'pb-4 border-b border-gray-200' : ''}">
+                    <div class="w-2 h-2 ${dotColor[a.color]} rounded-full mt-2 flex-shrink-0"></div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-gray-900">${a.title}</p>
+                        <p class="text-xs text-gray-600 mt-1">${a.desc}</p>
+                        <p class="text-xs text-gray-500 mt-1">${a.time}</p>
+                    </div>
+                </div>`
+            ).join('');
         }
 
-        function openChatAI() {
-            document.getElementById('aiChatModal').classList.remove('hidden');
+        function refreshActivityLog() {
+            const btn = document.getElementById('refreshBtn').querySelector('span');
+            btn.classList.add('spin');
+            showToast('Activity log diperbarui', 'success');
+            setTimeout(() => btn.classList.remove('spin'), 600);
         }
 
-        function closeChatAI() {
-            document.getElementById('aiChatModal').classList.add('hidden');
-        }
+        function navigateTo(page) { window.location.href = page; }
 
-        function handleAIInput(e) {
-            if (e.key === 'Enter') {
-                sendAIMessage();
-            }
+        function openChatAI()  { document.getElementById('aiChatModal').classList.remove('hidden'); document.getElementById('modalAiInput').focus(); }
+        function closeChatAI() { document.getElementById('aiChatModal').classList.add('hidden'); }
+
+        function handleAIInput(e) { if (e.key === 'Enter') sendAIMessage(); }
+
+        function appendChat(area, role, text) {
+            const isBot = role === 'bot';
+            const div = document.createElement('div');
+            div.className = 'flex gap-3 chat-msg-enter' + (isBot ? '' : ' justify-end');
+            div.innerHTML = isBot
+                ? `<div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center text-xs flex-shrink-0">🤖</div>
+                   <div class="bg-white rounded-lg px-4 py-2 text-sm text-gray-700 max-w-xs shadow-sm">${text}</div>`
+                : `<div class="bg-blue-500 text-white rounded-lg px-4 py-2 text-sm max-w-xs">${text}</div>`;
+            area.appendChild(div);
+            area.scrollTop = area.scrollHeight;
         }
 
         function sendAIMessage() {
             const input = document.getElementById('aiInput');
-            const message = input.value.trim();
-            if (message) {
-                // TODO: Integrate with actual AI API
-                input.value = '';
+            const msg = input.value.trim();
+            if (!msg) return;
+            const area = document.getElementById('chatArea');
+            appendChat(area, 'user', msg);
+            input.value = '';
+            setTimeout(() => {
+                appendChat(area, 'bot', AI_REPLIES[aiReplyIdx % AI_REPLIES.length]);
+                aiReplyIdx++;
+            }, 700);
+        }
+
+        function sendModalAI() {
+            const input = document.getElementById('modalAiInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            const area = document.getElementById('modalChatArea');
+            appendChat(area, 'user', msg);
+            input.value = '';
+            setTimeout(() => {
+                appendChat(area, 'bot', AI_REPLIES[aiReplyIdx % AI_REPLIES.length]);
+                aiReplyIdx++;
+            }, 700);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+            const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+            const h = String(now.getHours()).padStart(2,'0');
+            const m = String(now.getMinutes()).padStart(2,'0');
+            document.getElementById('clockDisplay').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} · ${h}:${m}`;
+            document.getElementById('todayDate').textContent = '';
+        }
+
+        function checkSession() {
+            try {
+                const session = localStorage.getItem('lunomi_session');
+                if (!session) { window.location.href = 'index.html'; return; }
+                const data = JSON.parse(session);
+                document.getElementById('userName').textContent = data.user.name;
+            } catch (e) {
+                window.location.href = 'index.html';
             }
         }
 
-        function refreshActivityLog() {
-            // TODO: Fetch latest activities
+        function logout() {
+            if (!confirm('Yakin ingin logout?')) return;
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             checkSession();
+            renderActivityLog();
+            updateClock();
+            setInterval(updateClock, 60000);
         });
     </script>
 </body>
