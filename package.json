@@ -1,0 +1,22 @@
+{
+  "name": "lunomi-pos",
+  "version": "1.0.0",
+  "description": "Smart POS System for F&B Indonesia with Multi-Agent AI Orchestration",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "start": "python -m http.server 8000"
+  },
+  "keywords": [
+    "pos",
+    "restaurant",
+    "f&b",
+    "ai",
+    "indonesia"
+  ],
+  "author": "Lunomi Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cleco-group/lunomi-pos.git"
+  }
+}

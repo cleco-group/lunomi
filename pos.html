@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi POS - Kasir Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+        .product-item { background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; cursor: pointer; transition: all 0.2s; }
+        .product-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="font-bold text-xl text-gray-900">Lunomi POS</h1>
+                    <p class="text-xs text-gray-500">Terminal Kasir - Outlet Jl. Sudirman</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-gray-900" id="kasirName">Kasir: Ahmad</p>
+                    <p class="text-xs text-gray-500">Shift: 09:00 - 18:00</p>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 font-medium text-sm">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-[calc(100vh-64px)]">
+        <!-- Left: Products -->
+        <div class="flex-1 p-6 overflow-y-auto">
+            <!-- Categories -->
+            <div class="flex gap-2 mb-6 pb-4 border-b border-gray-200 overflow-x-auto">
+                <button onclick="filterCat('all')" class="px-4 py-2 rounded-full border-2 border-blue-600 bg-blue-50 text-blue-600 font-semibold text-sm whitespace-nowrap">Semua Menu</button>
+                <button onclick="filterCat('makanan')" class="px-4 py-2 rounded-full border-2 border-gray-300 text-gray-600 font-semibold text-sm whitespace-nowrap hover:border-gray-400">Makanan</button>
+                <button onclick="filterCat('minuman')" class="px-4 py-2 rounded-full border-2 border-gray-300 text-gray-600 font-semibold text-sm whitespace-nowrap hover:border-gray-400">Minuman</button>
+                <button onclick="filterCat('snack')" class="px-4 py-2 rounded-full border-2 border-gray-300 text-gray-600 font-semibold text-sm whitespace-nowrap hover:border-gray-400">Snack</button>
+                <button onclick="filterCat('dessert')" class="px-4 py-2 rounded-full border-2 border-gray-300 text-gray-600 font-semibold text-sm whitespace-nowrap hover:border-gray-400">Dessert</button>
+            </div>
+
+            <!-- Product Grid -->
+            <div id="productGrid" class="product-grid"></div>
+        </div>
+
+        <!-- Right: Cart -->
+        <div class="w-96 bg-white border-l border-gray-200 flex flex-col">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-bold text-gray-900">Pesanan Aktif</h2>
+                <p class="text-xs text-gray-500 mt-1">ID: <span id="trxId">TRX-20260501-001</span></p>
+            </div>
+
+            <!-- Cart Items -->
+            <div id="cartList" class="flex-1 overflow-y-auto px-6 py-4">
+                <p class="text-center text-gray-500 text-sm py-8">Belum ada item</p>
+            </div>
+
+            <!-- Summary -->
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 space-y-3">
+                <div class="flex justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span id="sub" class="font-semibold">Rp 0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span>Diskon</span>
+                    <span id="disc" class="font-semibold">Rp 0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span>PPN 10%</span>
+                    <span id="ppn" class="font-semibold">Rp 0</span>
+                </div>
+                <div class="flex justify-between text-lg border-t border-gray-300 pt-3">
+                    <span class="font-bold">Total</span>
+                    <span id="tot" class="font-bold text-blue-600">Rp 0</span>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="px-6 py-4 space-y-3 border-t border-gray-200">
+                <button onclick="openDiskon()" class="w-full px-4 py-2 border border-orange-300 text-orange-600 rounded-lg hover:bg-orange-50 text-sm font-semibold">
+                    Diskon
+                </button>
+                <button onclick="openHistory()" class="w-full px-4 py-2 border border-purple-300 text-purple-600 rounded-lg hover:bg-purple-50 text-sm font-semibold">
+                    Riwayat
+                </button>
+                <button onclick="clearCart()" class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-semibold">
+                    Hapus
+                </button>
+                <button onclick="payment()" id="payBtn" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold disabled:opacity-50" disabled>
+                    Pembayaran
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Diskon -->
+    <div id="diskonModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h2 class="text-lg font-bold mb-4">Tambah Diskon</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Tipe</label>
+                    <select id="diskonType" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                        <option value="percent">Persentase (%)</option>
+                        <option value="nominal">Nominal (Rp)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Jumlah</label>
+                    <input type="number" id="diskonValue" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="0" min="0">
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="closeDiskon()" class="flex-1 border border-gray-300 px-4 py-2 rounded text-sm font-semibold hover:bg-gray-50">Batal</button>
+                    <button onclick="applyDiskon()" class="flex-1 bg-orange-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-orange-700">Terapkan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal History -->
+    <div id="historyModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-screen overflow-auto">
+            <div class="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold">Riwayat Transaksi</h2>
+                    <button onclick="closeHistory()" class="text-gray-500 hover:text-gray-700 font-bold">×</button>
+                </div>
+            </div>
+            <div class="p-6 space-y-3" id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const PROD = [
+            {id:1,n:'Nasi Goreng',c:'makanan',p:22000,e:'🍜'},
+            {id:2,n:'Mie Ayam',c:'makanan',p:18000,e:'🍜'},
+            {id:3,n:'Soto Ayam',c:'makanan',p:20000,e:'🍜'},
+            {id:4,n:'Ikan Bakar',c:'makanan',p:35000,e:'🍗'},
+            {id:5,n:'Es Teh',c:'minuman',p:8000,e:'🥤'},
+            {id:6,n:'Kopi',c:'minuman',p:12000,e:'☕'},
+            {id:7,n:'Jus',c:'minuman',p:15000,e:'🧃'},
+            {id:8,n:'Smoothie',c:'minuman',p:18000,e:'🥤'},
+            {id:9,n:'Roti Goreng',c:'snack',p:10000,e:'🍪'},
+            {id:10,n:'Lumpia',c:'snack',p:12000,e:'🥟'},
+            {id:11,n:'Kue Lapis',c:'dessert',p:25000,e:'🍰'},
+            {id:12,n:'Bika Ambon',c:'dessert',p:20000,e:'🍰'}
+        ];
+
+        const HIST = [
+            {id:'TRX-001',t:'09:30',tot:75000,st:'paid',itm:3,m:'cash'},
+            {id:'TRX-002',t:'09:45',tot:120000,st:'paid',itm:5,m:'card'},
+            {id:'TRX-003',t:'10:15',tot:95000,st:'paid',itm:4,m:'ewallet'},
+            {id:'TRX-004',t:'10:30',tot:85000,st:'pending',itm:3,m:null},
+            {id:'TRX-005',t:'11:00',tot:150000,st:'paid',itm:6,m:'cash'},
+            {id:'TRX-006',t:'11:15',tot:65000,st:'pending',itm:2,m:null},
+            {id:'TRX-007',t:'11:45',tot:200000,st:'paid',itm:8,m:'bank'},
+            {id:'TRX-008',t:'12:00',tot:110000,st:'pending',itm:4,m:null}
+        ];
+
+        let cart = [];
+        let cat = 'all';
+        let disco = 0;
+
+        function render() {
+            const grid = document.getElementById('productGrid');
+            const f = cat === 'all' ? PROD : PROD.filter(p => p.c === cat);
+            grid.innerHTML = f.map(p => 
+                '<div class="product-item" onclick="add(' + p.id + ')">' +
+                '<div style="font-size:2rem;margin-bottom:0.5rem;text-align:center">' + p.e + '</div>' +
+                '<div style="font-weight:600;font-size:0.875rem;text-align:center">' + p.n + '</div>' +
+                '<div style="color:#2563eb;font-weight:700;text-align:center;margin-top:0.5rem">Rp ' + p.p.toLocaleString('id-ID') + '</div>' +
+                '</div>'
+            ).join('');
+        }
+
+        function filterCat(c) {
+            cat = c;
+            render();
+        }
+
+        function add(id) {
+            const p = PROD.find(x => x.id === id);
+            const e = cart.find(x => x.id === id);
+            if (e) e.q++;
+            else cart.push({...p, q: 1});
+            update();
+        }
+
+        function remove(id) {
+            cart = cart.filter(x => x.id !== id);
+            update();
+        }
+
+        function qty(id, q) {
+            const i = cart.find(x => x.id === id);
+            if (i) {
+                i.q = Math.max(1, q);
+                update();
+            }
+        }
+
+        function update() {
+            const cl = document.getElementById('cartList');
+            if (cart.length === 0) {
+                cl.innerHTML = '<p style="text-align:center;color:#9ca3af;font-size:0.875rem;padding:2rem">Belum ada item</p>';
+                document.getElementById('payBtn').disabled = true;
+            } else {
+                cl.innerHTML = cart.map(i =>
+                    '<div class="cart-item">' +
+                    '<div><div style="font-weight:600;color:#111827">' + i.e + ' ' + i.n + '</div>' +
+                    '<div style="font-size:0.75rem;color:#6b7280;margin-top:0.25rem">Rp ' + i.p.toLocaleString('id-ID') + '</div></div>' +
+                    '<div style="display:flex;gap:0.5rem;align-items:center">' +
+                    '<button onclick="qty(' + i.id + ',' + (i.q-1) + ')" style="width:1.5rem;height:1.5rem;border:1px solid #d1d5db;border-radius:0.25rem">-</button>' +
+                    '<span style="width:1.5rem;text-align:center;font-weight:600">' + i.q + '</span>' +
+                    '<button onclick="qty(' + i.id + ',' + (i.q+1) + ')" style="width:1.5rem;height:1.5rem;border:1px solid #d1d5db;border-radius:0.25rem">+</button>' +
+                    '<button onclick="remove(' + i.id + ')" style="color:#ef4444;margin-left:0.5rem;font-weight:700">✕</button>' +
+                    '</div></div>'
+                ).join('');
+                document.getElementById('payBtn').disabled = false;
+            }
+            calc();
+        }
+
+        function calc() {
+            const sub = cart.reduce((s, i) => s + (i.p * i.q), 0);
+            const ppn = Math.round(sub * 0.1);
+            const tot = sub + ppn - disco;
+            document.getElementById('sub').textContent = 'Rp ' + sub.toLocaleString('id-ID');
+            document.getElementById('disc').textContent = 'Rp ' + disco.toLocaleString('id-ID');
+            document.getElementById('ppn').textContent = 'Rp ' + ppn.toLocaleString('id-ID');
+            document.getElementById('tot').textContent = 'Rp ' + tot.toLocaleString('id-ID');
+        }
+
+        function clearCart() {
+            if (confirm('Hapus semua?')) {
+                cart = [];
+                disco = 0;
+                update();
+            }
+        }
+
+        function openDiskon() { document.getElementById('diskonModal').style.display = 'flex'; }
+        function closeDiskon() { document.getElementById('diskonModal').style.display = 'none'; }
+
+        function applyDiskon() {
+            const t = document.getElementById('diskonType').value;
+            const v = parseFloat(document.getElementById('diskonValue').value) || 0;
+            if (v <= 0) { alert('Masukkan jumlah'); return; }
+            const sub = cart.reduce((s,i) => s + (i.p*i.q), 0);
+            if (t === 'percent') disco = Math.round(sub * v / 100);
+            else disco = v;
+            calc();
+            closeDiskon();
+            alert('✓ Diskon diterapkan');
+        }
+
+        function openHistory() {
+            const h = document.getElementById('historyList');
+            h.innerHTML = HIST.map(x =>
+                '<div style="border:1px solid #e5e7eb;border-radius:0.5rem;padding:1rem">' +
+                '<div style="display:flex;justify-content:space-between;margin-bottom:0.75rem">' +
+                '<div><div style="font-weight:600;color:#111827">' + x.id + '</div>' +
+                '<div style="font-size:0.75rem;color:#6b7280">' + x.t + ' · ' + x.itm + ' item</div></div>' +
+                '<div style="text-align:right">' +
+                '<div style="font-weight:700;font-size:1.125rem;color:#111827">Rp ' + x.tot.toLocaleString('id-ID') + '</div>' +
+                '<span style="display:inline-block;padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.75rem;font-weight:600;' +
+                (x.st === 'paid' ? 'background:#dcfce7;color:#166534' : 'background:#fed7aa;color:#92400e') + '">' +
+                (x.st === 'paid' ? '✓ Dibayar' : '⏱️ Pending') + '</span></div></div>' +
+                '<div style="font-size:0.875rem;color:#6b7280">' + (x.m ? {cash:'💵',card:'💳',ewallet:'📱',bank:'🏦'}[x.m] : '-') + '</div>' +
+                '</div>'
+            ).join('');
+            document.getElementById('historyModal').style.display = 'flex';
+        }
+        function closeHistory() { document.getElementById('historyModal').style.display = 'none'; }
+
+        function payment() {
+            const tot = cart.reduce((s,i) => s + (i.p*i.q), 0) + Math.round(cart.reduce((s,i) => s + (i.p*i.q), 0) * 0.1) - disco;
+            alert('✓ Pembayaran Rp ' + tot.toLocaleString('id-ID') + ' berhasil\n\nTransaksi disimpan');
+            cart = [];
+            disco = 0;
+            update();
+        }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+            const d = JSON.parse(s);
+            document.getElementById('kasirName').textContent = 'Kasir: ' + d.user.name;
+            render();
+        });
+    </script>
+</body>
+</html>
