@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Shift - Manajemen Shift</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .summary-card { transition: all 0.3s; border-left: 4px solid #2563eb; }
+        .summary-card.error { border-left-color: #ef4444; }
+        .summary-card.success { border-left-color: #10b981; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">⏱️ Manajemen Shift</h1>
+                    <p class="text-sm text-gray-500">Lunomi - Shift Reconciliation & Summary</p>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Current Shift Status -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900">Shift Aktif</h2>
+                    <p class="text-sm text-gray-600 mt-1">Kasir: Ahmad | 09:00 - Sekarang</p>
+                </div>
+                <button onclick="openEndShift()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
+                    🛑 Tutup Shift
+                </button>
+            </div>
+        </div>
+
+        <!-- Shift Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="summary-card success bg-green-50 p-6 rounded-lg">
+                <p class="text-sm text-gray-600 font-semibold mb-2">Total Transaksi</p>
+                <p class="text-3xl font-bold text-gray-900">128</p>
+                <p class="text-xs text-green-600 mt-2">Shift ini</p>
+            </div>
+            <div class="summary-card bg-white p-6 rounded-lg shadow">
+                <p class="text-sm text-gray-600 font-semibold mb-2">Total Penjualan</p>
+                <p class="text-3xl font-bold text-gray-900">Rp 24.5M</p>
+                <p class="text-xs text-gray-500 mt-2">Gross revenue</p>
+            </div>
+            <div class="summary-card bg-white p-6 rounded-lg shadow">
+                <p class="text-sm text-gray-600 font-semibold mb-2">Pembayaran Tunai</p>
+                <p class="text-3xl font-bold text-gray-900">Rp 15.3M</p>
+                <p class="text-xs text-gray-500 mt-2">65% dari total</p>
+            </div>
+            <div class="summary-card bg-white p-6 rounded-lg shadow">
+                <p class="text-sm text-gray-600 font-semibold mb-2">Pembayaran Non-Tunai</p>
+                <p class="text-3xl font-bold text-gray-900">Rp 9.2M</p>
+                <p class="text-xs text-gray-500 mt-2">35% dari total</p>
+            </div>
+        </div>
+
+        <!-- Shift History -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-6">Riwayat Shift</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="border-b border-gray-200">
+                        <tr>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">Kasir</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">Jam Kerja</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">Transaksi</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">Total Penjualan</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shiftHistory"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: End Shift -->
+    <div id="endShiftModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full">
+            <h2 class="text-lg font-bold mb-6 text-gray-900">Tutup Shift - Reconciliation</h2>
+            
+            <div class="space-y-6">
+                <!-- Opening Balance -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">1. Opening Balance</h3>
+                    <input type="number" id="openingBalance" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Rp 0" value="500000">
+                </div>
+
+                <!-- Summary -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">2. Summary Shift</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Transaksi</span>
+                            <span class="font-semibold">128</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Penjualan</span>
+                            <span class="font-semibold">Rp 24.5M</span>
+                        </div>
+                        <div class="flex justify-between border-t border-gray-200 pt-2 mt-2">
+                            <span class="text-gray-900 font-semibold">Expected Cash</span>
+                            <span class="font-bold text-lg">Rp 24.5M</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actual Cash Count -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">3. Actual Cash Count</h3>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah Uang Tunai Sebenarnya (Rp)</label>
+                    <input type="number" id="actualCash" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Rp 0">
+                </div>
+
+                <!-- Variance Analysis -->
+                <div id="varianceBox" style="display:none" class="border border-yellow-200 bg-yellow-50 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">4. Variance Analysis</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Expected</span>
+                            <span class="font-semibold" id="expectedAmount">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Actual</span>
+                            <span class="font-semibold" id="actualAmount">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between border-t border-yellow-300 pt-2 mt-2">
+                            <span class="text-gray-900 font-semibold">Variance</span>
+                            <span class="font-bold" id="variance">Rp 0</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-2" id="varianceMsg"></p>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan (Opsional)</label>
+                    <textarea id="shiftNotes" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Misal: Ada uang hilang, dll" rows="3"></textarea>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3">
+                    <button onclick="closeEndShift()" class="flex-1 border border-gray-300 px-4 py-3 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button onclick="calculateVariance()" class="flex-1 border border-blue-300 text-blue-600 px-4 py-3 rounded-lg text-sm font-semibold hover:bg-blue-50">
+                        🔍 Hitung Variance
+                    </button>
+                    <button onclick="submitEndShift()" class="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-green-700">
+                        ✓ Tutup Shift
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Shift Summary Success -->
+    <div id="summaryModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full text-center">
+            <div class="text-5xl mb-4">✓</div>
+            <h2 class="text-lg font-bold text-gray-900 mb-2">Shift Berhasil Ditutup!</h2>
+            <p class="text-sm text-gray-600 mb-6">Shift data telah disimpan dan dapat diakses di Riwayat Shift</p>
+            <button onclick="closeSummaryModal()" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const SHIFT_HISTORY = [
+            {kasir:'Ahmad',jam:'09:00 - 17:00',trx:128,total:24500000,st:'closed'},
+            {kasir:'Siti',jam:'08:00 - 16:00',trx:115,total:23200000,st:'closed'},
+            {kasir:'Budi',jam:'16:00 - 00:00',trx:92,total:18900000,st:'closed'},
+            {kasir:'Rina',jam:'09:00 - 17:00',trx:135,total:27100000,st:'closed'},
+            {kasir:'Hendra',jam:'17:00 - 01:00',trx:88,total:17600000,st:'closed'}
+        ];
+
+        function renderHistory() {
+            const html = document.getElementById('shiftHistory');
+            html.innerHTML = SHIFT_HISTORY.map(s =>
+                '<tr class="border-b border-gray-200">' +
+                '<td class="py-3 px-4">' + s.kasir + '</td>' +
+                '<td class="py-3 px-4">' + s.jam + '</td>' +
+                '<td class="py-3 px-4">' + s.trx + '</td>' +
+                '<td class="py-3 px-4">Rp ' + (s.total/1000000).toFixed(1) + 'M</td>' +
+                '<td class="py-3 px-4"><span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ ' + s.st + '</span></td>' +
+                '</tr>'
+            ).join('');
+        }
+
+        function openEndShift() {
+            document.getElementById('endShiftModal').style.display = 'flex';
+        }
+
+        function closeEndShift() {
+            document.getElementById('endShiftModal').style.display = 'none';
+            document.getElementById('actualCash').value = '';
+            document.getElementById('varianceBox').style.display = 'none';
+        }
+
+        function calculateVariance() {
+            const opening = parseFloat(document.getElementById('openingBalance').value) || 0;
+            const actual = parseFloat(document.getElementById('actualCash').value) || 0;
+            const expected = 24500000 + opening;
+            const variance = actual - expected;
+
+            document.getElementById('expectedAmount').textContent = 'Rp ' + (expected/1000000).toFixed(1) + 'M';
+            document.getElementById('actualAmount').textContent = 'Rp ' + (actual/1000000).toFixed(1) + 'M';
+            document.getElementById('variance').textContent = 'Rp ' + (variance/1000000).toFixed(1) + 'M';
+
+            const msg = variance === 0 ? '✓ Sempurna - Tidak ada variance' : 
+                        variance > 0 ? '⭐ Kelebihan Rp ' + (variance).toLocaleString('id-ID') :
+                        '⚠️ Kekurangan Rp ' + Math.abs(variance).toLocaleString('id-ID');
+            document.getElementById('varianceMsg').textContent = msg;
+            document.getElementById('varianceBox').style.display = 'block';
+        }
+
+        function submitEndShift() {
+            const notes = document.getElementById('shiftNotes').value;
+            alert('✓ Shift berhasil ditutup!\n\nOpening: Rp ' + parseFloat(document.getElementById('openingBalance').value).toLocaleString('id-ID') + 
+                  '\nActual: Rp ' + parseFloat(document.getElementById('actualCash').value).toLocaleString('id-ID') +
+                  (notes ? '\nNotes: ' + notes : ''));
+            closeEndShift();
+            document.getElementById('summaryModal').style.display = 'flex';
+        }
+
+        function closeSummaryModal() {
+            document.getElementById('summaryModal').style.display = 'none';
+            renderHistory();
+        }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            renderHistory();
+        });
+    </script>
+</body>
+</html>

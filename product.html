@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Products - Manajemen Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .product-card { transition: all 0.3s; }
+        .product-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">📦 Manajemen Menu Produk</h1>
+                    <p class="text-sm text-gray-500">Lunomi - Product Management & Pricing</p>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex gap-4">
+                <input type="text" id="searchInput" placeholder="Cari produk..." class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" onkeyup="filterProducts()">
+                <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterProducts()">
+                    <option value="">Semua Kategori</option>
+                    <option value="makanan">Makanan</option>
+                    <option value="minuman">Minuman</option>
+                    <option value="dessert">Dessert</option>
+                </select>
+            </div>
+            <button onclick="openAddProduct()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                + Tambah Produk
+            </button>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="productsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- Modal: Add/Edit Product -->
+    <div id="productModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-screen overflow-y-auto">
+            <h2 id="modalTitle" class="text-lg font-bold mb-6 text-gray-900">Tambah Produk Baru</h2>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Produk</label>
+                        <input type="text" id="productName" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Misal: Nasi Goreng">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori</label>
+                        <select id="productCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="makanan">Makanan</option>
+                            <option value="minuman">Minuman</option>
+                            <option value="dessert">Dessert</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi</label>
+                    <textarea id="productDesc" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Deskripsi produk" rows="2"></textarea>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Harga Jual (Rp)</label>
+                        <input type="number" id="productPrice" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Harga Pokok (Rp)</label>
+                        <input type="number" id="productCost" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Margin %</label>
+                        <input type="number" id="productMargin" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" disabled placeholder="Auto calc">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Stok Awal</label>
+                        <input type="number" id="productStock" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Stok Minimum Alert</label>
+                        <input type="number" id="productMinStock" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Unit</label>
+                        <select id="productUnit" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="pcs">Pcs</option>
+                            <option value="porsi">Porsi</option>
+                            <option value="cup">Cup</option>
+                            <option value="box">Box</option>
+                            <option value="kg">Kg</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="flex items-center gap-3 cursor-pointer mt-7">
+                            <input type="checkbox" id="productActive" checked class="w-4 h-4">
+                            <span class="text-sm font-semibold text-gray-700">Produk Aktif</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 pt-4 flex gap-3">
+                    <button onclick="closeProductModal()" class="flex-1 border border-gray-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button onclick="saveProduct()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
+                        ✓ Simpan Produk
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Delete Confirmation -->
+    <div id="deleteModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full text-center">
+            <div class="text-3xl mb-3">⚠️</div>
+            <h2 class="text-lg font-bold mb-2 text-gray-900">Hapus Produk?</h2>
+            <p class="text-sm text-gray-600 mb-6">Produk ini akan dihapus dari sistem</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 border border-gray-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                    Batal
+                </button>
+                <button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PRODUCTS = [
+            {id:1,n:'Nasi Goreng',c:'makanan',d:'Nasi goreng dengan telur & sayuran',p:22000,cp:8000,st:45,ms:10,u:'porsi',a:true},
+            {id:2,n:'Mie Ayam',c:'makanan',d:'Mie dengan kuah ayam gurih',p:18000,cp:6000,st:30,ms:10,u:'porsi',a:true},
+            {id:3,n:'Es Teh',c:'minuman',d:'Es teh segar',p:8000,cp:2000,st:100,ms:20,u:'cup',a:true},
+            {id:4,n:'Soto Ayam',c:'makanan',d:'Soto ayam tradisional',p:20000,cp:7000,st:25,ms:8,u:'porsi',a:true},
+            {id:5,n:'Kopi Hitam',c:'minuman',d:'Kopi hitam panas',p:12000,cp:3000,st:50,ms:15,u:'cup',a:true},
+            {id:6,n:'Lumpia',c:'dessert',d:'Lumpia goreng',p:12000,cp:4000,st:60,ms:15,u:'pcs',a:true}
+        ];
+
+        let editingId = null;
+
+        function renderProducts() {
+            const html = document.getElementById('productsList');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const cat = document.getElementById('categoryFilter').value;
+
+            const filtered = PRODUCTS.filter(p => 
+                (p.n.toLowerCase().includes(search) || p.d.toLowerCase().includes(search)) &&
+                (!cat || p.c === cat)
+            );
+
+            html.innerHTML = filtered.map(p => {
+                const margin = p.cp ? Math.round(((p.p - p.cp) / p.p) * 100) : 0;
+                const stockColor = p.st <= p.ms ? 'red' : p.st <= p.ms * 2 ? 'yellow' : 'green';
+                return '<div class="product-card bg-white rounded-lg shadow p-4 border-l-4 border-blue-600">' +
+                '<div class="flex justify-between items-start mb-2">' +
+                '<div>' +
+                '<h3 class="font-bold text-gray-900">' + p.n + '</h3>' +
+                '<p class="text-xs text-gray-500">' + p.c + '</p>' +
+                '</div>' +
+                '<span class="px-2 py-1 rounded text-xs font-semibold bg-' + stockColor + '-100 text-' + stockColor + '-700">Stock: ' + p.st + '</span>' +
+                '</div>' +
+                '<p class="text-xs text-gray-600 mb-3">' + p.d + '</p>' +
+                '<div class="space-y-1 text-xs mb-3">' +
+                '<div class="flex justify-between"><span class="text-gray-600">Harga Jual</span><span class="font-semibold">Rp ' + p.p.toLocaleString('id-ID') + '</span></div>' +
+                '<div class="flex justify-between"><span class="text-gray-600">Harga Pokok</span><span class="font-semibold">Rp ' + p.cp.toLocaleString('id-ID') + '</span></div>' +
+                '<div class="flex justify-between border-t border-gray-200 pt-1"><span class="text-gray-600">Margin</span><span class="font-bold text-blue-600">' + margin + '%</span></div>' +
+                '</div>' +
+                '<div class="flex gap-2">' +
+                '<button onclick="editProduct(' + p.id + ')" class="flex-1 border border-blue-300 text-blue-600 px-3 py-2 rounded text-xs font-semibold hover:bg-blue-50">Edit</button>' +
+                '<button onclick="deleteProduct(' + p.id + ')" class="flex-1 border border-red-300 text-red-600 px-3 py-2 rounded text-xs font-semibold hover:bg-red-50">Hapus</button>' +
+                '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        function filterProducts() { renderProducts(); }
+
+        function openAddProduct() {
+            editingId = null;
+            document.getElementById('modalTitle').textContent = 'Tambah Produk Baru';
+            document.getElementById('productName').value = '';
+            document.getElementById('productCategory').value = 'makanan';
+            document.getElementById('productDesc').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productCost').value = '';
+            document.getElementById('productStock').value = '';
+            document.getElementById('productMinStock').value = '';
+            document.getElementById('productUnit').value = 'porsi';
+            document.getElementById('productActive').checked = true;
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        function editProduct(id) {
+            const p = PRODUCTS.find(x => x.id === id);
+            if (!p) return;
+            editingId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Produk: ' + p.n;
+            document.getElementById('productName').value = p.n;
+            document.getElementById('productCategory').value = p.c;
+            document.getElementById('productDesc').value = p.d;
+            document.getElementById('productPrice').value = p.p;
+            document.getElementById('productCost').value = p.cp;
+            document.getElementById('productStock').value = p.st;
+            document.getElementById('productMinStock').value = p.ms;
+            document.getElementById('productUnit').value = p.u;
+            document.getElementById('productActive').checked = p.a;
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+
+        function saveProduct() {
+            const n = document.getElementById('productName').value;
+            if (!n) { alert('Nama produk harus diisi'); return; }
+
+            const p = {
+                n, c: document.getElementById('productCategory').value,
+                d: document.getElementById('productDesc').value,
+                p: parseFloat(document.getElementById('productPrice').value) || 0,
+                cp: parseFloat(document.getElementById('productCost').value) || 0,
+                st: parseFloat(document.getElementById('productStock').value) || 0,
+                ms: parseFloat(document.getElementById('productMinStock').value) || 0,
+                u: document.getElementById('productUnit').value,
+                a: document.getElementById('productActive').checked
+            };
+
+            if (editingId) {
+                const idx = PRODUCTS.findIndex(x => x.id === editingId);
+                if (idx >= 0) PRODUCTS[idx] = {...PRODUCTS[idx], ...p};
+            } else {
+                p.id = Math.max(...PRODUCTS.map(x => x.id)) + 1;
+                PRODUCTS.push(p);
+            }
+
+            renderProducts();
+            closeProductModal();
+            alert('✓ Produk berhasil disimpan');
+        }
+
+        function deleteProduct(id) {
+            document.getElementById('deleteModal').style.display = 'flex';
+            window.deleteId = id;
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        function confirmDelete() {
+            const idx = PRODUCTS.findIndex(x => x.id === window.deleteId);
+            if (idx >= 0) PRODUCTS.splice(idx, 1);
+            renderProducts();
+            closeDeleteModal();
+            alert('✓ Produk berhasil dihapus');
+        }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            renderProducts();
+        });
+    </script>
+</body>
+</html>

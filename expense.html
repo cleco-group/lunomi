@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Expenses - Pengeluaran Kas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .expense-item { transition: all 0.3s; }
+        .expense-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .category-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">💰 Pengeluaran Kas</h1>
+                    <p class="text-sm text-gray-500">Lunomi - Cash Expense Tracking</p>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Total Pengeluaran Hari Ini</p>
+                <p class="text-2xl font-bold text-gray-900">Rp 2.4M</p>
+                <p class="text-xs text-gray-500 mt-1">18 transaksi</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Total Minggu Ini</p>
+                <p class="text-2xl font-bold text-gray-900">Rp 15.8M</p>
+                <p class="text-xs text-gray-500 mt-1">128 transaksi</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Total Bulan Ini</p>
+                <p class="text-2xl font-bold text-gray-900">Rp 52.3M</p>
+                <p class="text-xs text-gray-500 mt-1">456 transaksi</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Kategori Terbesar</p>
+                <p class="text-2xl font-bold text-red-600">Operational</p>
+                <p class="text-xs text-gray-500 mt-1">Rp 28.5M</p>
+            </div>
+        </div>
+
+        <!-- Filter & Add -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex gap-4">
+                <input type="text" placeholder="Cari pengeluaran..." class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterExpenses()">
+                    <option value="">Semua Kategori</option>
+                    <option value="operational">Operational</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="supplies">Supplies</option>
+                    <option value="utilities">Utilities</option>
+                    <option value="other">Lainnya</option>
+                </select>
+            </div>
+            <button onclick="openAddExpense()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                + Catat Pengeluaran
+            </button>
+        </div>
+
+        <!-- Expenses List -->
+        <div id="expensesList" class="space-y-4"></div>
+    </div>
+
+    <!-- Modal: Add Expense -->
+    <div id="expenseModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full">
+            <h2 class="text-lg font-bold mb-6 text-gray-900">Catat Pengeluaran Kas</h2>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori</label>
+                        <select id="expenseCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="operational">Operational</option>
+                            <option value="maintenance">Maintenance (Perbaikan/Maintenance)</option>
+                            <option value="supplies">Supplies (Perlengkapan)</option>
+                            <option value="utilities">Utilities (Listrik/Air/Internet)</option>
+                            <option value="other">Lainnya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal</label>
+                        <input type="date" id="expenseDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi Pengeluaran</label>
+                    <input type="text" id="expenseDesc" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Misal: Beli lap pel, perbaikan pintu, dll">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah (Rp)</label>
+                        <input type="number" id="expenseAmount" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" onkeyup="formatAmount()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Metode Pembayaran</label>
+                        <select id="expensePayment" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="tunai">Tunai</option>
+                            <option value="transfer">Transfer Bank</option>
+                            <option value="kartu">Kartu Kredit</option>
+                            <option value="cheque">Cheque</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Penerima/Vendor</label>
+                    <input type="text" id="expenseRecipient" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Misal: Toko Bangunan ABC, Pak Hendra, dll">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan Tambahan (Opsional)</label>
+                    <textarea id="expenseNotes" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Invoice/bukti pembayaran, dll" rows="2"></textarea>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="closeExpenseModal()" class="flex-1 border border-gray-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button onclick="saveExpense()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
+                        ✓ Simpan Pengeluaran
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EXPENSES = [
+            {c:'operational',t:new Date(2026,4,1),d:'Pembelian lap pel & sabun',a:125000,p:'Tunai',r:'Toko Bangunan ABC',n:'Stok supplies harian'},
+            {c:'maintenance',t:new Date(2026,4,1),d:'Perbaikan AC kasir',a:450000,p:'Transfer',r:'Pak Hendra Maintenance',n:'Perlu servis bulanan'},
+            {c:'utilities',t:new Date(2026,4,1),d:'Tagihan listrik bulan April',a:850000,p:'Transfer',r:'PLN',n:'Nomor ref: INV-2026-04'},
+            {c:'supplies',t:new Date(2026,4,1),d:'Beli nota struk POS',a:325000,p:'Tunai',r:'CV Print Express',n:'Qty: 5 rim'},
+            {c:'operational',t:new Date(2026,5,1),d:'Cleaning service',a:600000,p:'Tunai',r:'Tim Kebersihan',n:'Cleaning outlet '},
+            {c:'other',t:new Date(2026,5,1),d:'Donasi sosial',a:200000,p:'Tunai',r:'Yayasan Anak Bangsa',n:'Komitmen CSR bulanan'}
+        ];
+
+        function renderExpenses() {
+            const html = document.getElementById('expensesList');
+            const cat = document.getElementById('categoryFilter').value;
+            const filtered = cat ? EXPENSES.filter(e => e.c === cat) : EXPENSES;
+
+            const sorted = filtered.sort((a, b) => b.t - a.t);
+
+            html.innerHTML = sorted.map(e => {
+                const catColor = {operational:'red',maintenance:'orange',supplies:'blue',utilities:'purple',other:'gray'};
+                const col = catColor[e.c] || 'gray';
+                return '<div class="expense-item bg-white rounded-lg shadow p-4 border-l-4 border-' + col + '-500">' +
+                '<div class="flex justify-between items-start mb-2">' +
+                '<div><h3 class="font-bold text-gray-900">' + e.d + '</h3>' +
+                '<p class="text-sm text-gray-600">' + e.r + '</p></div>' +
+                '<span class="category-badge bg-' + col + '-100 text-' + col + '-700">' + e.c.charAt(0).toUpperCase() + e.c.slice(1) + '</span>' +
+                '</div>' +
+                '<div class="text-xs text-gray-500 mb-2">' + formatDate(e.t) + ' | ' + e.p + '</div>' +
+                '<div class="flex justify-between items-center">' +
+                '<p class="text-xs text-gray-600">' + e.n + '</p>' +
+                '<span class="text-lg font-bold text-gray-900">Rp ' + e.a.toLocaleString('id-ID') + '</span>' +
+                '</div></div>';
+            }).join('');
+        }
+
+        function formatDate(d) {
+            const opt = {year:'numeric',month:'2-digit',day:'2-digit'};
+            return d.toLocaleDateString('id-ID', opt);
+        }
+
+        function filterExpenses() { renderExpenses(); }
+
+        function openAddExpense() {
+            document.getElementById('expenseDate').valueAsDate = new Date();
+            document.getElementById('expenseModal').style.display = 'flex';
+        }
+
+        function closeExpenseModal() {
+            document.getElementById('expenseModal').style.display = 'none';
+        }
+
+        function formatAmount() {
+            const inp = document.getElementById('expenseAmount');
+            inp.value = inp.value.replace(/[^0-9]/g, '');
+        }
+
+        function saveExpense() {
+            const c = document.getElementById('expenseCategory').value;
+            const d = document.getElementById('expenseDesc').value;
+            const a = parseFloat(document.getElementById('expenseAmount').value) || 0;
+            
+            if (!d || !a) { alert('Deskripsi dan jumlah harus diisi'); return; }
+
+            const e = {
+                c, t: new Date(document.getElementById('expenseDate').value),
+                d, a, p: document.getElementById('expensePayment').value,
+                r: document.getElementById('expenseRecipient').value,
+                n: document.getElementById('expenseNotes').value
+            };
+
+            EXPENSES.push(e);
+            renderExpenses();
+            closeExpenseModal();
+            alert('✓ Pengeluaran berhasil dicatat');
+        }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            renderExpenses();
+        });
+    </script>
+</body>
+</html>
