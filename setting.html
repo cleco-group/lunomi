@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Settings - Pengaturan Sistem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .settings-tab { transition: all 0.3s; }
+        .setting-item { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; }
+        .setting-item:last-child { border-bottom: none; }
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #2563eb; }
+        input:checked + .slider:before { transform: translateX(22px); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">⚙️ Pengaturan Sistem</h1>
+                    <p class="text-sm text-gray-500">Lunomi - System Configuration</p>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar Navigation -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow p-4 sticky top-20">
+                    <nav class="space-y-2">
+                        <button onclick="switchTab('general')" class="tab-btn w-full text-left px-4 py-3 rounded-lg bg-blue-100 text-blue-600 font-semibold text-sm hover:bg-blue-200" id="tab-general">
+                            🏢 Umum
+                        </button>
+                        <button onclick="switchTab('users')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-users">
+                            👥 User & Role
+                        </button>
+                        <button onclick="switchTab('security')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-security">
+                            🔒 Keamanan
+                        </button>
+                        <button onclick="switchTab('notification')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-notification">
+                            🔔 Notifikasi
+                        </button>
+                        <button onclick="switchTab('integration')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-integration">
+                            🔗 Integrasi
+                        </button>
+                        <button onclick="switchTab('backup')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-backup">
+                            💾 Backup & Data
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <!-- Tab: General -->
+                <div id="content-general" class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-bold text-gray-900">Pengaturan Umum</h2>
+                        <p class="text-sm text-gray-600 mt-1">Konfigurasi dasar sistem Lunomi</p>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 mb-2">Nama Bisnis</label>
+                            <input type="text" value="Lunomi F&B Indonesia" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 mb-2">Email Bisnis</label>
+                            <input type="email" value="info@lunomi.id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 mb-2">Nomor Telepon</label>
+                            <input type="tel" value="021-7777-7777" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 mb-2">Alamat Kantor Pusat</label>
+                            <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3">Jl. Jendral Sudirman No. 123, Jakarta Pusat 12190, Indonesia</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 mb-2">Currency</label>
+                            <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>IDR (Rupiah) - Rp</option>
+                                <option>USD (Dollar) - $</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 mb-2">Timezone</label>
+                            <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>Asia/Jakarta (WIB)</option>
+                                <option>Asia/Makassar (WITA)</option>
+                                <option>Asia/Jayapura (WIT)</option>
+                            </select>
+                        </div>
+                        <button onclick="saveSetting('general')" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab: Users -->
+                <div id="content-users" style="display:none" class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900">User & Role Management</h2>
+                            <p class="text-sm text-gray-600 mt-1">Kelola pengguna dan hak akses</p>
+                        </div>
+                        <button onclick="openAddUser()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold">
+                            + Tambah User
+                        </button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Andi Setiawan (Owner)</p>
+                                    <p class="text-sm text-gray-600">owner@lunomi.local</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Super Admin</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Edit</button>
+                                <button class="text-red-600 text-sm font-semibold hover:text-red-800">Hapus</button>
+                            </div>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Budi Hartono (Manager)</p>
+                                    <p class="text-sm text-gray-600">manager@lunomi.local</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Admin</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Edit</button>
+                                <button class="text-red-600 text-sm font-semibold hover:text-red-800">Hapus</button>
+                            </div>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Ahmad Wijaya (Kasir)</p>
+                                    <p class="text-sm text-gray-600">kasir@lunomi.local</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">User</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Edit</button>
+                                <button class="text-red-600 text-sm font-semibold hover:text-red-800">Hapus</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Security -->
+                <div id="content-security" style="display:none" class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-bold text-gray-900">Pengaturan Keamanan</h2>
+                        <p class="text-sm text-gray-600 mt-1">Kelola keamanan dan privasi sistem</p>
+                    </div>
+                    <div class="space-y-0">
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Two-Factor Authentication (2FA)</p>
+                                    <p class="text-sm text-gray-600">Tambahkan lapisan keamanan extra</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Session Timeout</p>
+                                    <p class="text-sm text-gray-600">Auto logout setelah 30 menit inaktif</p>
+                                </div>
+                                <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option>15 menit</option>
+                                    <option selected>30 menit</option>
+                                    <option>60 menit</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Password Encryption</p>
+                                    <p class="text-sm text-gray-600">Enkripsi password dengan standar industry</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Activity Log</p>
+                                    <p class="text-sm text-gray-600">Catat semua aktivitas user untuk audit</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <button onclick="changePassword()" class="px-6 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 font-semibold text-sm">
+                                Ubah Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Notification -->
+                <div id="content-notification" style="display:none" class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-bold text-gray-900">Pengaturan Notifikasi</h2>
+                        <p class="text-sm text-gray-600 mt-1">Kelola notifikasi dan alert sistem</p>
+                    </div>
+                    <div class="space-y-0">
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Email Notification</p>
+                                    <p class="text-sm text-gray-600">Terima laporan via email</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Stock Alert</p>
+                                    <p class="text-sm text-gray-600">Notifikasi ketika stok minimum</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Order Alert</p>
+                                    <p class="text-sm text-gray-600">Notifikasi order baru masuk</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900">Revenue Report</p>
+                                    <p class="text-sm text-gray-600">Laporan harian revenue</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900">System Alert</p>
+                                    <p class="text-sm text-gray-600">Alert untuk masalah sistem</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Integration -->
+                <div id="content-integration" style="display:none" class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-bold text-gray-900">Integrasi Pihak Ketiga</h2>
+                        <p class="text-sm text-gray-600 mt-1">Hubungkan Lunomi dengan layanan eksternal</p>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <p class="font-semibold text-gray-900">🏦 Midtrans Payment</p>
+                                    <p class="text-sm text-gray-600">Gateway pembayaran (status: terkoneksi)</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Connected</span>
+                            </div>
+                            <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Disconnect</button>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <p class="font-semibold text-gray-900">☁️ Supabase Database</p>
+                                    <p class="text-sm text-gray-600">Cloud database (status: terkoneksi)</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Connected</span>
+                            </div>
+                            <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Settings</button>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <p class="font-semibold text-gray-900">🤖 Anthropic Claude API</p>
+                                    <p class="text-sm text-gray-600">AI untuk CEO Orchestrator (status: ready)</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">⚙️ Setup</span>
+                            </div>
+                            <button onclick="setupAI()" class="text-blue-600 text-sm font-semibold hover:text-blue-800">Configure</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Backup -->
+                <div id="content-backup" style="display:none" class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-bold text-gray-900">Backup & Data Management</h2>
+                        <p class="text-sm text-gray-600 mt-1">Backup dan restore data Lunomi</p>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div class="border-2 border-dashed border-blue-300 rounded-lg p-6 text-center">
+                            <p class="text-sm text-gray-600 mb-2">Last Backup: 2026-05-01 22:15:30 (1.2 GB)</p>
+                            <p class="text-xs text-gray-500 mb-4">Automatic backup setiap hari jam 22:00 WIB</p>
+                            <div class="flex gap-3 justify-center">
+                                <button onclick="backupNow()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm">
+                                    💾 Backup Sekarang
+                                </button>
+                                <button onclick="restoreBackup()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold text-sm">
+                                    📂 Restore Backup
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-3">Backup History</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-sm p-3 bg-gray-50 rounded-lg">
+                                    <span class="text-gray-700">2026-05-01 22:15:30</span>
+                                    <span class="text-gray-600">1.2 GB</span>
+                                    <button class="text-red-600 text-xs font-semibold hover:text-red-800">Hapus</button>
+                                </div>
+                                <div class="flex justify-between items-center text-sm p-3 bg-gray-50 rounded-lg">
+                                    <span class="text-gray-700">2026-04-30 22:10:15</span>
+                                    <span class="text-gray-600">1.1 GB</span>
+                                    <button class="text-red-600 text-xs font-semibold hover:text-red-800">Hapus</button>
+                                </div>
+                                <div class="flex justify-between items-center text-sm p-3 bg-gray-50 rounded-lg">
+                                    <span class="text-gray-700">2026-04-29 22:05:45</span>
+                                    <span class="text-gray-600">1.0 GB</span>
+                                    <button class="text-red-600 text-xs font-semibold hover:text-red-800">Hapus</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'general';
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update button styles
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-100', 'text-blue-600');
+                btn.classList.add('text-gray-700', 'hover:bg-gray-100');
+            });
+            document.getElementById('tab-' + tab).classList.add('bg-blue-100', 'text-blue-600');
+            document.getElementById('tab-' + tab).classList.remove('text-gray-700', 'hover:bg-gray-100');
+
+            // Update content
+            document.querySelectorAll('[id^="content-"]').forEach(c => c.style.display = 'none');
+            document.getElementById('content-' + tab).style.display = 'block';
+        }
+
+        function saveSetting(section) {
+            alert('✓ Pengaturan ' + section + ' telah disimpan');
+        }
+
+        function openAddUser() {
+            alert('Modal tambah user - Coming soon!');
+        }
+
+        function changePassword() {
+            alert('Modal ubah password - Coming soon!');
+        }
+
+        function setupAI() {
+            alert('Modal setup Claude API - Coming soon!\n\nNanti akan minta:\n- API Key\n- Model selection\n- Configuration');
+        }
+
+        function backupNow() {
+            alert('✓ Backup dimulai...\n\nProses backup sedang berjalan, tunggu beberapa menit');
+        }
+
+        function restoreBackup() {
+            alert('Modal restore backup - Coming soon!');
+        }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+        });
+    </script>
+</body>
+</html>
