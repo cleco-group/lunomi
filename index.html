@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi POS - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e8f5 50%, #c1d9f0 100%);
+            min-height: 100vh;
+        }
+        
+        .gradient-orb {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+        
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            top: -250px;
+            right: -250px;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #10b981, #047857);
+            bottom: -200px;
+            left: -200px;
+            animation: float 10s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(30px); }
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- Gradient orbs -->
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+
+    <!-- Main container -->
+    <div class="min-h-screen flex items-center justify-center p-4 relative z-10">
+        <div class="w-full max-w-md">
+            <!-- Card -->
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-12 text-center">
+                    <div class="inline-block bg-white bg-opacity-20 rounded-full p-4 mb-4">
+                        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-1-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                        </svg>
+                    </div>
+                    <h1 class="text-4xl font-bold text-white mb-2">Lunomi POS</h1>
+                    <p class="text-blue-100">Sistem POS Pintar untuk F&B Indonesia</p>
+                </div>
+
+                <!-- Body -->
+                <div class="p-8">
+                    <!-- Error message -->
+                    <div id="errorMsg" class="hidden mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
+
+                    <!-- Role selector -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Pilih Role Akses</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <label class="relative">
+                                <input type="radio" name="role" value="owner" class="hidden peer" checked onchange="updateRole()">
+                                <div class="p-3 text-center rounded-lg border-2 border-gray-300 peer-checked:border-blue-600 peer-checked:bg-blue-50 cursor-pointer transition">
+                                    <div class="text-2xl mb-1">👤</div>
+                                    <div class="text-xs font-semibold text-gray-600">Owner</div>
+                                </div>
+                            </label>
+                            <label class="relative">
+                                <input type="radio" name="role" value="manager" class="hidden peer" onchange="updateRole()">
+                                <div class="p-3 text-center rounded-lg border-2 border-gray-300 peer-checked:border-blue-600 peer-checked:bg-blue-50 cursor-pointer transition">
+                                    <div class="text-2xl mb-1">📋</div>
+                                    <div class="text-xs font-semibold text-gray-600">Manager</div>
+                                </div>
+                            </label>
+                            <label class="relative">
+                                <input type="radio" name="role" value="cashier" class="hidden peer" onchange="updateRole()">
+                                <div class="p-3 text-center rounded-lg border-2 border-gray-300 peer-checked:border-blue-600 peer-checked:bg-blue-50 cursor-pointer transition">
+                                    <div class="text-2xl mb-1">💳</div>
+                                    <div class="text-xs font-semibold text-gray-600">Kasir</div>
+                                </div>
+                            </label>
+                            <label class="relative">
+                                <input type="radio" name="role" value="kitchen" class="hidden peer" onchange="updateRole()">
+                                <div class="p-3 text-center rounded-lg border-2 border-gray-300 peer-checked:border-blue-600 peer-checked:bg-blue-50 cursor-pointer transition">
+                                    <div class="text-2xl mb-1">👨‍🍳</div>
+                                    <div class="text-xs font-semibold text-gray-600">Kitchen</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Email input -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="email">Email</label>
+                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="email" type="email" placeholder="staff@lunomi.local">
+                    </div>
+
+                    <!-- Password input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="password">Password</label>
+                        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="password" type="password" placeholder="••••••••">
+                    </div>
+
+                    <!-- Login button -->
+                    <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white font-semibold py-3 rounded-lg hover:from-blue-700 hover:to-blue-900 transition mb-4 disabled:opacity-60 disabled:cursor-not-allowed" id="loginBtn">
+                        Masuk ke Lunomi
+                    </button>
+
+                    <!-- Demo info -->
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg text-xs">
+                        <div class="font-semibold text-amber-900 mb-2">Akun Demo Tersedia:</div>
+                        <div class="space-y-1 text-amber-800">
+                            <div>👤 owner@lunomi.local - demo123</div>
+                            <div>📋 manager@lunomi.local - demo123</div>
+                            <div>💳 kasir@lunomi.local - demo123</div>
+                            <div>👨‍🍳 kitchen@lunomi.local - demo123</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DEMO_ACCOUNTS = {
+            owner: { email: 'owner@lunomi.local', password: 'demo123', role: 'owner' },
+            manager: { email: 'manager@lunomi.local', password: 'demo123', role: 'manager' },
+            cashier: { email: 'kasir@lunomi.local', password: 'demo123', role: 'cashier' },
+            kitchen: { email: 'kitchen@lunomi.local', password: 'demo123', role: 'kitchen' }
+        };
+
+        function updateRole() {
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const account = DEMO_ACCOUNTS[role];
+            document.getElementById('email').value = account.email;
+            document.getElementById('password').value = account.password;
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (!email || !password) {
+                errorMsg.textContent = 'Email dan password harus diisi';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            const account = DEMO_ACCOUNTS[role];
+            if (email === account.email && password === account.password) {
+                const session = {
+                    user: {
+                        email: email,
+                        id: `user_${role}_${Date.now()}`,
+                        role: role,
+                        name: role.charAt(0).toUpperCase() + role.slice(1)
+                    },
+                    loginTime: new Date().toISOString(),
+                    outlet_id: 'outlet_demo_001'
+                };
+
+                localStorage.setItem('lunomi_session', JSON.stringify(session));
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Sedang membuka...';
+
+                const dashboards = {
+                    owner: 'dashboard.html',
+                    manager: 'dashboard.html?role=manager',
+                    cashier: 'pos.html',
+                    kitchen: 'kitchen.html'
+                };
+
+                setTimeout(() => {
+                    window.location.href = dashboards[role];
+                }, 600);
+            } else {
+                errorMsg.textContent = 'Email atau password salah. Gunakan akun demo yang tersedia.';
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRole();
+            
+            document.getElementById('password').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+        });
+
+        // Check if already logged in
+        window.addEventListener('load', () => {
+            const session = localStorage.getItem('lunomi_session');
+            if (session) {
+                const data = JSON.parse(session);
+                const dashboards = {
+                    owner: 'dashboard.html',
+                    manager: 'dashboard.html?role=manager',
+                    cashier: 'pos.html',
+                    kitchen: 'kitchen.html'
+                };
+                window.location.href = dashboards[data.user.role];
+            }
+        });
+    </script>
+</body>
+</html>
