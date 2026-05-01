@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi HR - Manajemen SDM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .status-present { color: #10b981; }
+        .status-absent { color: #ef4444; }
+        .status-late { color: #f59e0b; }
+        .salary-card { transition: all 0.3s; }
+        .salary-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .attendance-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .badge-present { background: #bbf7d0; color: #065f46; }
+        .badge-absent { background: #fecaca; color: #991b1b; }
+        .badge-late { background: #fed7aa; color: #92400e; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">👥 HR & Payroll System</h1>
+                    <p class="text-sm text-gray-500">Lunomi - Manajemen SDM & Gaji</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="openAddEmployee()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold">
+                        + Tambah Karyawan
+                    </button>
+                    <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-6">
+            <button onclick="switchTab('employees')" id="tab-employees" class="py-4 font-semibold text-gray-900 border-b-2 border-blue-600">
+                👤 Daftar Karyawan
+            </button>
+            <button onclick="switchTab('attendance')" id="tab-attendance" class="py-4 font-semibold text-gray-600 border-b-2 border-transparent hover:text-gray-900">
+                📋 Absensi
+            </button>
+            <button onclick="switchTab('payroll')" id="tab-payroll" class="py-4 font-semibold text-gray-600 border-b-2 border-transparent hover:text-gray-900">
+                💸 Payroll
+            </button>
+            <button onclick="switchTab('leave')" id="tab-leave" class="py-4 font-semibold text-gray-600 border-b-2 border-transparent hover:text-gray-900">
+                🏖️ Cuti
+            </button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Tab: Employees -->
+        <div id="content-employees" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="employeeList"></div>
+        </div>
+
+        <!-- Tab: Attendance -->
+        <div id="content-attendance" style="display:none" class="space-y-4">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-bold mb-4 text-gray-900">Absensi Hari Ini</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="border-b border-gray-200">
+                            <tr>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Nama</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Posisi</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Jam Masuk</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Jam Keluar</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Payroll -->
+        <div id="content-payroll" style="display:none" class="space-y-6">
+            <div class="flex gap-3 mb-6">
+                <select id="payrollMonth" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>Mei 2026</option>
+                    <option>April 2026</option>
+                    <option>Maret 2026</option>
+                </select>
+                <button onclick="generatePayroll()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-sm">
+                    Proses Payroll
+                </button>
+            </div>
+            <div class="grid grid-cols-1 gap-4" id="payrollList"></div>
+        </div>
+
+        <!-- Tab: Leave -->
+        <div id="content-leave" style="display:none" class="space-y-4">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-bold mb-4 text-gray-900">Daftar Pengajuan Cuti</h2>
+                <div id="leaveList" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Karyawan -->
+    <div id="addEmployeeModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 class="text-lg font-bold mb-4">Tambah Karyawan</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Nama</label>
+                    <input type="text" id="empName" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Posisi</label>
+                    <select id="empPosition" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="kasir">Kasir</option>
+                        <option value="chef">Chef</option>
+                        <option value="helper">Helper</option>
+                        <option value="manager">Manager</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Gaji Pokok (Rp)</label>
+                    <input type="number" id="empSalary" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Tanggal Masuk</label>
+                    <input type="date" id="empDate" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="closeAddEmployee()" class="flex-1 border border-gray-300 px-4 py-2 rounded text-sm font-semibold hover:bg-gray-50">Batal</button>
+                    <button onclick="saveEmployee()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-blue-700">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const EMP = [
+            {id:1,n:'Ahmad',p:'Kasir',s:2000000,d:'2025-01-15',a:25,t:2},
+            {id:2,n:'Siti',p:'Chef',s:3000000,d:'2024-06-20',a:24,t:1},
+            {id:3,n:'Budi',p:'Helper',s:1500000,d:'2025-03-10',a:23,t:3},
+            {id:4,n:'Rina',p:'Manager',s:4000000,d:'2024-01-01',a:24,t:0},
+            {id:5,n:'Hendra',p:'Kasir',s:2000000,d:'2025-02-01',a:22,t:4},
+            {id:6,n:'Dewi',p:'Helper',s:1500000,d:'2025-03-15',a:25,t:0}
+        ];
+
+        const ATT = [
+            {id:1,n:'Ahmad',p:'Kasir',in:'09:05',out:'17:30',st:'late'},
+            {id:2,n:'Siti',p:'Chef',in:'07:55',out:'16:45',st:'present'},
+            {id:3,n:'Budi',p:'Helper',in:'-',out:'-',st:'absent'},
+            {id:4,n:'Rina',p:'Manager',in:'08:00',out:'17:00',st:'present'},
+            {id:5,n:'Hendra',p:'Kasir',in:'09:15',out:'17:45',st:'late'},
+            {id:6,n:'Dewi',p:'Helper',in:'08:00',out:'16:30',st:'present'}
+        ];
+
+        const LEAVE = [
+            {id:1,n:'Budi',t:'Sakit',d:'2026-05-01',st:'approved',dur:1},
+            {id:2,n:'Hendra',t:'Cuti',d:'2026-05-05 - 2026-05-07',st:'pending',dur:3},
+            {id:3,n:'Dewi',t:'Keluarga',d:'2026-04-28',st:'approved',dur:1}
+        ];
+
+        let emp = JSON.parse(JSON.stringify(EMP));
+        let currentTab = 'employees';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('[id^="tab-"]').forEach(b => {
+                b.classList.remove('border-blue-600', 'text-gray-900');
+                b.classList.add('border-transparent', 'text-gray-600');
+            });
+            document.getElementById('tab-' + tab).classList.add('border-blue-600', 'text-gray-900');
+            document.getElementById('tab-' + tab).classList.remove('border-transparent', 'text-gray-600');
+
+            document.querySelectorAll('[id^="content-"]').forEach(c => c.style.display = 'none');
+            document.getElementById('content-' + tab).style.display = 'block';
+
+            if (tab === 'attendance') renderAttendance();
+            else if (tab === 'payroll') renderPayroll();
+            else if (tab === 'leave') renderLeave();
+            else renderEmployees();
+        }
+
+        function renderEmployees() {
+            const list = document.getElementById('employeeList');
+            list.innerHTML = emp.map(e => 
+                '<div class="salary-card bg-white rounded-lg shadow p-6">' +
+                '<div class="flex justify-between items-start mb-4">' +
+                '<div><div class="font-bold text-lg">' + e.n + '</div>' +
+                '<div class="text-sm text-gray-600">' + e.p + '</div></div>' +
+                '<div class="text-xs text-gray-500">ID: ' + e.id + '</div></div>' +
+                '<div class="border-t border-gray-200 pt-4 space-y-2 text-sm">' +
+                '<div><span class="text-gray-600">Gaji Pokok:</span> <strong>Rp ' + (e.s/1000000).toFixed(1) + 'M</strong></div>' +
+                '<div><span class="text-gray-600">Masuk:</span> <strong>' + e.d + '</strong></div>' +
+                '<div><span class="text-gray-600">Hadir:</span> <strong class="text-green-600">' + e.a + '/26</strong></div>' +
+                '<div><span class="text-gray-600">Terlambat:</span> <strong class="text-orange-600">' + e.t + ' hari</strong></div></div>' +
+                '<div class="flex gap-2 mt-4">' +
+                '<button onclick="editEmployee(' + e.id + ')" class="flex-1 text-blue-600 border border-blue-600 px-3 py-2 rounded text-xs font-semibold hover:bg-blue-50">Edit</button>' +
+                '<button onclick="deleteEmployee(' + e.id + ')" class="flex-1 text-red-600 border border-red-600 px-3 py-2 rounded text-xs font-semibold hover:bg-red-50">Hapus</button>' +
+                '</div></div>'
+            ).join('');
+        }
+
+        function renderAttendance() {
+            const list = document.getElementById('attendanceList');
+            list.innerHTML = ATT.map(a =>
+                '<tr class="border-b border-gray-200">' +
+                '<td class="py-3 px-4">' + a.n + '</td>' +
+                '<td class="py-3 px-4">' + a.p + '</td>' +
+                '<td class="py-3 px-4">' + a.in + '</td>' +
+                '<td class="py-3 px-4">' + a.out + '</td>' +
+                '<td class="py-3 px-4"><span class="attendance-badge ' + (a.st === 'present' ? 'badge-present' : a.st === 'absent' ? 'badge-absent' : 'badge-late') + '">' +
+                (a.st === 'present' ? '✓ Hadir' : a.st === 'absent' ? '✗ Absen' : '⏰ Terlambat') + '</span></td>' +
+                '<td class="py-3 px-4"><button onclick="editAttendance(' + a.id + ')" class="text-blue-600 text-sm font-semibold hover:text-blue-800">Edit</button></td>' +
+                '</tr>'
+            ).join('');
+        }
+
+        function renderPayroll() {
+            const list = document.getElementById('payrollList');
+            list.innerHTML = emp.map(e => {
+                const gajiPokok = e.s;
+                const tunjangan = 500000;
+                const potonganTerlambat = e.t * 100000;
+                const potonganBpjs = Math.round(gajiPokok * 0.02);
+                const gajiKotor = gajiPokok + tunjangan;
+                const gajiNetto = gajiKotor - potonganTerlambat - potonganBpjs;
+                return '<div class="bg-white rounded-lg shadow p-6">' +
+                '<div class="flex justify-between items-start mb-4">' +
+                '<div><div class="font-bold text-lg">' + e.n + '</div>' +
+                '<div class="text-sm text-gray-600">' + e.p + '</div></div>' +
+                '</div>' +
+                '<table class="w-full text-sm mb-4">' +
+                '<tr class="border-b border-gray-200"><td class="py-2 text-gray-600">Gaji Pokok</td><td class="text-right font-semibold">Rp ' + (gajiPokok/1000000).toFixed(1) + 'M</td></tr>' +
+                '<tr class="border-b border-gray-200"><td class="py-2 text-gray-600">Tunjangan</td><td class="text-right font-semibold">Rp ' + (tunjangan/1000000).toFixed(1) + 'M</td></tr>' +
+                '<tr class="border-b border-gray-200 bg-green-50"><td class="py-2 font-semibold">Gaji Kotor</td><td class="text-right font-bold text-green-700">Rp ' + (gajiKotor/1000000).toFixed(1) + 'M</td></tr>' +
+                '<tr class="border-b border-gray-200"><td class="py-2 text-red-600">- Potongan Terlambat</td><td class="text-right font-semibold text-red-600">Rp ' + (potonganTerlambat/1000000).toFixed(1) + 'M</td></tr>' +
+                '<tr class="border-b border-gray-200"><td class="py-2 text-red-600">- BPJS (2%)</td><td class="text-right font-semibold text-red-600">Rp ' + (potonganBpjs/1000000).toFixed(1) + 'M</td></tr>' +
+                '<tr class="bg-blue-50"><td class="py-2 font-semibold">Gaji Netto</td><td class="text-right font-bold text-blue-700">Rp ' + (gajiNetto/1000000).toFixed(1) + 'M</td></tr>' +
+                '</table>' +
+                '<button onclick="approveSalary(' + e.id + ')" class="w-full bg-green-600 text-white py-2 rounded font-semibold text-sm hover:bg-green-700">Bayarkan Gaji</button>' +
+                '</div>';
+            }).join('');
+        }
+
+        function renderLeave() {
+            const list = document.getElementById('leaveList');
+            list.innerHTML = LEAVE.map(l =>
+                '<div class="border border-gray-200 rounded-lg p-4">' +
+                '<div class="flex justify-between items-start mb-3">' +
+                '<div><div class="font-bold">' + l.n + '</div>' +
+                '<div class="text-sm text-gray-600">' + l.t + ' - ' + l.d + '</div></div>' +
+                '<span class="text-xs font-semibold px-3 py-1 rounded-full ' + (l.st === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700') + '">' +
+                (l.st === 'approved' ? '✓ Disetujui' : '⏳ Pending') + '</span></div>' +
+                '<div class="text-sm text-gray-600 mb-3">Durasi: ' + l.dur + ' hari</div>' +
+                '<div class="flex gap-2">' +
+                (l.st === 'pending' ? 
+                '<button onclick="approveLeave(' + l.id + ')" class="flex-1 bg-green-600 text-white py-2 rounded text-sm font-semibold hover:bg-green-700">Setujui</button>' +
+                '<button onclick="rejectLeave(' + l.id + ')" class="flex-1 bg-red-600 text-white py-2 rounded text-sm font-semibold hover:bg-red-700">Tolak</button>' :
+                '<button class="flex-1 bg-gray-300 text-gray-600 py-2 rounded text-sm font-semibold cursor-not-allowed">Selesai</button>'
+                ) +
+                '</div></div>'
+            ).join('');
+        }
+
+        function openAddEmployee() { document.getElementById('addEmployeeModal').style.display = 'flex'; }
+        function closeAddEmployee() { document.getElementById('addEmployeeModal').style.display = 'none'; }
+
+        function saveEmployee() {
+            const n = document.getElementById('empName').value;
+            const p = document.getElementById('empPosition').value;
+            const s = parseFloat(document.getElementById('empSalary').value) || 0;
+            const d = document.getElementById('empDate').value;
+            if (!n || !d) { alert('Isi semua field'); return; }
+            const id = Math.max(...emp.map(e => e.id), 0) + 1;
+            emp.push({id,n,p,s,d,a:0,t:0});
+            renderEmployees();
+            closeAddEmployee();
+            alert('✓ Karyawan ditambahkan');
+        }
+
+        function editEmployee(id) { alert('Edit employee ' + id); }
+        function deleteEmployee(id) {
+            if (confirm('Hapus karyawan?')) {
+                emp = emp.filter(e => e.id !== id);
+                renderEmployees();
+            }
+        }
+
+        function editAttendance(id) { alert('Edit attendance ' + id); }
+        function generatePayroll() { alert('✓ Payroll diproses untuk bulan terpilih'); }
+        function approveSalary(id) { alert('✓ Gaji karyawan ' + id + ' telah ditransfer'); }
+        function approveLeave(id) { alert('✓ Cuti disetujui'); }
+        function rejectLeave(id) { alert('✗ Cuti ditolak'); }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            renderEmployees();
+        });
+    </script>
+</body>
+</html>
