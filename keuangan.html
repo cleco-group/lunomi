@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Keuangan - Laporan Keuangan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .chart-bar { background: linear-gradient(180deg, #2563eb 0%, #1e40af 100%); border-radius: 4px; }
+        .chart-bar.expense { background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%); }
+        .metric-card { border-left: 4px solid #2563eb; }
+        .metric-card.profit { border-left-color: #10b981; }
+        .metric-card.expense { border-left-color: #ef4444; }
+        .metric-card.neutral { border-left-color: #f59e0b; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">💰 Laporan Keuangan</h1>
+                    <p class="text-sm text-gray-500">Lunomi - Financial Dashboard</p>
+                </div>
+                <div class="flex gap-3">
+                    <select id="periodFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="changePeriod()">
+                        <option value="daily">Hari Ini</option>
+                        <option value="weekly">Minggu Ini</option>
+                        <option value="monthly" selected>Bulan Ini</option>
+                        <option value="yearly">Tahun Ini</option>
+                    </select>
+                    <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="metric-card p-6 rounded-lg bg-blue-50">
+                <p class="text-gray-600 text-sm font-semibold mb-2">Total Revenue</p>
+                <p class="text-3xl font-bold text-gray-900" id="totalRevenue">Rp 0</p>
+                <p class="text-xs text-green-600 mt-2">↑ 12% dari periode lalu</p>
+            </div>
+            <div class="metric-card expense p-6 rounded-lg bg-red-50">
+                <p class="text-gray-600 text-sm font-semibold mb-2">Total Expense</p>
+                <p class="text-3xl font-bold text-gray-900" id="totalExpense">Rp 0</p>
+                <p class="text-xs text-red-600 mt-2">↑ 5% dari periode lalu</p>
+            </div>
+            <div class="metric-card profit p-6 rounded-lg bg-green-50">
+                <p class="text-gray-600 text-sm font-semibold mb-2">Profit</p>
+                <p class="text-3xl font-bold text-gray-900" id="totalProfit">Rp 0</p>
+                <p class="text-xs text-green-600 mt-2">Margin: <span id="profitMargin">0</span>%</p>
+            </div>
+            <div class="metric-card neutral p-6 rounded-lg bg-orange-50">
+                <p class="text-gray-600 text-sm font-semibold mb-2">Transactions</p>
+                <p class="text-3xl font-bold text-gray-900" id="totalTrx">0</p>
+                <p class="text-xs text-gray-600 mt-2">Avg: <span id="avgTrx">Rp 0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Revenue Chart -->
+            <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-bold mb-6 text-gray-900">📊 Revenue Trend (Last 7 Days)</h2>
+                <div class="flex items-end gap-2 h-64 mb-4">
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="chart-bar w-full" style="height: 70%"></div>
+                        <p class="text-xs text-gray-600">Mon</p>
+                        <p class="text-xs font-semibold">Rp 25M</p>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="chart-bar w-full" style="height: 60%"></div>
+                        <p class="text-xs text-gray-600">Tue</p>
+                        <p class="text-xs font-semibold">Rp 22M</p>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="chart-bar w-full" style="height: 85%"></div>
+                        <p class="text-xs text-gray-600">Wed</p>
+                        <p class="text-xs font-semibold">Rp 30M</p>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="chart-bar w-full" style="height: 75%"></div>
+                        <p class="text-xs text-gray-600">Thu</p>
+                        <p class="text-xs font-semibold">Rp 28M</p>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="chart-bar w-full" style="height: 65%"></div>
+                        <p class="text-xs text-gray-600">Fri</p>
+                        <p class="text-xs font-semibold">Rp 24M</p>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="chart-bar w-full" style="height: 90%"></div>
+                        <p class="text-xs text-gray-600">Sat</p>
+                        <p class="text-xs font-semibold">Rp 32M</p>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="chart-bar w-full" style="height: 80%"></div>
+                        <p class="text-xs text-gray-600">Sun</p>
+                        <p class="text-xs font-semibold">Rp 29M</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-bold mb-6 text-gray-900">📈 Summary</h2>
+                <div class="space-y-4">
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Avg Daily Revenue</p>
+                        <p class="text-2xl font-bold text-gray-900">Rp 27.3M</p>
+                    </div>
+                    <div class="p-4 bg-red-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Avg Daily Expense</p>
+                        <p class="text-2xl font-bold text-gray-900">Rp 10.2M</p>
+                    </div>
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Avg Daily Profit</p>
+                        <p class="text-2xl font-bold text-gray-900">Rp 17.1M</p>
+                    </div>
+                    <div class="p-4 bg-yellow-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Profit Margin</p>
+                        <p class="text-2xl font-bold text-gray-900">62.6%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Breakdown -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold mb-6 text-gray-900">💸 Expense Breakdown</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-semibold text-gray-900">Bahan Baku</p>
+                        <span class="text-sm bg-red-100 text-red-700 px-2 py-1 rounded">35%</span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900">Rp 3.5M</p>
+                    <div class="w-full bg-gray-200 rounded h-2 mt-3"><div class="bg-red-500 h-2 rounded" style="width: 35%"></div></div>
+                </div>
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-semibold text-gray-900">Gaji Karyawan</p>
+                        <span class="text-sm bg-orange-100 text-orange-700 px-2 py-1 rounded">40%</span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900">Rp 4.0M</p>
+                    <div class="w-full bg-gray-200 rounded h-2 mt-3"><div class="bg-orange-500 h-2 rounded" style="width: 40%"></div></div>
+                </div>
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-semibold text-gray-900">Utilitas</p>
+                        <span class="text-sm bg-yellow-100 text-yellow-700 px-2 py-1 rounded">15%</span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900">Rp 1.5M</p>
+                    <div class="w-full bg-gray-200 rounded h-2 mt-3"><div class="bg-yellow-500 h-2 rounded" style="width: 15%"></div></div>
+                </div>
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-semibold text-gray-900">Lainnya</p>
+                        <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">10%</span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900">Rp 1.0M</p>
+                    <div class="w-full bg-gray-200 rounded h-2 mt-3"><div class="bg-blue-500 h-2 rounded" style="width: 10%"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Income Statement -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold mb-6 text-gray-900">📄 Income Statement (Laporan Laba Rugi)</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <tbody>
+                        <tr class="border-b border-gray-200">
+                            <td class="py-3 px-4 font-semibold text-gray-900">Revenue (Penjualan)</td>
+                            <td class="py-3 px-4 text-right font-bold text-gray-900">Rp 190.8M</td>
+                        </tr>
+                        <tr class="border-b border-gray-200 bg-gray-50">
+                            <td class="py-3 px-4 text-gray-700">- Cost of Goods Sold (COGS)</td>
+                            <td class="py-3 px-4 text-right text-gray-700">Rp 71.8M</td>
+                        </tr>
+                        <tr class="border-b border-gray-200 font-semibold bg-green-50">
+                            <td class="py-3 px-4 text-gray-900">Gross Profit</td>
+                            <td class="py-3 px-4 text-right text-green-700">Rp 119.0M (62.3%)</td>
+                        </tr>
+                        <tr class="border-b border-gray-200">
+                            <td class="py-3 px-4 text-gray-700">- Operating Expense</td>
+                            <td class="py-3 px-4 text-right text-gray-700">Rp 71.9M</td>
+                        </tr>
+                        <tr class="border-b border-gray-200">
+                            <td class="py-3 px-4 text-xs text-gray-600 pl-8">  • Gaji Karyawan: Rp 40M</td>
+                            <td class="py-3 px-4"></td>
+                        </tr>
+                        <tr class="border-b border-gray-200">
+                            <td class="py-3 px-4 text-xs text-gray-600 pl-8">  • Utilitas: Rp 15M</td>
+                            <td class="py-3 px-4"></td>
+                        </tr>
+                        <tr class="border-b border-gray-200">
+                            <td class="py-3 px-4 text-xs text-gray-600 pl-8">  • Marketing: Rp 10M</td>
+                            <td class="py-3 px-4"></td>
+                        </tr>
+                        <tr class="border-b border-gray-200">
+                            <td class="py-3 px-4 text-xs text-gray-600 pl-8">  • Maintenance: Rp 6.9M</td>
+                            <td class="py-3 px-4"></td>
+                        </tr>
+                        <tr class="border-b border-gray-200 font-semibold bg-yellow-50">
+                            <td class="py-3 px-4 text-gray-900">EBIT (Operating Income)</td>
+                            <td class="py-3 px-4 text-right text-orange-700">Rp 47.1M (24.7%)</td>
+                        </tr>
+                        <tr class="border-b border-gray-200">
+                            <td class="py-3 px-4 text-gray-700">- Interest & Other Expense</td>
+                            <td class="py-3 px-4 text-right text-gray-700">Rp 2.0M</td>
+                        </tr>
+                        <tr class="border-b border-gray-200 font-semibold bg-green-50">
+                            <td class="py-3 px-4 text-gray-900">Net Profit (Laba Bersih)</td>
+                            <td class="py-3 px-4 text-right text-green-700">Rp 45.1M (23.6%)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 text-xs text-gray-600">* Data simulasi untuk periode bulan Mei 2026</td>
+                            <td class="py-3 px-4"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Export & Actions -->
+        <div class="mt-8 flex gap-3 justify-end">
+            <button onclick="exportPDF()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold text-sm">
+                📥 Export PDF
+            </button>
+            <button onclick="exportExcel()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-sm">
+                📊 Export Excel
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const REVENUE_DATA = [
+            {day:'Mon',amt:25000000},
+            {day:'Tue',amt:22000000},
+            {day:'Wed',amt:30000000},
+            {day:'Thu',amt:28000000},
+            {day:'Fri',amt:24000000},
+            {day:'Sat',amt:32000000},
+            {day:'Sun',amt:29000000}
+        ];
+
+        const EXPENSE_DATA = {
+            'bahan': 3500000,
+            'gaji': 4000000,
+            'utilitas': 1500000,
+            'lainnya': 1000000
+        };
+
+        let period = 'monthly';
+
+        function changePeriod() {
+            period = document.getElementById('periodFilter').value;
+            updateMetrics();
+        }
+
+        function updateMetrics() {
+            const revenue = 190800000;
+            const expense = 100000000;
+            const profit = revenue - expense;
+            const margin = Math.round((profit / revenue) * 100);
+            const trx = 128;
+            const avgTrx = Math.round(revenue / trx);
+
+            document.getElementById('totalRevenue').textContent = 'Rp ' + (revenue / 1000000).toFixed(1) + 'M';
+            document.getElementById('totalExpense').textContent = 'Rp ' + (expense / 1000000).toFixed(1) + 'M';
+            document.getElementById('totalProfit').textContent = 'Rp ' + (profit / 1000000).toFixed(1) + 'M';
+            document.getElementById('profitMargin').textContent = margin;
+            document.getElementById('totalTrx').textContent = trx;
+            document.getElementById('avgTrx').textContent = 'Rp ' + (avgTrx / 1000000).toFixed(1) + 'M';
+        }
+
+        function exportPDF() {
+            alert('📥 Export PDF - Coming Soon!\n\nNanti akan generate PDF report otomatis');
+        }
+
+        function exportExcel() {
+            alert('📊 Export Excel - Coming Soon!\n\nNanti akan generate Excel report dengan detail transactions');
+        }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            updateMetrics();
+        });
+    </script>
+</body>
+</html>
