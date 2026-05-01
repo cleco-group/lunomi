@@ -113,7 +113,7 @@ export default function Dashboard() {
   const [ceoInput, setCeoInput] = useState('')
   const [ceoIdx, setCeoIdx] = useState(0)
 
-  useEffect(() => { if (!kasir) router.push('/login') }, [kasir])
+  useEffect(() => { if (!kasir) router.push('/login') }, [kasir, router])
 
   function handleLogout() { reset(); router.push('/login') }
 

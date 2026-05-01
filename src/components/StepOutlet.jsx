@@ -9,9 +9,21 @@ export default function StepOutlet() {
   const [data, setData] = useState([])
   const [selected, setSelected] = useState(null)
   const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    supabase.from('outlets').select('*').then(res => setData(res.data || []))
+    setLoading(true)
+    setError(null)
+    supabase
+      .from('outlets')
+      .select('id, name, address, is_active')
+      .eq('is_active', true)
+      .then(({ data: rows, error: err }) => {
+        if (err) setError('Gagal memuat daftar outlet. Coba lagi.')
+        else setData(rows || [])
+        setLoading(false)
+      })
   }, [])
 
   const filtered = data.filter(o => o.name?.toLowerCase().includes(search.toLowerCase()))
@@ -29,8 +41,13 @@ export default function StepOutlet() {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
+      {error && (
+        <div className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{error}</div>
+      )}
       <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
-        {filtered.map((o) => (
+        {loading ? (
+          <div className="text-center py-8 text-sm text-gray-400">Memuat outlet...</div>
+        ) : filtered.map((o) => (
           <div
             key={o.id}
             onClick={() => setSelected(o)}

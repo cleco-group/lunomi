@@ -9,18 +9,22 @@ export default function StepKasir() {
   const [data, setData] = useState([])
   const [selected, setSelected] = useState(null)
   const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (outlet?.id) {
-      supabase
-        .from('kasir')
-        .select('*')
-        .eq('outlet_id', outlet.id)
-        .then(res => {
-          console.log('kasir data:', res.data, res.error)
-          setData(res.data || [])
-        })
-    }
+    if (!outlet?.id) return
+    setLoading(true)
+    setError(null)
+    supabase
+      .from('kasir')
+      .select('id, name, outlet_id')
+      .eq('outlet_id', outlet.id)
+      .then(({ data: rows, error: err }) => {
+        if (err) setError('Gagal memuat daftar kasir. Coba lagi.')
+        else setData(rows || [])
+        setLoading(false)
+      })
   }, [outlet])
 
   const filtered = data.filter(k => k.name?.toLowerCase().includes(search.toLowerCase()))
@@ -38,8 +42,15 @@ export default function StepKasir() {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
+      {error && (
+        <div className="text-sm mb-3 px-3 py-2 rounded-xl" style={{ color: '#FF4757', background: '#FFF1F2', border: '1px solid #FFD0D5' }}>{error}</div>
+      )}
       <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
-        {filtered.map((k) => (
+        {loading ? (
+          <div className="text-center py-8 text-sm" style={{ color: '#64748B' }}>Memuat kasir...</div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-4 text-sm" style={{ color: '#64748B' }}>Tidak ada kasir ditemukan</div>
+        ) : filtered.map((k) => (
           <div
             key={k.id}
             onClick={() => setSelected(k)}
@@ -56,9 +67,6 @@ export default function StepKasir() {
             {selected?.id === k.id && <CheckCircle2 size={20} style={{ color: '#2563EB' }} />}
           </div>
         ))}
-        {filtered.length === 0 && (
-          <div className="text-center py-4 text-sm" style={{ color: '#64748B' }}>Tidak ada kasir ditemukan</div>
-        )}
       </div>
       <div className="flex gap-2">
         <button onClick={() => setStep(2)} className="flex-1 border py-3 rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-gray-50" style={{ borderColor: '#E5E7EB' }}>
