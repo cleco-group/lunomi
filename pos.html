@@ -322,6 +322,16 @@
         function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
         function genTrxId(){const d=new Date(),p=n=>String(n).padStart(2,'0');return`TRX-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${String(Math.floor(Math.random()*9000)+1000)}`;}
 
+        function getMenuStock(){
+            const stored=localStorage.getItem('lunomi_menu_stock');
+            if(stored) return JSON.parse(stored);
+            const d={};
+            PROD.forEach(p=>{d[p.id]={qty:p.c==='minuman'?60:30,min:5,max:p.c==='minuman'?80:40};});
+            localStorage.setItem('lunomi_menu_stock',JSON.stringify(d));
+            return d;
+        }
+        function saveMenuStock(s){localStorage.setItem('lunomi_menu_stock',JSON.stringify(s));}
+
         let toastTimer=null;
         function showToast(msg,type='success'){
             clearTimeout(toastTimer);
@@ -336,13 +346,18 @@
 
         function render(){
             const f=cat==='all'?PROD:PROD.filter(p=>p.c===cat);
-            document.getElementById('productGrid').innerHTML=f.map(p=>
-                `<div class="product-item" onclick="add(${p.id})">
+            const stk=getMenuStock();
+            document.getElementById('productGrid').innerHTML=f.map(p=>{
+                const s=stk[p.id]||{qty:0,min:5};
+                const oos=s.qty<=0;
+                const low=!oos&&s.qty<=s.min;
+                return`<div class="product-item${oos?' opacity-40 pointer-events-none':''}" onclick="add(${p.id})">
                     <div style="font-size:2rem;margin-bottom:0.4rem">${p.e}</div>
                     <div style="font-weight:700;font-size:0.78rem;color:rgba(255,255,255,0.9);line-height:1.3">${p.n}</div>
                     <div style="font-weight:700;font-size:0.78rem;margin-top:0.4rem;color:#60a5fa">${rp(p.p)}</div>
-                </div>`
-            ).join('');
+                    <div style="font-size:0.65rem;margin-top:0.25rem;font-weight:600;color:${oos?'#f87171':low?'#fbbf24':'rgba(255,255,255,0.25)'}">${oos?'Habis':low?'Sisa '+s.qty:'Stok: '+s.qty}</div>
+                </div>`;
+            }).join('');
         }
 
         function filterCat(c,btn){
@@ -352,7 +367,16 @@
             render();
         }
 
-        function add(id){const p=PROD.find(x=>x.id===id),e=cart.find(x=>x.id===id);if(e)e.q++;else cart.push({...p,q:1});update();}
+        function add(id){
+            const stk=getMenuStock();
+            const s=stk[id]||{qty:0};
+            const inCart=cart.find(x=>x.id===id);
+            const cartQty=inCart?inCart.q:0;
+            if(s.qty<=cartQty){showToast('Stok tidak mencukupi!','warning');return;}
+            const p=PROD.find(x=>x.id===id);
+            if(inCart)inCart.q++;else cart.push({...p,q:1});
+            update();
+        }
         function remove(id){cart=cart.filter(x=>x.id!==id);update();}
         function qty(id,q){if(q<1){remove(id);return;}const i=cart.find(x=>x.id===id);if(i){i.q=q;update();}}
 
@@ -446,10 +470,20 @@
             const m=document.querySelector('input[name="payMethod"]:checked').value;
             const mMap={cash:'💵 Tunai',card:'💳 Kartu',ewallet:'📱 E-Wallet',bank:'🏦 Transfer'};
             const trxId=document.getElementById('payTrxId').textContent;
+            // Deduct menu stock
+            const stk=getMenuStock();
+            cart.forEach(i=>{if(stk[i.id]){stk[i.id].qty=Math.max(0,stk[i.id].qty-i.q);}});
+            saveMenuStock(stk);
+            // Save transaction to localStorage
+            const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+            const trxs=JSON.parse(localStorage.getItem('lunomi_transactions')||'[]');
+            trxs.unshift({id:trxId,date:new Date().toISOString(),time:new Date().toTimeString().slice(0,5),total:currentTotal,method:m,items:cart.map(i=>({id:i.id,name:i.n,qty:i.q,price:i.p})),outlet_id:outlet?outlet.id:''});
+            localStorage.setItem('lunomi_transactions',JSON.stringify(trxs));
             closePayment();
             showToast(`Pembayaran ${rp(currentTotal)} via ${mMap[m]} berhasil!`,'success');
             HIST.unshift({id:trxId,t:new Date().toTimeString().slice(0,5),tot:currentTotal,st:'paid',itm:cart.reduce((s,i)=>s+i.q,0),m});
             cart=[];disco=0;update();document.getElementById('trxId').textContent=genTrxId();
+            render();
         }
 
         function openHistory(){renderHistory();document.getElementById('historyModal').style.display='flex';}
