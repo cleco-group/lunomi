@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Registration - Pendaftaran Outlet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .step-indicator { transition: all 0.3s; }
+        .step-indicator.active { background-color: #2563eb; color: white; }
+        .step-indicator.completed { background-color: #10b981; color: white; }
+        .outlet-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 class="text-3xl font-bold">🏪 Lunomi Registration</h1>
+            <p class="text-blue-100 mt-2">Daftarkan outlet Anda untuk menggunakan Lunomi POS</p>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Step Indicator -->
+        <div class="flex justify-between mb-12">
+            <div class="text-center flex-1">
+                <div id="step1" class="step-indicator active w-12 h-12 rounded-full flex items-center justify-center font-bold mx-auto mb-2 border-2 border-blue-600">1</div>
+                <p class="text-sm font-semibold text-gray-700">Pilih Outlet</p>
+            </div>
+            <div class="flex-1 flex items-center justify-center mb-6">
+                <div class="h-1 bg-gray-300 flex-1"></div>
+            </div>
+            <div class="text-center flex-1">
+                <div id="step2" class="step-indicator w-12 h-12 rounded-full flex items-center justify-center font-bold mx-auto mb-2 border-2 border-gray-300 text-gray-600">2</div>
+                <p class="text-sm font-semibold text-gray-700">Data Admin</p>
+            </div>
+            <div class="flex-1 flex items-center justify-center mb-6">
+                <div class="h-1 bg-gray-300 flex-1"></div>
+            </div>
+            <div class="text-center flex-1">
+                <div id="step3" class="step-indicator w-12 h-12 rounded-full flex items-center justify-center font-bold mx-auto mb-2 border-2 border-gray-300 text-gray-600">3</div>
+                <p class="text-sm font-semibold text-gray-700">Verifikasi</p>
+            </div>
+        </div>
+
+        <!-- Step 1: Pilih Outlet -->
+        <div id="step1-content" class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-900">Pilih Outlet Anda</h2>
+            <p class="text-gray-600">Pilih outlet mana yang ingin didaftarkan terlebih dahulu</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Cleco Pii -->
+                <div onclick="selectOutlet('cleco_pii')" class="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl hover:border-orange-500 border-2 border-transparent transition outlet-select">
+                    <div class="text-4xl mb-3">☕</div>
+                    <h3 class="text-xl font-bold text-gray-900">Cleco Pii</h3>
+                    <p class="text-sm text-gray-600 mt-1">Cafe & Coffee Shop</p>
+                    <p class="text-xs text-gray-500 mt-3">F&B • Online Integration</p>
+                    <input type="radio" name="outlet" value="cleco_pii" class="mt-4" style="display:none">
+                </div>
+
+                <!-- Resep Bunce -->
+                <div onclick="selectOutlet('resep_bunce')" class="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl hover:border-red-500 border-2 border-transparent transition outlet-select">
+                    <div class="text-4xl mb-3">🍗</div>
+                    <h3 class="text-xl font-bold text-gray-900">Resep Bunce</h3>
+                    <p class="text-sm text-gray-600 mt-1">Ayam Goreng</p>
+                    <p class="text-xs text-gray-500 mt-3">F&B • Delivery</p>
+                    <input type="radio" name="outlet" value="resep_bunce" class="mt-4" style="display:none">
+                </div>
+
+                <!-- Baby Joy -->
+                <div onclick="selectOutlet('baby_joy')" class="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl hover:border-pink-500 border-2 border-transparent transition outlet-select">
+                    <div class="text-4xl mb-3">👶</div>
+                    <h3 class="text-xl font-bold text-gray-900">Baby Joy</h3>
+                    <p class="text-sm text-gray-600 mt-1">Retail Store</p>
+                    <p class="text-xs text-gray-500 mt-3">Retail • Membership</p>
+                    <input type="radio" name="outlet" value="baby_joy" class="mt-4" style="display:none">
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900">
+                ℹ️ Anda bisa mendaftarkan email yang sama untuk multiple outlets. Setiap outlet akan punya setting dan data terpisah.
+            </div>
+
+            <button onclick="nextStep(1)" class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold text-lg">
+                Lanjut ke Step 2 →
+            </button>
+        </div>
+
+        <!-- Step 2: Data Admin -->
+        <div id="step2-content" style="display:none" class="space-y-6">
+            <div class="flex items-center gap-3 mb-6">
+                <button onclick="prevStep(1)" class="text-blue-600 hover:text-blue-800 font-semibold">← Kembali</button>
+                <span id="selected-outlet-display" class="outlet-badge bg-blue-100 text-blue-700"></span>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-900">Data Administrator</h2>
+            <p class="text-gray-600">Masukkan data admin untuk outlet ini</p>
+
+            <div class="bg-white rounded-lg shadow p-6 space-y-6">
+                <!-- Email Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="font-bold text-gray-900 mb-4">📧 Email</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Email</label>
+                            <div class="space-y-3">
+                                <label class="flex items-center gap-3 cursor-pointer p-3 border-2 border-gray-200 rounded-lg hover:border-blue-500">
+                                    <input type="radio" name="email_choice" value="new" class="w-4 h-4" onchange="toggleEmailInput()" checked>
+                                    <span class="font-semibold text-gray-900">Email Baru</span>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer p-3 border-2 border-gray-200 rounded-lg hover:border-blue-500">
+                                    <input type="radio" name="email_choice" value="existing" class="w-4 h-4" onchange="toggleEmailInput()">
+                                    <span class="font-semibold text-gray-900">Gunakan Email Existing</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- New Email -->
+                        <div id="new-email-section">
+                            <input type="email" id="new_email" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="nama@outlet.com">
+                            <p class="text-xs text-gray-500 mt-2">Misal: admin@clecopii.com, admin@resepbunce.com</p>
+                        </div>
+
+                        <!-- Existing Email -->
+                        <div id="existing-email-section" style="display:none">
+                            <select id="existing_email" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Pilih Email --</option>
+                                <option value="owner@lunomi.local">owner@lunomi.local (Admin Utama)</option>
+                                <option value="manager@lunomi.local">manager@lunomi.local (Manager)</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-2">Email yang sudah terdaftar di sistem Lunomi Anda</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Info -->
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-4">👤 Data Administrator</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Admin</label>
+                            <input type="text" id="admin_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nama lengkap">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Telepon</label>
+                            <input type="tel" id="admin_phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="08xx-xxxx-xxxx">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outlet Details -->
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-4">🏢 Detail Outlet</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Outlet</label>
+                            <input type="text" id="outlet_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nama outlet">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Telepon Outlet</label>
+                            <input type="tel" id="outlet_phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="021-xxxx-xxxx">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Alamat Outlet</label>
+                        <textarea id="outlet_address" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Alamat lengkap" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-4">🔐 Password</h3>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password Admin</label>
+                        <input type="password" id="admin_password" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Min 12 karakter, huruf, angka, simbol">
+                        <p class="text-xs text-gray-500 mt-2">Contoh: MyStore@2024!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="prevStep(1)" class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-bold">
+                    ← Kembali
+                </button>
+                <button onclick="nextStep(2)" class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold">
+                    Lanjut ke Step 3 →
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Verifikasi & Review -->
+        <div id="step3-content" style="display:none" class="space-y-6">
+            <div class="flex items-center gap-3 mb-6">
+                <button onclick="prevStep(2)" class="text-blue-600 hover:text-blue-800 font-semibold">← Kembali</button>
+                <span id="final-outlet-display" class="outlet-badge bg-blue-100 text-blue-700"></span>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-900">Review & Verifikasi</h2>
+            <p class="text-gray-600">Pastikan semua data sudah benar sebelum mendaftar</p>
+
+            <div class="bg-white rounded-lg shadow p-6 space-y-6">
+                <!-- Summary -->
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-4">📋 Ringkasan Data</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between border-b border-gray-200 pb-2">
+                            <span class="text-gray-600">Outlet</span>
+                            <span id="review-outlet" class="font-semibold text-gray-900">-</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-200 pb-2">
+                            <span class="text-gray-600">Email</span>
+                            <span id="review-email" class="font-semibold text-gray-900">-</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-200 pb-2">
+                            <span class="text-gray-600">Nama Admin</span>
+                            <span id="review-admin" class="font-semibold text-gray-900">-</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-200 pb-2">
+                            <span class="text-gray-600">Nomor Telepon</span>
+                            <span id="review-phone" class="font-semibold text-gray-900">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Alamat</span>
+                            <span id="review-address" class="font-semibold text-gray-900 text-right max-w-xs">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms & Conditions -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" id="agree_terms" class="w-4 h-4 mt-1">
+                        <span class="text-sm text-gray-700">
+                            Saya setuju dengan <a href="#" class="text-blue-600 hover:text-blue-800 font-semibold">Syarat & Ketentuan</a> dan 
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-semibold">Kebijakan Privasi</a> Lunomi
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Verification Notice -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-900">
+                    ✓ Setelah registrasi, kami akan mengirimkan email verifikasi ke alamat Anda. 
+                    Silakan cek email dan klik link verifikasi untuk mengaktifkan akun.
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="prevStep(2)" class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-bold">
+                    ← Kembali
+                </button>
+                <button onclick="submitRegistration()" class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold">
+                    ✓ Daftar Outlet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full text-center">
+            <div class="text-5xl mb-4">✓</div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Pendaftaran Berhasil!</h2>
+            <p class="text-gray-600 mb-6">
+                Email verifikasi telah dikirim ke <strong id="success-email"></strong>
+            </p>
+            <div class="bg-blue-50 rounded-lg p-4 mb-6 text-sm text-blue-900">
+                Silakan cek email dan klik link verifikasi untuk mengaktifkan akun outlet Anda.
+            </div>
+            <button onclick="redirectToDashboard()" class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold">
+                Lanjut ke Dashboard
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let selectedOutlet = null;
+        let registrationData = {};
+
+        const outletNames = {
+            'cleco_pii': '☕ Cleco Pii',
+            'resep_bunce': '🍗 Resep Bunce',
+            'baby_joy': '👶 Baby Joy'
+        };
+
+        function selectOutlet(outlet) {
+            selectedOutlet = outlet;
+            document.querySelectorAll('.outlet-select').forEach(el => {
+                el.style.borderColor = 'transparent';
+            });
+            event.currentTarget.style.borderColor = 
+                outlet === 'cleco_pii' ? '#f97316' : 
+                outlet === 'resep_bunce' ? '#ef4444' : '#ec4899';
+            event.currentTarget.style.borderWidth = '2px';
+        }
+
+        function toggleEmailInput() {
+            const choice = document.querySelector('input[name="email_choice"]:checked').value;
+            document.getElementById('new-email-section').style.display = choice === 'new' ? 'block' : 'none';
+            document.getElementById('existing-email-section').style.display = choice === 'existing' ? 'block' : 'none';
+        }
+
+        function nextStep(step) {
+            if (step === 1) {
+                if (!selectedOutlet) { alert('Pilih outlet terlebih dahulu'); return; }
+                registrationData.outlet = selectedOutlet;
+                currentStep = 2;
+            } else if (step === 2) {
+                const emailChoice = document.querySelector('input[name="email_choice"]:checked').value;
+                const email = emailChoice === 'new' ? 
+                    document.getElementById('new_email').value :
+                    document.getElementById('existing_email').value;
+                
+                if (!email) { alert('Masukkan email'); return; }
+                if (!document.getElementById('admin_name').value) { alert('Masukkan nama admin'); return; }
+                if (!document.getElementById('admin_password').value) { alert('Masukkan password'); return; }
+
+                registrationData = {
+                    ...registrationData,
+                    email: email,
+                    admin_name: document.getElementById('admin_name').value,
+                    admin_phone: document.getElementById('admin_phone').value,
+                    outlet_name: document.getElementById('outlet_name').value,
+                    outlet_phone: document.getElementById('outlet_phone').value,
+                    outlet_address: document.getElementById('outlet_address').value,
+                    password: document.getElementById('admin_password').value
+                };
+                
+                // Update review
+                document.getElementById('review-outlet').textContent = outletNames[selectedOutlet];
+                document.getElementById('review-email').textContent = email;
+                document.getElementById('review-admin').textContent = registrationData.admin_name;
+                document.getElementById('review-phone').textContent = registrationData.admin_phone;
+                document.getElementById('review-address').textContent = registrationData.outlet_address;
+                document.getElementById('final-outlet-display').textContent = outletNames[selectedOutlet];
+                
+                currentStep = 3;
+            }
+
+            updateUI();
+        }
+
+        function prevStep(step) {
+            currentStep = step;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('step1-content').style.display = currentStep === 1 ? 'block' : 'none';
+            document.getElementById('step2-content').style.display = currentStep === 2 ? 'block' : 'none';
+            document.getElementById('step3-content').style.display = currentStep === 3 ? 'block' : 'none';
+
+            // Update step indicators
+            for (let i = 1; i <= 3; i++) {
+                const el = document.getElementById('step' + i);
+                if (i < currentStep) {
+                    el.classList.add('completed');
+                    el.classList.remove('active');
+                } else if (i === currentStep) {
+                    el.classList.add('active');
+                    el.classList.remove('completed');
+                } else {
+                    el.classList.remove('active', 'completed');
+                }
+            }
+
+            if (currentStep === 2) {
+                document.getElementById('selected-outlet-display').textContent = outletNames[selectedOutlet];
+            }
+        }
+
+        function submitRegistration() {
+            if (!document.getElementById('agree_terms').checked) {
+                alert('Setujui Syarat & Ketentuan terlebih dahulu');
+                return;
+            }
+
+            document.getElementById('success-email').textContent = registrationData.email;
+            document.getElementById('successModal').style.display = 'flex';
+            
+            // Save to localStorage for demo
+            const registrations = JSON.parse(localStorage.getItem('lunomi_registrations') || '{}');
+            registrations[registrationData.outlet] = registrationData;
+            localStorage.setItem('lunomi_registrations', JSON.stringify(registrations));
+        }
+
+        function redirectToDashboard() {
+            localStorage.setItem('lunomi_session', registrationData.email);
+            localStorage.setItem('lunomi_outlet', selectedOutlet);
+            window.location.href = 'dashboard.html?outlet=' + selectedOutlet;
+        }
+    </script>
+</body>
+</html>

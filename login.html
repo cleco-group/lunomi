@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi POS - Login Multi-Outlet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e8f5 50%, #c1d9f0 100%);
+            min-height: 100vh;
+        }
+        
+        .gradient-orb {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+        
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            top: -250px;
+            right: -250px;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #10b981, #047857);
+            bottom: -200px;
+            left: -200px;
+            animation: float 10s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(30px); }
+        }
+
+        .tab-btn { transition: all 0.3s; }
+        .tab-content { transition: all 0.3s; }
+    </style>
+</head>
+<body class="relative">
+    <!-- Gradient orbs -->
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+
+    <!-- Login Container -->
+    <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-md w-full">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-8 text-white text-center">
+                <h1 class="text-4xl font-bold mb-2">🏪</h1>
+                <h2 class="text-2xl font-bold">Lunomi</h2>
+                <p class="text-blue-100 text-sm mt-2">Smart POS Multi-Outlet</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200">
+                <button onclick="switchTab('login')" id="login-tab" class="tab-btn flex-1 py-4 font-bold text-center border-b-2 border-blue-600 text-blue-600">
+                    🔐 Login
+                </button>
+                <button onclick="switchTab('register')" id="register-tab" class="tab-btn flex-1 py-4 font-bold text-center border-b-2 border-transparent text-gray-600 hover:text-gray-900">
+                    📝 Daftar
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-content" class="tab-content p-8 space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                    <input type="email" id="login-email" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition" placeholder="nama@outlet.com">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Password</label>
+                    <input type="password" id="login-password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition" placeholder="••••••••">
+                </div>
+
+                <!-- Multi-Outlet Selector (muncul jika email punya multiple outlets) -->
+                <div id="outlet-selector" style="display:none">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">📍 Pilih Outlet</label>
+                    <select id="login-outlet" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition">
+                        <option value="">-- Pilih Outlet --</option>
+                    </select>
+                </div>
+
+                <div id="errorMsg" style="display:none" class="p-3 bg-red-100 border border-red-300 rounded-lg text-sm text-red-700"></div>
+
+                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-3 rounded-lg hover:shadow-lg transition">
+                    🔓 Login ke Lunomi
+                </button>
+
+                <!-- Demo Section -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-xs space-y-2">
+                    <p class="font-bold text-blue-900">🧪 Demo Accounts:</p>
+                    <div class="space-y-1 text-blue-800">
+                        <div class="cursor-pointer hover:bg-blue-100 p-2 rounded" onclick="presetLogin('owner@lunomi.local', 'demo123')">👤 owner@lunomi.local</div>
+                        <div class="cursor-pointer hover:bg-blue-100 p-2 rounded" onclick="presetLogin('manager@lunomi.local', 'demo123')">📋 manager@lunomi.local</div>
+                        <div class="cursor-pointer hover:bg-blue-100 p-2 rounded" onclick="presetLogin('kasir@lunomi.local', 'demo123')">💳 kasir@lunomi.local</div>
+                        <div class="cursor-pointer hover:bg-blue-100 p-2 rounded" onclick="presetLogin('kitchen@lunomi.local', 'demo123')">👨‍🍳 kitchen@lunomi.local</div>
+                    </div>
+                    <p class="text-blue-700 font-semibold mt-2">Password: demo123</p>
+                </div>
+
+                <p class="text-center text-sm text-gray-600">
+                    Belum punya akun? <a href="#" onclick="switchTab('register'); return false;" class="text-blue-600 hover:text-blue-800 font-bold">Daftar di sini</a>
+                </p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-content" style="display:none" class="tab-content p-8 space-y-4">
+                <h3 class="font-bold text-gray-900 text-lg mb-4">Daftarkan Outlet Anda</h3>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Outlet</label>
+                    <select id="reg-outlet" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition">
+                        <option value="">-- Pilih Outlet --</option>
+                        <option value="cleco_pii">☕ Cleco Pii (Cafe)</option>
+                        <option value="resep_bunce">🍗 Resep Bunce (Ayam Goreng)</option>
+                        <option value="baby_joy">👶 Baby Joy (Retail)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Email Admin</label>
+                    <input type="email" id="reg-email" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition" placeholder="admin@outlet.com">
+                    <p class="text-xs text-gray-500 mt-1">💡 1 email bisa login ke multiple outlets</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Nama Admin</label>
+                    <input type="text" id="reg-name" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition" placeholder="Nama lengkap">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Nomor Telepon</label>
+                    <input type="tel" id="reg-phone" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition" placeholder="08xx-xxxx-xxxx">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Password</label>
+                    <input type="password" id="reg-password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition" placeholder="Min 8 karakter">
+                </div>
+
+                <div id="reg-error" style="display:none" class="p-3 bg-red-100 border border-red-300 rounded-lg text-sm text-red-700"></div>
+
+                <button onclick="handleRegister()" class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-3 rounded-lg hover:shadow-lg transition">
+                    ✓ Daftar Outlet
+                </button>
+
+                <p class="text-center text-sm text-gray-600">
+                    Sudah terdaftar? <a href="#" onclick="switchTab('login'); return false;" class="text-blue-600 hover:text-blue-800 font-bold">Login di sini</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-8 max-w-sm w-full text-center">
+            <div class="text-5xl mb-4">✓</div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Pendaftaran Berhasil!</h2>
+            <p class="text-gray-600 mb-6" id="success-msg">Outlet Anda sudah terdaftar. Silakan login dengan email dan password yang baru Anda buat.</p>
+            <button onclick="successRedirect()" class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold">
+                🔓 Login Sekarang
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Database dummy (nanti ganti dengan Supabase)
+        const REGISTERED_USERS = {
+            'owner@lunomi.local': { password: 'demo123', outlets: ['cleco_pii', 'resep_bunce', 'baby_joy'] },
+            'manager@lunomi.local': { password: 'demo123', outlets: ['cleco_pii'] },
+            'kasir@lunomi.local': { password: 'demo123', outlets: ['cleco_pii'] },
+            'kitchen@lunomi.local': { password: 'demo123', outlets: ['cleco_pii'] }
+        };
+
+        const OUTLET_DATA = {
+            'cleco_pii': { name: '☕ Cleco Pii', type: 'Cafe' },
+            'resep_bunce': { name: '🍗 Resep Bunce', type: 'Ayam Goreng' },
+            'baby_joy': { name: '👶 Baby Joy', type: 'Retail' }
+        };
+
+        function switchTab(tab) {
+            const loginContent = document.getElementById('login-content');
+            const registerContent = document.getElementById('register-content');
+            const loginTab = document.getElementById('login-tab');
+            const registerTab = document.getElementById('register-tab');
+
+            if (tab === 'login') {
+                loginContent.style.display = 'block';
+                registerContent.style.display = 'none';
+                loginTab.classList.add('border-blue-600', 'text-blue-600');
+                loginTab.classList.remove('border-transparent', 'text-gray-600');
+                registerTab.classList.remove('border-blue-600', 'text-blue-600');
+                registerTab.classList.add('border-transparent', 'text-gray-600');
+            } else {
+                loginContent.style.display = 'none';
+                registerContent.style.display = 'block';
+                registerTab.classList.add('border-blue-600', 'text-blue-600');
+                registerTab.classList.remove('border-transparent', 'text-gray-600');
+                loginTab.classList.remove('border-blue-600', 'text-blue-600');
+                loginTab.classList.add('border-transparent', 'text-gray-600');
+            }
+        }
+
+        function presetLogin(email, password) {
+            document.getElementById('login-email').value = email;
+            document.getElementById('login-password').value = password;
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (!email || !password) {
+                errorMsg.textContent = 'Email dan password harus diisi';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Check credentials
+            if (!REGISTERED_USERS[email]) {
+                errorMsg.textContent = 'Email tidak terdaftar';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (REGISTERED_USERS[email].password !== password) {
+                errorMsg.textContent = 'Password salah';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            const outlets = REGISTERED_USERS[email].outlets;
+
+            // Jika hanya 1 outlet, langsung ke dashboard
+            if (outlets.length === 1) {
+                localStorage.setItem('lunomi_session', email);
+                localStorage.setItem('lunomi_outlet', outlets[0]);
+                window.location.href = 'dashboard.html?outlet=' + outlets[0];
+                return;
+            }
+
+            // Jika multiple outlets, tampilkan selector
+            const selector = document.getElementById('outlet-selector');
+            const outletSelect = document.getElementById('login-outlet');
+            
+            outletSelect.innerHTML = '<option value="">-- Pilih Outlet --</option>';
+            outlets.forEach(outlet => {
+                const option = document.createElement('option');
+                option.value = outlet;
+                option.textContent = OUTLET_DATA[outlet].name;
+                outletSelect.appendChild(option);
+            });
+
+            selector.style.display = 'block';
+            errorMsg.style.display = 'none';
+        }
+
+        function handleOutletSelect() {
+            const email = document.getElementById('login-email').value;
+            const outlet = document.getElementById('login-outlet').value;
+
+            if (!outlet) return;
+
+            localStorage.setItem('lunomi_session', email);
+            localStorage.setItem('lunomi_outlet', outlet);
+            window.location.href = 'dashboard.html?outlet=' + outlet;
+        }
+
+        function handleRegister() {
+            const outlet = document.getElementById('reg-outlet').value;
+            const email = document.getElementById('reg-email').value.trim();
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const errorMsg = document.getElementById('reg-error');
+
+            if (!outlet || !email || !name || !password) {
+                errorMsg.textContent = 'Semua field harus diisi';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 8) {
+                errorMsg.textContent = 'Password minimal 8 karakter';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Register user
+            if (!REGISTERED_USERS[email]) {
+                REGISTERED_USERS[email] = { password: password, outlets: [] };
+            }
+
+            if (!REGISTERED_USERS[email].outlets.includes(outlet)) {
+                REGISTERED_USERS[email].outlets.push(outlet);
+            }
+
+            // Save to localStorage
+            localStorage.setItem('lunomi_registrations', JSON.stringify(REGISTERED_USERS));
+
+            // Show success
+            document.getElementById('successModal').style.display = 'flex';
+
+            // Clear form
+            document.getElementById('reg-outlet').value = '';
+            document.getElementById('reg-email').value = '';
+            document.getElementById('reg-name').value = '';
+            document.getElementById('reg-phone').value = '';
+            document.getElementById('reg-password').value = '';
+            errorMsg.style.display = 'none';
+        }
+
+        function successRedirect() {
+            document.getElementById('successModal').style.display = 'none';
+            switchTab('login');
+        }
+
+        // Support outlet selector change
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'login-outlet' && e.target.value) {
+                handleOutletSelect();
+            }
+        });
+    </script>
+</body>
+</html>
