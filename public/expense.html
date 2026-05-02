@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Pengeluaran OPEX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.06);transition:background .15s;}
+        .row-item:hover{background:rgba(255,255,255,.03);}
+        .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(8px);}
+        .modal-box{background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:1.25rem;}
+        .cat-badge{display:inline-block;padding:.2rem .6rem;border-radius:9999px;font-size:.68rem;font-weight:700;}
+        .metric-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>💸</span></div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Pengeluaran Operasional</div>
+                <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
+            </div>
+        </div>
+        <button onclick="openAddModal()" class="btn-primary px-4 py-2 rounded-xl text-xs">+ Catat Pengeluaran</button>
+    </div>
+</nav>
+
+<div class="max-w-4xl mx-auto px-4 py-6">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="metric-card rounded-2xl p-4" style="border-left:3px solid #f87171">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Hari Ini</div>
+            <div class="text-xl font-extrabold text-white" id="statToday">Rp 0</div>
+        </div>
+        <div class="metric-card rounded-2xl p-4" style="border-left:3px solid #f59e0b">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Bulan Ini</div>
+            <div class="text-xl font-extrabold text-white" id="statMonth">Rp 0</div>
+        </div>
+        <div class="metric-card rounded-2xl p-4" style="border-left:3px solid #6366f1">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Catatan</div>
+            <div class="text-xl font-extrabold text-white" id="statCount">0</div>
+        </div>
+        <div class="metric-card rounded-2xl p-4" style="border-left:3px solid #22c55e">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Terbesar Bulan Ini</div>
+            <div class="text-xl font-extrabold text-white" id="statBiggest">—</div>
+        </div>
+    </div>
+
+    <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
+        <input id="searchExp" type="text" placeholder="🔍  Cari deskripsi..." oninput="renderList()"
+            class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[160px]">
+        <select id="filterCat" onchange="renderList()" class="input-glass px-3 py-2 rounded-xl text-sm">
+            <option value="all">Semua Kategori</option>
+            <option>Gaji & Upah</option>
+            <option>Listrik & Air</option>
+            <option>Sewa</option>
+            <option>Bahan Baku</option>
+            <option>Marketing</option>
+            <option>Perawatan</option>
+            <option>Lain-lain</option>
+        </select>
+        <select id="filterMonth" onchange="renderList()" class="input-glass px-3 py-2 rounded-xl text-sm">
+            <option value="">Semua Bulan</option>
+        </select>
+    </div>
+
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div id="expenseList" class="divide-y" style="divide-color:rgba(255,255,255,.06)"></div>
+        <div id="emptyState" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Belum ada catatan pengeluaran.</div>
+    </div>
+</div>
+
+<div id="addModal" class="modal-overlay hidden fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4">
+    <div class="modal-box w-full max-w-md shadow-2xl">
+        <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <h2 class="font-bold text-white" id="modalTitle">Catat Pengeluaran</h2>
+            <button onclick="closeAddModal()" style="color:rgba(255,255,255,.4)" class="hover:text-white text-xl font-bold">×</button>
+        </div>
+        <div class="px-6 py-5 space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Tanggal</label>
+                    <input id="expDate" type="date" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Kategori</label>
+                    <select id="expCat" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
+                        <option>Gaji & Upah</option>
+                        <option>Listrik & Air</option>
+                        <option>Sewa</option>
+                        <option>Bahan Baku</option>
+                        <option>Marketing</option>
+                        <option>Perawatan</option>
+                        <option>Lain-lain</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Deskripsi</label>
+                <input id="expDesc" type="text" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="cth: Gaji karyawan bulan Mei">
+            </div>
+            <div>
+                <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Jumlah (Rp)</label>
+                <input id="expAmount" type="number" min="0" inputmode="numeric" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="0">
+            </div>
+            <div>
+                <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Catatan</label>
+                <textarea id="expNote" rows="2" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm resize-none" placeholder="Opsional..."></textarea>
+            </div>
+            <div id="expError" class="hidden px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;"></div>
+        </div>
+        <div class="px-6 pb-5 flex gap-3">
+            <button onclick="closeAddModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="saveExpense()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm" id="saveBtn">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="hidden fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2" style="opacity:0;transition:opacity .3s"></div>
+
+<script>
+    const CAT_COLORS = {
+        'Gaji & Upah':  {bg:'rgba(99,102,241,.15)',  color:'#a5b4fc'},
+        'Listrik & Air':{bg:'rgba(59,130,246,.15)',   color:'#93c5fd'},
+        'Sewa':         {bg:'rgba(245,158,11,.15)',   color:'#fcd34d'},
+        'Bahan Baku':   {bg:'rgba(34,197,94,.15)',    color:'#86efac'},
+        'Marketing':    {bg:'rgba(236,72,153,.15)',   color:'#f9a8d4'},
+        'Perawatan':    {bg:'rgba(249,115,22,.15)',   color:'#fdba74'},
+        'Lain-lain':    {bg:'rgba(255,255,255,.1)',   color:'rgba(255,255,255,.6)'},
+    };
+    const CAT_ICONS = {
+        'Gaji & Upah':'👥','Listrik & Air':'💡','Sewa':'🏠',
+        'Bahan Baku':'🥩','Marketing':'📣','Perawatan':'🔧','Lain-lain':'📎'
+    };
+
+    let editingId=null;
+    let toastTimer=null;
+
+    function getExpenses(){return JSON.parse(localStorage.getItem('lunomi_expenses')||'[]');}
+    function saveExpenses(e){localStorage.setItem('lunomi_expenses',JSON.stringify(e));}
+    function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
+
+    function showToast(msg, type='success'){
+        clearTimeout(toastTimer);
+        const C={success:'rgba(34,197,94,.9)',error:'rgba(239,68,68,.9)',info:'rgba(99,102,241,.9)'};
+        const t=document.getElementById('toast');
+        t.style.background=C[type]||C.info;
+        t.innerHTML=`<span>${type==='success'?'✓':'ℹ️'}</span><span>${msg}</span>`;
+        t.classList.remove('hidden');t.style.opacity='1';
+        toastTimer=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.classList.add('hidden'),300);},3000);
+    }
+
+    function openAddModal(id){
+        editingId=id||null;
+        document.getElementById('expDate').value=new Date().toISOString().split('T')[0];
+        document.getElementById('expCat').value='Gaji & Upah';
+        document.getElementById('expDesc').value='';
+        document.getElementById('expAmount').value='';
+        document.getElementById('expNote').value='';
+        document.getElementById('expError').classList.add('hidden');
+        if(id){
+            const e=getExpenses().find(x=>x.id===id);
+            if(e){
+                document.getElementById('modalTitle').textContent='Edit Pengeluaran';
+                document.getElementById('expDate').value=e.date;
+                document.getElementById('expCat').value=e.cat;
+                document.getElementById('expDesc').value=e.desc;
+                document.getElementById('expAmount').value=e.amount;
+                document.getElementById('expNote').value=e.note||'';
+            }
+        } else {
+            document.getElementById('modalTitle').textContent='Catat Pengeluaran';
+        }
+        document.getElementById('addModal').classList.remove('hidden');
+        document.getElementById('expDesc').focus();
+    }
+    function closeAddModal(){document.getElementById('addModal').classList.add('hidden');}
+
+    function saveExpense(){
+        const date=document.getElementById('expDate').value;
+        const cat=document.getElementById('expCat').value;
+        const desc=document.getElementById('expDesc').value.trim();
+        const amount=parseFloat(document.getElementById('expAmount').value)||0;
+        const note=document.getElementById('expNote').value.trim();
+        const err=document.getElementById('expError');
+        if(!date){err.textContent='Tanggal harus diisi.';err.classList.remove('hidden');return;}
+        if(!desc){err.textContent='Deskripsi harus diisi.';err.classList.remove('hidden');return;}
+        if(amount<=0){err.textContent='Jumlah harus lebih dari 0.';err.classList.remove('hidden');return;}
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        const exps=getExpenses();
+        if(editingId){
+            const idx=exps.findIndex(x=>x.id===editingId);
+            if(idx>=0) exps[idx]={...exps[idx],date,cat,desc,amount,note};
+        } else {
+            exps.unshift({id:'EXP-'+Date.now(),date,cat,desc,amount,note,outlet_id:outlet?outlet.id:''});
+        }
+        saveExpenses(exps);
+        closeAddModal();
+        renderList();
+        updateStats();
+        showToast(editingId?'Pengeluaran diperbarui!':'Pengeluaran dicatat!','success');
+    }
+
+    function deleteExpense(id){
+        if(!confirm('Hapus catatan ini?'))return;
+        const exps=getExpenses().filter(x=>x.id!==id);
+        saveExpenses(exps);
+        renderList();
+        updateStats();
+        showToast('Catatan dihapus','info');
+    }
+
+    function renderList(){
+        const q=(document.getElementById('searchExp').value||'').toLowerCase();
+        const cf=document.getElementById('filterCat').value;
+        const mf=document.getElementById('filterMonth').value;
+        let exps=getExpenses().filter(e=>{
+            const mKey=e.date.slice(0,7);
+            return(!q||e.desc.toLowerCase().includes(q))&&(cf==='all'||e.cat===cf)&&(!mf||mKey===mf);
+        });
+        const list=document.getElementById('expenseList');
+        const empty=document.getElementById('emptyState');
+        if(!exps.length){list.innerHTML='';empty.classList.remove('hidden');return;}
+        empty.classList.add('hidden');
+        list.innerHTML=exps.map(e=>{
+            const cs=CAT_COLORS[e.cat]||CAT_COLORS['Lain-lain'];
+            const ico=CAT_ICONS[e.cat]||'📎';
+            return`<div class="row-item px-5 py-3.5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base flex-shrink-0" style="background:${cs.bg}">${ico}</div>
+                    <div>
+                        <div class="font-semibold text-white text-sm">${e.desc}</div>
+                        <div class="text-xs mt-0.5 flex items-center gap-2">
+                            <span class="cat-badge" style="background:${cs.bg};color:${cs.color}">${e.cat}</span>
+                            <span style="color:rgba(255,255,255,.35)">${e.date}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0 ml-3">
+                    <div class="text-right">
+                        <div class="font-bold text-white text-sm">${rp(e.amount)}</div>
+                        ${e.note?`<div class="text-xs" style="color:rgba(255,255,255,.3)">${e.note}</div>`:''}
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <button onclick="openAddModal('${e.id}')" class="text-xs px-2 py-1 rounded-lg font-semibold" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)">Edit</button>
+                        <button onclick="deleteExpense('${e.id}')" class="text-xs px-2 py-1 rounded-lg font-semibold" style="background:rgba(239,68,68,.1);color:#f87171">Hapus</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function updateStats(){
+        const exps=getExpenses();
+        const today=new Date().toISOString().split('T')[0];
+        const nowMonth=today.slice(0,7);
+        const todayTotal=exps.filter(e=>e.date===today).reduce((s,e)=>s+e.amount,0);
+        const monthExps=exps.filter(e=>e.date.startsWith(nowMonth));
+        const monthTotal=monthExps.reduce((s,e)=>s+e.amount,0);
+        const catTotals={};
+        monthExps.forEach(e=>{catTotals[e.cat]=(catTotals[e.cat]||0)+e.amount;});
+        const bigCat=Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
+        document.getElementById('statToday').textContent=rp(todayTotal);
+        document.getElementById('statMonth').textContent=rp(monthTotal);
+        document.getElementById('statCount').textContent=exps.length;
+        document.getElementById('statBiggest').textContent=bigCat?bigCat[0]:'—';
+    }
+
+    function populateMonthFilter(){
+        const exps=getExpenses();
+        const months=[...new Set(exps.map(e=>e.date.slice(0,7)))].sort().reverse();
+        const sel=document.getElementById('filterMonth');
+        const cur=sel.value;
+        sel.innerHTML='<option value="">Semua Bulan</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');
+        if(months.includes(cur)) sel.value=cur;
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        try{
+            const s=localStorage.getItem('lunomi_session');
+            if(!s){window.location.href='index.html';return;}
+            const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+            if(o) document.getElementById('outletLabel').textContent=o.name;
+        }catch(e){window.location.href='index.html';}
+        populateMonthFilter();
+        renderList();
+        updateStats();
+    });
+</script>
+</body>
+</html>
