@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Invoice - Manajemen Invoice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .invoice-card { transition: all 0.3s; }
+        .invoice-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .invoice-preview { background: white; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.4; width: 320px; }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">🧾 Manajemen Invoice</h1>
+                    <p class="text-sm text-gray-500">Lunomi - Invoice Management & Payment Tracking</p>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Total Invoice</p>
+                <p class="text-2xl font-bold text-gray-900">128</p>
+                <p class="text-xs text-gray-500 mt-1">Bulan ini</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Total Revenue</p>
+                <p class="text-2xl font-bold text-green-600">Rp 52.3M</p>
+                <p class="text-xs text-gray-500 mt-1">Sudah dibayar</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Pending Payment</p>
+                <p class="text-2xl font-bold text-orange-600">Rp 8.5M</p>
+                <p class="text-xs text-gray-500 mt-1">12 invoice</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Overdue</p>
+                <p class="text-2xl font-bold text-red-600">Rp 2.1M</p>
+                <p class="text-xs text-gray-500 mt-1">3 invoice</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex gap-4">
+                <input type="text" placeholder="Cari invoice..." id="searchInput" onkeyup="filterInvoices()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="statusFilter" onchange="filterInvoices()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Status</option>
+                    <option value="paid">Lunas</option>
+                    <option value="pending">Pending</option>
+                    <option value="overdue">Jatuh Tempo</option>
+                    <option value="draft">Draft</option>
+                </select>
+            </div>
+            <button onclick="openCreateInvoice()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                + Buat Invoice
+            </button>
+        </div>
+
+        <!-- Invoices List -->
+        <div id="invoicesList" class="space-y-4"></div>
+    </div>
+
+    <!-- Modal: Create/Edit Invoice -->
+    <div id="invoiceModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-screen overflow-y-auto">
+            <h2 id="modalTitle" class="text-lg font-bold mb-6 text-gray-900">Buat Invoice Baru</h2>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">No. Invoice</label>
+                        <input type="text" id="invoiceNo" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Auto-generate" disabled>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Invoice</label>
+                        <input type="date" id="invoiceDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Customer</label>
+                    <input type="text" id="customerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nama/Nama Perusahaan">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Customer</label>
+                        <input type="email" id="customerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="email@customer.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">No. Telepon</label>
+                        <input type="tel" id="customerPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="08xx-xxxx-xxxx">
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 pt-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">Item Invoice</h3>
+                    <div id="itemsList" class="space-y-2 mb-3"></div>
+                    <button onclick="addInvoiceItem()" class="text-blue-600 text-sm font-semibold hover:text-blue-800">+ Tambah Item</button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 border-t border-gray-200 pt-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Subtotal</label>
+                        <input type="text" id="subtotal" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" disabled>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">PPN (10%)</label>
+                        <input type="text" id="ppn" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" disabled>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Total</label>
+                        <input type="text" id="total" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-blue-50 font-bold" disabled>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Jatuh Tempo</label>
+                        <input type="date" id="dueDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan (Opsional)</label>
+                        <input type="text" id="invoiceNotes" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Misal: Terms of payment">
+                    </div>
+                </div>
+
+                <div class="flex gap-3 border-t border-gray-200 pt-4">
+                    <button onclick="closeInvoiceModal()" class="flex-1 border border-gray-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button onclick="saveInvoice()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
+                        ✓ Simpan Invoice
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Invoice Preview & Actions -->
+    <div id="previewModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-bold text-gray-900">Preview Invoice</h2>
+                <button onclick="closePreviewModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+
+            <!-- Invoice Preview -->
+            <div class="bg-gray-50 rounded-lg p-4 flex justify-center mb-6">
+                <div class="invoice-preview bg-white border border-gray-300 p-4 shadow">
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <div style="font-weight: bold; font-size: 14px;">🏪 LUNOMI</div>
+                        <div style="font-size: 10px;">Invoice</div>
+                    </div>
+
+                    <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px;">
+                        <div style="font-size: 11px; font-weight: bold;" id="previewInvNo">INV-20260501-001</div>
+                        <div style="font-size: 10px;" id="previewDate">2026-05-01</div>
+                    </div>
+
+                    <div style="margin-bottom: 8px; font-size: 10px;">
+                        <div style="font-weight: bold;" id="previewCustomer">Customer Name</div>
+                        <div id="previewEmail">email@customer.com</div>
+                        <div id="previewPhone">08xx-xxxx-xxxx</div>
+                    </div>
+
+                    <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 8px 0; margin: 8px 0;">
+                        <div id="previewItems" style="font-size: 10px;"></div>
+                    </div>
+
+                    <div style="margin: 8px 0; font-size: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>Subtotal</span>
+                            <span id="previewSubtotal">Rp 0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>PPN (10%)</span>
+                            <span id="previewPPN">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px dashed #000; padding-top: 8px; margin: 8px 0; font-weight: bold; text-align: center; font-size: 12px;">
+                        <span id="previewTotal">Rp 0</span>
+                    </div>
+
+                    <div style="border-top: 1px dashed #000; padding-top: 8px; text-align: center; font-size: 9px;">
+                        Jatuh Tempo: <span id="previewDue">2026-05-08</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="space-y-3">
+                <button onclick="printInvoice()" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm">
+                    🖨️ Cetak Invoice
+                </button>
+                <button onclick="downloadPDF()" class="w-full px-4 py-3 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 font-semibold text-sm">
+                    📥 Unduh PDF
+                </button>
+                <button onclick="sendEmail()" class="w-full px-4 py-3 border border-green-300 text-green-600 rounded-lg hover:bg-green-50 font-semibold text-sm">
+                    📧 Kirim Email
+                </button>
+                <button onclick="sendWhatsApp()" class="w-full px-4 py-3 border border-green-500 text-green-700 rounded-lg hover:bg-green-50 font-semibold text-sm">
+                    💬 Kirim WhatsApp
+                </button>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="markAsPaid()" class="px-4 py-3 border border-green-300 text-green-600 rounded-lg hover:bg-green-50 font-semibold text-sm">
+                        ✓ Mark Paid
+                    </button>
+                    <button onclick="closePreviewModal()" class="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold text-sm">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const INVOICES = [
+            {id:'INV-20260501-001',d:'2026-05-01',c:'PT Sejahtera',e:'pt@sejahtera.com',p:'021-1234567',st:'paid',sub:75000,ppn:7500,tot:82500,due:'2026-05-08',it:[{n:'Nasi Goreng',q:2,p:22000},{n:'Es Teh',q:3,p:8000}]},
+            {id:'INV-20260501-002',d:'2026-05-01',c:'CV Bersama',e:'cv@bersama.com',p:'021-7654321',st:'pending',sub:150000,ppn:15000,tot:165000,due:'2026-05-15',it:[{n:'Paket Catering',q:1,p:150000}]},
+            {id:'INV-20260430-001',d:'2026-04-30',c:'Ibu Sarah',e:'sarah@email.com',p:'0812-3456789',st:'overdue',sub:95000,ppn:9500,tot:104500,due:'2026-04-30',it:[{n:'Menu A',q:1,p:95000}]},
+            {id:'INV-20260428-001',d:'2026-04-28',c:'Kantor ABC',e:'kantor@abc.com',p:'021-9876543',st:'paid',sub:500000,ppn:50000,tot:550000,due:'2026-05-05',it:[{n:'Katering Rapat',q:25,p:20000}]}
+        ];
+
+        let currentInvoice = null;
+
+        function renderInvoices() {
+            const html = document.getElementById('invoicesList');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+
+            const filtered = INVOICES.filter(inv =>
+                (inv.id.toLowerCase().includes(search) || inv.c.toLowerCase().includes(search)) &&
+                (!status || inv.st === status)
+            );
+
+            html.innerHTML = filtered.map(inv => {
+                const stColor = inv.st === 'paid' ? 'green' : inv.st === 'pending' ? 'yellow' : 'red';
+                const stText = inv.st === 'paid' ? 'Lunas' : inv.st === 'pending' ? 'Pending' : 'Jatuh Tempo';
+                return '<div class="invoice-card bg-white rounded-lg shadow p-4 border-l-4 border-' + stColor + '-500">' +
+                '<div class="flex justify-between items-start mb-2">' +
+                '<div><h3 class="font-bold text-gray-900">' + inv.id + '</h3>' +
+                '<p class="text-sm text-gray-600">' + inv.c + '</p></div>' +
+                '<span class="status-badge bg-' + stColor + '-100 text-' + stColor + '-700">' + stText + '</span>' +
+                '</div>' +
+                '<div class="flex justify-between items-center text-sm mb-3">' +
+                '<span class="text-gray-600">' + inv.d + ' | Jatuh Tempo: ' + inv.due + '</span>' +
+                '<span class="font-bold">Rp ' + inv.tot.toLocaleString('id-ID') + '</span>' +
+                '</div>' +
+                '<div class="flex gap-2">' +
+                '<button onclick="previewInvoice(\'' + inv.id + '\')" class="flex-1 border border-blue-300 text-blue-600 px-3 py-2 rounded text-xs font-semibold hover:bg-blue-50">Preview</button>' +
+                '<button onclick="editInvoice(\'' + inv.id + '\')" class="flex-1 border border-gray-300 text-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-gray-50">Edit</button>' +
+                '</div></div>';
+            }).join('');
+        }
+
+        function filterInvoices() { renderInvoices(); }
+
+        function openCreateInvoice() {
+            document.getElementById('modalTitle').textContent = 'Buat Invoice Baru';
+            document.getElementById('invoiceNo').value = 'INV-' + new Date().toISOString().slice(0,10).replace(/-/g,'').slice(-6) + '-' + String(Math.floor(Math.random()*1000)).padStart(3,'0');
+            document.getElementById('invoiceDate').valueAsDate = new Date();
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerEmail').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('dueDate').valueAsDate = new Date(Date.now() + 7*24*60*60*1000);
+            document.getElementById('itemsList').innerHTML = '';
+            addInvoiceItem();
+            document.getElementById('invoiceModal').style.display = 'flex';
+        }
+
+        function addInvoiceItem() {
+            const idx = document.getElementById('itemsList').children.length;
+            const html = document.getElementById('itemsList');
+            const item = document.createElement('div');
+            item.className = 'grid grid-cols-4 gap-2';
+            item.innerHTML = '<input type="text" placeholder="Item" class="px-3 py-2 border border-gray-300 rounded text-sm" onkeyup="calculateTotal()">' +
+            '<input type="number" placeholder="Qty" class="px-3 py-2 border border-gray-300 rounded text-sm" value="1" onkeyup="calculateTotal()">' +
+            '<input type="number" placeholder="Harga" class="px-3 py-2 border border-gray-300 rounded text-sm" onkeyup="calculateTotal()">' +
+            '<button onclick="this.parentElement.remove(); calculateTotal()" class="text-red-600 text-sm font-semibold hover:text-red-800">Hapus</button>';
+            html.appendChild(item);
+        }
+
+        function calculateTotal() {
+            let subtotal = 0;
+            document.querySelectorAll('#itemsList > div').forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const qty = parseFloat(inputs[1].value) || 0;
+                const price = parseFloat(inputs[2].value) || 0;
+                subtotal += qty * price;
+            });
+            const ppn = Math.round(subtotal * 0.1);
+            const total = subtotal + ppn;
+            document.getElementById('subtotal').value = 'Rp ' + subtotal.toLocaleString('id-ID');
+            document.getElementById('ppn').value = 'Rp ' + ppn.toLocaleString('id-ID');
+            document.getElementById('total').value = 'Rp ' + total.toLocaleString('id-ID');
+        }
+
+        function closeInvoiceModal() { document.getElementById('invoiceModal').style.display = 'none'; }
+
+        function saveInvoice() {
+            alert('✓ Invoice berhasil disimpan');
+            closeInvoiceModal();
+            renderInvoices();
+        }
+
+        function previewInvoice(id) {
+            currentInvoice = INVOICES.find(i => i.id === id);
+            if (!currentInvoice) return;
+            document.getElementById('previewInvNo').textContent = currentInvoice.id;
+            document.getElementById('previewDate').textContent = currentInvoice.d;
+            document.getElementById('previewCustomer').textContent = currentInvoice.c;
+            document.getElementById('previewEmail').textContent = currentInvoice.e;
+            document.getElementById('previewPhone').textContent = currentInvoice.p;
+            document.getElementById('previewItems').innerHTML = currentInvoice.it.map(i => '<div style="display:flex;justify-content:space-between;"><span>' + i.n + ' x' + i.q + '</span><span>Rp ' + (i.q*i.p).toLocaleString('id-ID') + '</span></div>').join('');
+            document.getElementById('previewSubtotal').textContent = 'Rp ' + currentInvoice.sub.toLocaleString('id-ID');
+            document.getElementById('previewPPN').textContent = 'Rp ' + currentInvoice.ppn.toLocaleString('id-ID');
+            document.getElementById('previewTotal').textContent = 'Rp ' + currentInvoice.tot.toLocaleString('id-ID');
+            document.getElementById('previewDue').textContent = currentInvoice.due;
+            document.getElementById('previewModal').style.display = 'flex';
+        }
+
+        function closePreviewModal() { document.getElementById('previewModal').style.display = 'none'; }
+        function printInvoice() { alert('🖨️ Invoice sedang dicetak...'); }
+        function downloadPDF() { alert('📥 Invoice PDF sedang diunduh...'); }
+        function sendEmail() { alert('📧 Invoice sedang dikirim ke ' + currentInvoice.e); }
+        function sendWhatsApp() { alert('💬 Invoice sedang dikirim ke WhatsApp ' + currentInvoice.p); }
+        function markAsPaid() { alert('✓ Invoice ' + currentInvoice.id + ' ditandai sebagai Lunas'); closePreviewModal(); renderInvoices(); }
+        function editInvoice(id) { alert('Edit invoice: ' + id); }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            renderInvoices();
+        });
+    </script>
+</body>
+</html>

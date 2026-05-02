@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Customer - Manajemen Customer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .customer-card { transition: all 0.3s; }
+        .customer-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .tier-badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">👥 Manajemen Customer</h1>
+                    <p class="text-sm text-gray-500">Lunomi - Customer Database & CRM</p>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Total Customer</p>
+                <p class="text-2xl font-bold text-gray-900">485</p>
+                <p class="text-xs text-gray-500 mt-1">Aktif bulan ini</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">New Customer</p>
+                <p class="text-2xl font-bold text-green-600">28</p>
+                <p class="text-xs text-gray-500 mt-1">Bulan ini</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Total Points</p>
+                <p class="text-2xl font-bold text-blue-600">12.5K</p>
+                <p class="text-xs text-gray-500 mt-1">Distributed</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Gold Member</p>
+                <p class="text-2xl font-bold text-yellow-600">45</p>
+                <p class="text-xs text-gray-500 mt-1">Top tier</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Avg. Lifetime Value</p>
+                <p class="text-2xl font-bold text-purple-600">Rp 2.3M</p>
+                <p class="text-xs text-gray-500 mt-1">Per customer</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex gap-4">
+                <input type="text" placeholder="Cari customer..." id="searchInput" onkeyup="filterCustomers()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="tierFilter" onchange="filterCustomers()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Tier</option>
+                    <option value="platinum">Platinum</option>
+                    <option value="gold">Gold</option>
+                    <option value="silver">Silver</option>
+                    <option value="bronze">Bronze</option>
+                </select>
+            </div>
+            <button onclick="openAddCustomer()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                + Tambah Customer
+            </button>
+        </div>
+
+        <!-- Customers Grid -->
+        <div id="customersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- Modal: Add/Edit Customer -->
+    <div id="customerModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 id="modalTitle" class="text-lg font-bold mb-6 text-gray-900">Tambah Customer Baru</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Customer</label>
+                    <input type="text" id="customerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nama lengkap">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">No. Telepon</label>
+                    <input type="tel" id="customerPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="08xx-xxxx-xxxx">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                    <input type="email" id="customerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="email@customer.com">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Alamat</label>
+                    <textarea id="customerAddr" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Alamat lengkap" rows="2"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan (Misal: Preferensi, Alergi)</label>
+                    <textarea id="customerNotes" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Preferensi makanan, alergi, dll" rows="2"></textarea>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="closeCustomerModal()" class="flex-1 border border-gray-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button onclick="saveCustomer()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
+                        ✓ Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Customer Detail -->
+    <div id="detailModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="detailName" class="text-lg font-bold text-gray-900">Customer Details</h2>
+                <button onclick="closeDetailModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Info -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">Informasi Dasar</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-gray-600">Telepon</span><span id="detailPhone" class="font-semibold">-</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Email</span><span id="detailEmail" class="font-semibold">-</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Alamat</span><span id="detailAddr" class="font-semibold">-</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Join Date</span><span id="detailJoin" class="font-semibold">-</span></div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-blue-50 rounded-lg p-3 text-center">
+                        <p class="text-sm text-gray-600 font-semibold">Total Transaksi</p>
+                        <p class="text-2xl font-bold text-blue-600" id="detailTrx">0</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-3 text-center">
+                        <p class="text-sm text-gray-600 font-semibold">Total Belanja</p>
+                        <p class="text-lg font-bold text-green-600" id="detailSpent">Rp 0</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-3 text-center">
+                        <p class="text-sm text-gray-600 font-semibold">Loyalty Points</p>
+                        <p class="text-2xl font-bold text-purple-600" id="detailPoints">0</p>
+                    </div>
+                </div>
+
+                <!-- Tier & Actions -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">Membership Tier</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <span id="detailTier" class="tier-badge bg-blue-100 text-blue-700">Silver</span>
+                        <span class="text-sm text-gray-600" id="detailTierMsg">Naik ke Gold jika belanja Rp 10M lagi</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="givePoints()" class="flex-1 border border-purple-300 text-purple-600 px-3 py-2 rounded text-sm font-semibold hover:bg-purple-50">+ Points</button>
+                        <button onclick="sendPromo()" class="flex-1 border border-green-300 text-green-600 px-3 py-2 rounded text-sm font-semibold hover:bg-green-50">📧 Kirim Promo</button>
+                    </div>
+                </div>
+
+                <!-- Purchase History -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">Riwayat Pembelian</h3>
+                    <div id="detailHistory" class="space-y-2 text-sm"></div>
+                </div>
+
+                <!-- Notes -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-2">Catatan</h3>
+                    <p id="detailNotes" class="text-sm text-gray-700">-</p>
+                </div>
+
+                <button onclick="closeDetailModal()" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CUSTOMERS = [
+            {id:1,n:'Ahmad Wijaya',p:'0812-3456789',e:'ahmad@email.com',a:'Jl. Merdeka 123',t:'gold',trx:45,spent:5600000,pts:2800,j:'2025-06-15',h:[{d:'2026-05-01',a:125000},{d:'2026-04-28',a:95000}],nt:'Suka menu pedas'},
+            {id:2,n:'Siti Nurhaliza',p:'0813-4567890',e:'siti@email.com',a:'Jl. Ahmad Yani 45',t:'silver',trx:18,spent:2150000,pts:1075,j:'2025-09-20',h:[{d:'2026-04-25',a:85000}],nt:'Vegetarian'},
+            {id:3,n:'Budi Santoso',p:'0814-5678901',e:'budi@email.com',a:'Jl. Diponegoro 78',t:'platinum',trx:120,spent:12500000,pts:6250,j:'2024-01-10',h:[{d:'2026-05-01',a:450000},{d:'2026-04-20',a:320000}],nt:'VIP pelanggan'},
+            {id:4,n:'Rina Hermawan',p:'0815-6789012',e:'rina@email.com',a:'Jl. Gatot Subroto 90',t:'bronze',trx:5,spent:580000,pts:290,j:'2026-03-15',h:[{d:'2026-04-15',a:150000}],nt:'Pelanggan baru'},
+            {id:5,n:'Hendra Kusuma',p:'0816-7890123',e:'hendra@email.com',a:'Jl. Sudirman 56',t:'silver',trx:22,spent:2800000,pts:1400,j:'2025-07-05',h:[{d:'2026-05-01',a:275000}],nt:'Sering order dikirim'}
+        ];
+
+        let currentCustomer = null;
+
+        function renderCustomers() {
+            const html = document.getElementById('customersList');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const tier = document.getElementById('tierFilter').value;
+
+            const filtered = CUSTOMERS.filter(c =>
+                (c.n.toLowerCase().includes(search) || c.p.includes(search)) &&
+                (!tier || c.t === tier)
+            );
+
+            html.innerHTML = filtered.map(c => {
+                const tierColor = {platinum:'yellow',gold:'orange',silver:'blue',bronze:'gray'};
+                const col = tierColor[c.t] || 'gray';
+                return '<div class="customer-card bg-white rounded-lg shadow p-4 border-t-4 border-' + col + '-500">' +
+                '<div class="flex justify-between items-start mb-2">' +
+                '<div><h3 class="font-bold text-gray-900">' + c.n + '</h3>' +
+                '<p class="text-xs text-gray-500">' + c.p + '</p></div>' +
+                '<span class="tier-badge bg-' + col + '-100 text-' + col + '-700">' + c.t.toUpperCase() + '</span>' +
+                '</div>' +
+                '<div class="text-xs text-gray-600 mb-3">' + c.trx + ' transaksi | Rp ' + (c.spent/1000000).toFixed(1) + 'M</div>' +
+                '<div class="flex gap-2">' +
+                '<button onclick="showDetail(' + c.id + ')" class="flex-1 border border-blue-300 text-blue-600 px-3 py-2 rounded text-xs font-semibold hover:bg-blue-50">Detail</button>' +
+                '<button onclick="editCustomer(' + c.id + ')" class="flex-1 border border-gray-300 text-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-gray-50">Edit</button>' +
+                '</div></div>';
+            }).join('');
+        }
+
+        function filterCustomers() { renderCustomers(); }
+
+        function openAddCustomer() {
+            document.getElementById('modalTitle').textContent = 'Tambah Customer Baru';
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('customerEmail').value = '';
+            document.getElementById('customerAddr').value = '';
+            document.getElementById('customerNotes').value = '';
+            document.getElementById('customerModal').style.display = 'flex';
+        }
+
+        function closeCustomerModal() { document.getElementById('customerModal').style.display = 'none'; }
+
+        function saveCustomer() {
+            alert('✓ Customer berhasil disimpan');
+            closeCustomerModal();
+            renderCustomers();
+        }
+
+        function showDetail(id) {
+            currentCustomer = CUSTOMERS.find(c => c.id === id);
+            if (!currentCustomer) return;
+            document.getElementById('detailName').textContent = currentCustomer.n;
+            document.getElementById('detailPhone').textContent = currentCustomer.p;
+            document.getElementById('detailEmail').textContent = currentCustomer.e;
+            document.getElementById('detailAddr').textContent = currentCustomer.a;
+            document.getElementById('detailJoin').textContent = currentCustomer.j;
+            document.getElementById('detailTrx').textContent = currentCustomer.trx;
+            document.getElementById('detailSpent').textContent = 'Rp ' + currentCustomer.spent.toLocaleString('id-ID');
+            document.getElementById('detailPoints').textContent = currentCustomer.pts.toLocaleString('id-ID');
+            document.getElementById('detailTier').textContent = currentCustomer.t.toUpperCase();
+            document.getElementById('detailTier').className = 'tier-badge bg-' + {platinum:'yellow-100 text-yellow-700',gold:'orange-100 text-orange-700',silver:'blue-100 text-blue-700',bronze:'gray-100 text-gray-700'}[currentCustomer.t];
+            document.getElementById('detailHistory').innerHTML = currentCustomer.h.map(hx => '<div class="flex justify-between"><span>' + hx.d + '</span><span class="font-semibold">Rp ' + hx.a.toLocaleString('id-ID') + '</span></div>').join('');
+            document.getElementById('detailNotes').textContent = currentCustomer.nt || '-';
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function closeDetailModal() { document.getElementById('detailModal').style.display = 'none'; }
+        function givePoints() { alert('Berapa poin yang ingin ditambahkan ke customer ' + currentCustomer.n + '?'); }
+        function sendPromo() { alert('💬 Kirim promo ke ' + currentCustomer.p + ' via WhatsApp'); }
+        function editCustomer(id) { alert('Edit customer ' + id); }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            renderCustomers();
+        });
+    </script>
+</body>
+</html>
