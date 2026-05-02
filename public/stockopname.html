@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Stock Opname</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;text-align:center;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);}
+        .tab-btn{padding:.5rem 1.2rem;border-radius:9999px;font-size:.78rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;transition:all .2s;}
+        .tab-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.6);color:white;}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .opname-row{display:grid;grid-template-columns:1fr 70px 70px 70px;gap:.75rem;align-items:center;padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.06);}
+        .diff-pos{color:#4ade80;font-weight:700;}
+        .diff-neg{color:#f87171;font-weight:700;}
+        .diff-zero{color:rgba(255,255,255,.3);font-weight:600;}
+        @media(max-width:640px){.opname-row{grid-template-columns:1fr 60px 60px 60px;gap:.5rem;}}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>📋</span></div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Stock Opname</div>
+                <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
+            </div>
+        </div>
+        <div class="text-xs" id="opnameDate" style="color:rgba(255,255,255,.4)"></div>
+    </div>
+</nav>
+
+<div class="max-w-4xl mx-auto px-4 py-6">
+    <div class="flex gap-2 mb-6">
+        <button class="tab-btn active" id="tab-menu" onclick="switchTab('menu',this)">🍜 Stok Menu</button>
+        <button class="tab-btn" id="tab-bahan" onclick="switchTab('bahan',this)">📦 Bahan Baku</button>
+    </div>
+
+    <div class="glass-card rounded-2xl px-5 py-4 mb-5 flex flex-wrap items-center gap-4 justify-between">
+        <div class="text-sm" style="color:rgba(255,255,255,.6)">Masukkan jumlah fisik yang dihitung untuk menyesuaikan stok sistem.</div>
+        <button onclick="saveOpname()" class="btn-primary px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
+            💾 Simpan Penyesuaian
+        </button>
+    </div>
+
+    <div class="opname-row px-2 text-xs font-semibold" style="color:rgba(255,255,255,.35);border-bottom:1px solid rgba(255,255,255,.12)">
+        <span>Nama Item</span>
+        <span class="text-center">Sistem</span>
+        <span class="text-center">Fisik</span>
+        <span class="text-center">Selisih</span>
+    </div>
+
+    <div id="opnameRows" class="px-2"></div>
+
+    <div class="glass-card rounded-2xl p-5 mt-5 grid grid-cols-3 gap-4 text-center">
+        <div>
+            <div class="text-2xl font-extrabold text-green-400" id="sumPlus">0</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.4)">Item Lebih</div>
+        </div>
+        <div>
+            <div class="text-2xl font-extrabold text-white" id="sumMatch">0</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.4)">Item Sesuai</div>
+        </div>
+        <div>
+            <div class="text-2xl font-extrabold text-red-400" id="sumMinus">0</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.4)">Item Kurang</div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="hidden fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2" style="opacity:0;transition:opacity .3s"></div>
+
+<script>
+    const MENU_ITEMS = [
+        {id:1,  n:'Nasi Goreng', e:'🍜', unit:'porsi'},
+        {id:2,  n:'Mie Ayam',    e:'🍜', unit:'porsi'},
+        {id:3,  n:'Soto Ayam',   e:'🥣', unit:'porsi'},
+        {id:4,  n:'Ikan Bakar',  e:'🐟', unit:'porsi'},
+        {id:5,  n:'Es Teh',      e:'🥤', unit:'gelas'},
+        {id:6,  n:'Kopi',        e:'☕', unit:'gelas'},
+        {id:7,  n:'Jus',         e:'🧃', unit:'gelas'},
+        {id:8,  n:'Smoothie',    e:'🥤', unit:'gelas'},
+        {id:9,  n:'Roti Goreng', e:'🥐', unit:'pcs'},
+        {id:10, n:'Lumpia',      e:'🥟', unit:'pcs'},
+        {id:11, n:'Kue Lapis',   e:'🍰', unit:'pcs'},
+        {id:12, n:'Bika Ambon',  e:'🍮', unit:'pcs'},
+    ];
+    const RAW_ITEMS = [
+        {id:1, name:'Nasi (Beras)',     unit:'kg'},
+        {id:2, name:'Ayam Fillet',      unit:'kg'},
+        {id:3, name:'Mie Kuning',       unit:'kg'},
+        {id:4, name:'Soto Ayam Presto', unit:'porsi'},
+        {id:5, name:'Es Batu',          unit:'kg'},
+        {id:6, name:'Teh Celup',        unit:'box'},
+        {id:7, name:'Minyak Goreng',    unit:'liter'},
+        {id:8, name:'Kecap Manis',      unit:'botol'},
+    ];
+
+    let currentTab = 'menu';
+    let physicalCounts = {};
+    let toastTimer = null;
+
+    function showToast(msg, type='success'){
+        clearTimeout(toastTimer);
+        const C={success:'rgba(34,197,94,.9)',error:'rgba(239,68,68,.9)',info:'rgba(99,102,241,.9)'};
+        const t=document.getElementById('toast');
+        t.style.background=C[type]||C.info;
+        t.innerHTML=`<span>${type==='success'?'✓':'ℹ️'}</span><span>${msg}</span>`;
+        t.classList.remove('hidden');t.style.opacity='1';
+        toastTimer=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.classList.add('hidden'),300);},3000);
+    }
+
+    function getMenuStock(){
+        const s=localStorage.getItem('lunomi_menu_stock');
+        if(s) return JSON.parse(s);
+        const d={};
+        MENU_ITEMS.forEach(p=>{d[p.id]={qty:p.unit==='gelas'?60:30,min:5,max:p.unit==='gelas'?80:40};});
+        return d;
+    }
+    function getRawStock(){
+        const s=localStorage.getItem('lunomi_raw_stock');
+        if(s) return JSON.parse(s);
+        const d={};
+        RAW_ITEMS.forEach(i=>{d[i.id]={qty:0,unit:i.unit};});
+        return d;
+    }
+
+    function switchTab(tab, btn){
+        currentTab=tab;
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        physicalCounts={};
+        renderRows();
+    }
+
+    function renderRows(){
+        const isMenu=currentTab==='menu';
+        const items=isMenu?MENU_ITEMS:RAW_ITEMS;
+        const stk=isMenu?getMenuStock():getRawStock();
+        let html='';
+        items.forEach(item=>{
+            const sysQty=stk[item.id]?stk[item.id].qty:0;
+            const phys=physicalCounts[item.id]!==undefined?physicalCounts[item.id]:'';
+            const diff=phys!==''?phys-sysQty:null;
+            const diffHtml=diff===null?`<span class="diff-zero">—</span>`
+                :diff>0?`<span class="diff-pos">+${diff}</span>`
+                :diff<0?`<span class="diff-neg">${diff}</span>`
+                :`<span class="diff-zero">0</span>`;
+            const name=isMenu?`${item.e} ${item.n}`:item.name;
+            const unit=item.unit;
+            html+=`<div class="opname-row">
+                <div>
+                    <div class="text-sm font-semibold text-white">${name}</div>
+                    <div class="text-xs" style="color:rgba(255,255,255,.35)">${unit}</div>
+                </div>
+                <div class="text-center font-bold text-white text-sm">${sysQty}</div>
+                <input type="number" min="0" value="${phys}" inputmode="numeric"
+                    class="input-glass px-2 py-1.5 rounded-lg text-sm w-full"
+                    placeholder="—"
+                    oninput="physicalCounts[${item.id}]=parseFloat(this.value)||0;renderSummary()">
+                <div class="text-center text-sm">${diffHtml}</div>
+            </div>`;
+        });
+        document.getElementById('opnameRows').innerHTML=html;
+        renderSummary();
+    }
+
+    function renderSummary(){
+        const isMenu=currentTab==='menu';
+        const items=isMenu?MENU_ITEMS:RAW_ITEMS;
+        const stk=isMenu?getMenuStock():getRawStock();
+        let plus=0,match=0,minus=0;
+        items.forEach(item=>{
+            if(physicalCounts[item.id]===undefined) return;
+            const sysQty=stk[item.id]?stk[item.id].qty:0;
+            const diff=physicalCounts[item.id]-sysQty;
+            if(diff>0) plus++;
+            else if(diff<0) minus++;
+            else match++;
+        });
+        document.getElementById('sumPlus').textContent=plus;
+        document.getElementById('sumMatch').textContent=match;
+        document.getElementById('sumMinus').textContent=minus;
+    }
+
+    function saveOpname(){
+        const isMenu=currentTab==='menu';
+        const keys=Object.keys(physicalCounts);
+        if(!keys.length){showToast('Belum ada data fisik dimasukkan.','info');return;}
+
+        if(isMenu){
+            const stk=getMenuStock();
+            keys.forEach(id=>{
+                if(!stk[id]) stk[id]={qty:0,min:5,max:40};
+                stk[id].qty=physicalCounts[id];
+            });
+            localStorage.setItem('lunomi_menu_stock',JSON.stringify(stk));
+        } else {
+            const stk=getRawStock();
+            keys.forEach(id=>{
+                if(!stk[id]) stk[id]={qty:0,unit:'-'};
+                stk[id].qty=physicalCounts[id];
+            });
+            localStorage.setItem('lunomi_raw_stock',JSON.stringify(stk));
+        }
+
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        const logs=JSON.parse(localStorage.getItem('lunomi_opname_logs')||'[]');
+        logs.unshift({date:new Date().toISOString(),tab:currentTab,adjustments:keys.length,outlet_id:outlet?outlet.id:''});
+        localStorage.setItem('lunomi_opname_logs',JSON.stringify(logs));
+
+        physicalCounts={};
+        renderRows();
+        showToast(`Stok ${isMenu?'menu':'bahan baku'} berhasil disesuaikan (${keys.length} item)!`,'success');
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        try{
+            const s=localStorage.getItem('lunomi_session');
+            if(!s){window.location.href='index.html';return;}
+            const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+            if(o) document.getElementById('outletLabel').textContent=o.name;
+        }catch(e){window.location.href='index.html';}
+        const now=new Date();
+        const days=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+        const months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+        document.getElementById('opnameDate').textContent=`${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        renderRows();
+    });
+</script>
+</body>
+</html>
