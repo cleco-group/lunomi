@@ -128,7 +128,7 @@
                     </div>
                     <div>
                         <div class="font-extrabold text-white text-base leading-none">Lunomi</div>
-                        <div class="text-xs leading-none mt-0.5" id="clockDisplay" style="color:rgba(255,255,255,0.4)">POS Dashboard</div>
+                        <div class="text-xs leading-none mt-0.5" id="clockDisplay" style="color:rgba(255,255,255,0.4)"><span id="outletBadge"></span></div>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -435,6 +435,7 @@
         function logout() {
             if (!confirm('Yakin ingin logout?')) return;
             localStorage.removeItem('lunomi_session');
+            localStorage.removeItem('lunomi_outlet');
             window.location.href = 'index.html';
         }
 
@@ -442,7 +443,12 @@
             try {
                 const s = localStorage.getItem('lunomi_session');
                 if (!s) { window.location.href = 'index.html'; return; }
-                document.getElementById('userName').textContent = JSON.parse(s).user.name;
+                const sess = JSON.parse(s);
+                document.getElementById('userName').textContent = sess.user.name;
+                const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || 'null');
+                const outletEl = document.getElementById('outletBadge');
+                if (outlet && outletEl) outletEl.textContent = '🏪 ' + outlet.name;
+                else if (outletEl) outletEl.textContent = 'POS Dashboard';
             } catch(e) { window.location.href = 'index.html'; return; }
             renderAgents();
             renderActivityLog();

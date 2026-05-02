@@ -132,8 +132,8 @@
                 <p class="text-sm mt-1" style="color:rgba(255,255,255,0.45)">Sistem POS Pintar untuk F&B Indonesia</p>
             </div>
 
-            <!-- Card -->
-            <div class="glass rounded-3xl p-7 shadow-2xl">
+            <!-- STEP 1: Login Card -->
+            <div id="step-login" class="glass rounded-3xl p-7 shadow-2xl">
                 <!-- Error -->
                 <div id="errorMsg" class="hidden mb-4 px-4 py-3 rounded-xl error-glass flex items-center gap-2 text-sm">
                     <span>⚠️</span><span id="errorText"></span>
@@ -205,6 +205,52 @@
                     </div>
                 </div>
             </div>
+
+            <!-- STEP 2: Outlet Selector (owner only) -->
+            <div id="step-outlet" class="hidden glass rounded-3xl p-7 shadow-2xl">
+                <div class="flex items-center gap-3 mb-5">
+                    <button onclick="backToLogin()" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-widest" style="color:rgba(255,255,255,0.4)">Pilih Outlet</p>
+                        <p class="text-white font-bold text-base" id="outletGreet">Selamat datang, Owner</p>
+                    </div>
+                </div>
+                <div class="space-y-3" id="outletList">
+                    <button onclick="selectOutlet('outlet_cleco_pii','Cleco Pii')"
+                        class="w-full text-left glass-card p-4 rounded-2xl hover:border-indigo-500 transition group" style="border:1.5px solid rgba(255,255,255,0.1)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:rgba(99,102,241,0.2)">🏪</div>
+                            <div class="flex-1">
+                                <div class="font-semibold text-white text-sm">Cleco Pii</div>
+                                <div class="text-xs mt-0.5" style="color:rgba(255,255,255,0.4)">Jl. Sudirman No. 12 · Online</div>
+                            </div>
+                            <div class="text-indigo-400 opacity-0 group-hover:opacity-100 transition">→</div>
+                        </div>
+                    </button>
+                    <button onclick="selectOutlet('outlet_resep_bunce','Resep Bunce')"
+                        class="w-full text-left glass-card p-4 rounded-2xl hover:border-indigo-500 transition group" style="border:1.5px solid rgba(255,255,255,0.1)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:rgba(245,158,11,0.2)">🍳</div>
+                            <div class="flex-1">
+                                <div class="font-semibold text-white text-sm">Resep Bunce</div>
+                                <div class="text-xs mt-0.5" style="color:rgba(255,255,255,0.4)">Jl. Gatot Subroto No. 5 · Online</div>
+                            </div>
+                            <div class="text-indigo-400 opacity-0 group-hover:opacity-100 transition">→</div>
+                        </div>
+                    </button>
+                    <button onclick="selectOutlet('outlet_baby_joy','Baby Joy')"
+                        class="w-full text-left glass-card p-4 rounded-2xl hover:border-indigo-500 transition group" style="border:1.5px solid rgba(255,255,255,0.1)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:rgba(236,72,153,0.2)">🍼</div>
+                            <div class="flex-1">
+                                <div class="font-semibold text-white text-sm">Baby Joy</div>
+                                <div class="text-xs mt-0.5" style="color:rgba(255,255,255,0.4)">Jl. Thamrin No. 8 · Online</div>
+                            </div>
+                            <div class="text-indigo-400 opacity-0 group-hover:opacity-100 transition">→</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -215,12 +261,17 @@
             cashier: { email:'kasir@lunomi.local',    password:'demo123' },
             kitchen: { email:'kitchen@lunomi.local',  password:'demo123' }
         };
+        const DEFAULT_OUTLETS = {
+            manager: { id:'outlet_resep_bunce', name:'Resep Bunce' },
+            cashier:  { id:'outlet_cleco_pii',   name:'Cleco Pii' },
+            kitchen:  { id:'outlet_cleco_pii',   name:'Cleco Pii' }
+        };
         const DASHBOARDS = {
-            owner:'dashboard.html', manager:'dashboard.html?role=manager',
+            owner:'dashboard.html', manager:'dashboard.html',
             cashier:'pos.html', kitchen:'kitchen.html'
         };
 
-        let errorTimer = null;
+        let errorTimer = null, pendingSession = null;
 
         function updateRole() {
             const role = document.querySelector('input[name="role"]:checked').value;
@@ -257,19 +308,48 @@
             if (!email || !password) { showError('Email dan password harus diisi'); return; }
 
             const acc = DEMO_ACCOUNTS[role];
-            if (email === acc.email && password === acc.password) {
-                const session = {
-                    user: { email, id:`user_${role}_${Date.now()}`, role,
-                        name: role === 'cashier' ? 'Kasir' : role.charAt(0).toUpperCase() + role.slice(1) },
-                    loginTime: new Date().toISOString(), outlet_id:'outlet_demo_001'
-                };
-                localStorage.setItem('lunomi_session', JSON.stringify(session));
+            if (email !== acc.email || password !== acc.password) {
+                showError('Email atau password salah. Gunakan akun demo yang tersedia.');
+                return;
+            }
+
+            const displayName = role === 'cashier' ? 'Kasir' : role.charAt(0).toUpperCase() + role.slice(1);
+            pendingSession = {
+                user: { email, id:`user_${role}_${Date.now()}`, role, name: displayName },
+                loginTime: new Date().toISOString()
+            };
+
+            if (role === 'owner') {
+                // Owner: show outlet selector
+                document.getElementById('outletGreet').textContent = `Selamat datang, ${displayName}`;
+                document.getElementById('step-login').classList.add('hidden');
+                document.getElementById('step-outlet').classList.remove('hidden');
+            } else {
+                // Non-owner: auto-assign default outlet, redirect
+                const outlet = DEFAULT_OUTLETS[role];
+                pendingSession.outlet_id   = outlet.id;
+                pendingSession.outlet_name = outlet.name;
+                localStorage.setItem('lunomi_session', JSON.stringify(pendingSession));
+                localStorage.setItem('lunomi_outlet', JSON.stringify(outlet));
                 btn.disabled = true;
                 btn.innerHTML = '<span class="spinner"></span>Membuka...';
                 setTimeout(() => { window.location.href = DASHBOARDS[role]; }, 600);
-            } else {
-                showError('Email atau password salah. Gunakan akun demo yang tersedia.');
             }
+        }
+
+        function selectOutlet(id, name) {
+            if (!pendingSession) return;
+            pendingSession.outlet_id   = id;
+            pendingSession.outlet_name = name;
+            localStorage.setItem('lunomi_session', JSON.stringify(pendingSession));
+            localStorage.setItem('lunomi_outlet', JSON.stringify({ id, name }));
+            window.location.href = `dashboard.html?outlet=${id}`;
+        }
+
+        function backToLogin() {
+            pendingSession = null;
+            document.getElementById('step-outlet').classList.add('hidden');
+            document.getElementById('step-login').classList.remove('hidden');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -286,7 +366,10 @@
                     const d = JSON.parse(s);
                     if (DASHBOARDS[d.user.role]) window.location.href = DASHBOARDS[d.user.role];
                 }
-            } catch(e) { localStorage.removeItem('lunomi_session'); }
+            } catch(e) {
+                localStorage.removeItem('lunomi_session');
+                localStorage.removeItem('lunomi_outlet');
+            }
         });
     </script>
 </body>
