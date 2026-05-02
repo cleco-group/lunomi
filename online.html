@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Online - Integrasi Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .tab-btn { transition: all 0.3s; }
+        .marketplace-card { transition: all 0.3s; }
+        .marketplace-card:hover { transform: translateY(-4px); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">🛒 Online Integration</h1>
+                    <p class="text-sm text-gray-500">Lunomi - Marketplace Sync & Online Sales</p>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Sales Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Total Online Sales (30 hari)</p>
+                <p class="text-2xl font-bold text-gray-900">Rp 18.5M</p>
+                <p class="text-xs text-gray-500 mt-1">35% dari total penjualan</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Online Orders</p>
+                <p class="text-2xl font-bold text-gray-900">425</p>
+                <p class="text-xs text-gray-500 mt-1">33% dari total transaksi</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Marketplace Aktif</p>
+                <p class="text-2xl font-bold text-gray-900">3</p>
+                <p class="text-xs text-gray-500 mt-1">Shopee, TikTok, Tokopedia</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-sm text-gray-600 font-semibold mb-1">Avg Response Time</p>
+                <p class="text-2xl font-bold text-gray-900">2.3 jam</p>
+                <p class="text-xs text-gray-500 mt-1">⬇ 45% lebih cepat</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-4 mb-8 border-b border-gray-200 overflow-x-auto">
+            <button onclick="switchTab('dashboars')" id="tab-dashboars" class="tab-btn pb-4 px-4 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap">
+                📊 Dashboard
+            </button>
+            <button onclick="switchTab('shopee')" id="tab-shopee" class="tab-btn pb-4 px-4 border-b-2 border-transparent text-gray-600 font-semibold hover:text-gray-900 whitespace-nowrap">
+                🛍️ Shopee
+            </button>
+            <button onclick="switchTab('tiktok')" id="tab-tiktok" class="tab-btn pb-4 px-4 border-b-2 border-transparent text-gray-600 font-semibold hover:text-gray-900 whitespace-nowrap">
+                🎵 TikTok Shop
+            </button>
+            <button onclick="switchTab('tokopedia')" id="tab-tokopedia" class="tab-btn pb-4 px-4 border-b-2 border-transparent text-gray-600 font-semibold hover:text-gray-900 whitespace-nowrap">
+                🏪 Tokopedia
+            </button>
+            <button onclick="switchTab('inventory')" id="tab-inventory" class="tab-btn pb-4 px-4 border-b-2 border-transparent text-gray-600 font-semibold hover:text-gray-900 whitespace-nowrap">
+                📦 Inventory Sync
+            </button>
+        </div>
+
+        <!-- Tab 1: Dashboard -->
+        <div id="tab-dashboars-content" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">Marketplace Overview</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Shopee -->
+                <div class="marketplace-card bg-white rounded-lg shadow p-6 border-t-4 border-orange-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-gray-900">🛍️ Shopee</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Connected</span>
+                    </div>
+                    <div class="space-y-2 text-sm mb-4">
+                        <div class="flex justify-between"><span class="text-gray-600">Shop ID</span><span class="font-semibold">SHP123456</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Products</span><span class="font-semibold">85</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Sales (30d)</span><span class="font-semibold">Rp 8.2M</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Rating</span><span class="font-semibold">4.8 ⭐</span></div>
+                    </div>
+                    <button onclick="manageSC('shopee')" class="w-full px-4 py-2 border border-orange-300 text-orange-600 rounded-lg hover:bg-orange-50 font-semibold text-sm">
+                        Manage
+                    </button>
+                </div>
+
+                <!-- TikTok Shop -->
+                <div class="marketplace-card bg-white rounded-lg shadow p-6 border-t-4 border-black">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-gray-900">🎵 TikTok Shop</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Connected</span>
+                    </div>
+                    <div class="space-y-2 text-sm mb-4">
+                        <div class="flex justify-between"><span class="text-gray-600">Shop ID</span><span class="font-semibold">TIKTOK789</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Products</span><span class="font-semibold">78</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Sales (30d)</span><span class="font-semibold">Rp 6.5M</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Rating</span><span class="font-semibold">4.9 ⭐</span></div>
+                    </div>
+                    <button onclick="manageSC('tiktok')" class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold text-sm">
+                        Manage
+                    </button>
+                </div>
+
+                <!-- Tokopedia -->
+                <div class="marketplace-card bg-white rounded-lg shadow p-6 border-t-4 border-green-600">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-gray-900">🏪 Tokopedia</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Connected</span>
+                    </div>
+                    <div class="space-y-2 text-sm mb-4">
+                        <div class="flex justify-between"><span class="text-gray-600">Shop ID</span><span class="font-semibold">TOKO456</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Products</span><span class="font-semibold">92</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Sales (30d)</span><span class="font-semibold">Rp 3.8M</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Rating</span><span class="font-semibold">4.6 ⭐</span></div>
+                    </div>
+                    <button onclick="manageSC('tokopedia')" class="w-full px-4 py-2 border border-green-300 text-green-600 rounded-lg hover:bg-green-50 font-semibold text-sm">
+                        Manage
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Shopee -->
+        <div id="tab-shopee-content" style="display:none" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">Shopee Integration</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Connection Status -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Connection Status</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <div>
+                                <p class="font-semibold text-gray-900">API Connected</p>
+                                <p class="text-xs text-gray-600">Last sync: 5 minutes ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <div>
+                                <p class="font-semibold text-gray-900">Order Sync</p>
+                                <p class="text-xs text-gray-600">Real-time: enabled</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <div>
+                                <p class="font-semibold text-gray-900">Inventory Sync</p>
+                                <p class="text-xs text-gray-600">Auto-sync: every 30 minutes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Configuration</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Shop ID</label>
+                            <input type="text" value="SHP123456" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm" disabled>
+                        </div>
+                        <div>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" checked class="w-4 h-4">
+                                <span class="text-sm font-semibold text-gray-700">Auto-accept orders</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" checked class="w-4 h-4">
+                                <span class="text-sm font-semibold text-gray-700">Auto-print label</span>
+                            </label>
+                        </div>
+                        <button onclick="saveSC('shopee')" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm">
+                            Simpan Pengaturan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="font-bold text-gray-900 mb-4">Recent Orders (Last 7 Days)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="border-b border-gray-200">
+                            <tr>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Order ID</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Customer</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Amount</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shopeeOrdersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: TikTok Shop -->
+        <div id="tab-tiktok-content" style="display:none" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">TikTok Shop Integration</h2>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900">
+                ℹ️ TikTok Shop memberikan akses ke jutaan pembeli aktif TikTok. Real-time inventory sync memastikan produk Anda selalu up-to-date.
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="font-bold text-gray-900 mb-4">Integration Setup</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Business ID</label>
+                        <input type="text" value="TIKTOK789" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm" disabled>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Access Token Status</label>
+                        <div class="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-semibold">
+                            ✓ Valid (expires: 2026-08-01)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coming Soon Features -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="font-bold text-gray-900 mb-4">Live Shopping Features (Coming Soon)</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-start gap-3">
+                        <span class="text-gray-400">○</span>
+                        <span class="text-gray-700">Schedule live shopping events</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-gray-400">○</span>
+                        <span class="text-gray-700">Real-time viewer analytics</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-gray-400">○</span>
+                        <span class="text-gray-700">Flash deals during live</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Tokopedia -->
+        <div id="tab-tokopedia-content" style="display:none" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">Tokopedia Integration</h2>
+            <p class="text-gray-600">Tokopedia integration sedang dalam tahap setup. Hubungi support untuk aktivasi.</p>
+            <button onclick="requestSetup('tokopedia')" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold">
+                Request Setup
+            </button>
+        </div>
+
+        <!-- Tab 5: Inventory Sync -->
+        <div id="tab-inventory-content" style="display:none" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">Inventory Synchronization</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Sync Status</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between"><span class="text-gray-600">Last sync</span><span class="font-semibold">5 minutes ago</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Sync frequency</span><span class="font-semibold">Every 30 min</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Products synced</span><span class="font-semibold">255/255</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Success rate</span><span class="font-semibold text-green-600">99.8%</span></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <button onclick="syncNow()" class="w-full px-4 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 font-semibold text-sm">
+                            ▶️ Sync Now
+                        </button>
+                        <button onclick="checkConflicts()" class="w-full px-4 py-2 border border-orange-300 text-orange-600 rounded-lg hover:bg-orange-50 font-semibold text-sm">
+                            🔍 Check Conflicts
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sync History -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="font-bold text-gray-900 mb-4">Sync History</h3>
+                <div class="space-y-2 text-sm" id="syncHistoryTable"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SHOPEE_ORDERS = [
+            {id:'SHP-001',c:'Ahmad Wijaya',a:450000,st:'Shipped'},
+            {id:'SHP-002',c:'Siti Nurhaliza',a:275000,st:'Processing'},
+            {id:'SHP-003',c:'Budi Santoso',a:585000,st:'Completed'}
+        ];
+
+        const SYNC_HISTORY = [
+            {t:'2026-05-01 14:30',s:'Success',p:255},
+            {t:'2026-05-01 14:00',s:'Success',p:255},
+            {t:'2026-05-01 13:30',s:'Success',p:254},
+            {t:'2026-05-01 13:00',s:'Success',p:254}
+        ];
+
+        function renderShopeeOrders() {
+            const html = document.getElementById('shopeeOrdersTable');
+            html.innerHTML = SHOPEE_ORDERS.map(o =>
+                '<tr class="border-b border-gray-200">' +
+                '<td class="py-3 px-4">' + o.id + '</td>' +
+                '<td class="py-3 px-4">' + o.c + '</td>' +
+                '<td class="py-3 px-4">Rp ' + o.a.toLocaleString('id-ID') + '</td>' +
+                '<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-700">' + o.st + '</span></td>' +
+                '</tr>'
+            ).join('');
+        }
+
+        function renderSyncHistory() {
+            const html = document.getElementById('syncHistoryTable');
+            html.innerHTML = SYNC_HISTORY.map(s =>
+                '<div class="flex justify-between border-b border-gray-200 pb-2">' +
+                '<span>' + s.t + '</span>' +
+                '<span><span class="text-green-600 font-semibold">✓ ' + s.s + '</span> | ' + s.p + ' products</span>' +
+                '</div>'
+            ).join('');
+        }
+
+        function switchTab(tab) {
+            const tabs = ['dashboars', 'shopee', 'tiktok', 'tokopedia', 'inventory'];
+            tabs.forEach(t => {
+                document.getElementById('tab-' + t + '-content').style.display = t === tab ? 'block' : 'none';
+            });
+
+            document.querySelectorAll('.tab-btn').forEach((b, i) => {
+                if (tabs[i] === tab) {
+                    b.classList.add('border-blue-600', 'text-blue-600');
+                    b.classList.remove('border-transparent', 'text-gray-600');
+                } else {
+                    b.classList.remove('border-blue-600', 'text-blue-600');
+                    b.classList.add('border-transparent', 'text-gray-600');
+                }
+            });
+
+            if (tab === 'shopee') renderShopeeOrders();
+            else if (tab === 'inventory') renderSyncHistory();
+        }
+
+        function manageSC(sc) { alert('Manage ' + sc + ' integration'); }
+        function saveSC(sc) { alert('✓ ' + sc + ' settings saved'); }
+        function syncNow() { alert('▶️ Starting inventory sync...'); }
+        function checkConflicts() { alert('🔍 No conflicts found'); }
+        function requestSetup(sc) { alert('Request sent to setup ' + sc); }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            renderShopeeOrders();
+            renderSyncHistory();
+        });
+    </script>
+</body>
+</html>

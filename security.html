@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi Security - Keamanan Sistem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .tab-btn { transition: all 0.3s; }
+        .security-level { padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">🔐 Keamanan Sistem</h1>
+                    <p class="text-sm text-gray-500">Lunomi - Security & Data Protection</p>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Security Score -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-8 text-white mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold mb-2">Overall Security Score</h2>
+                    <p class="text-blue-100">System security & compliance assessment</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-6xl font-bold">92</div>
+                    <p class="text-blue-100 mt-2">Excellent</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-4 mb-8 border-b border-gray-200 overflow-x-auto">
+            <button onclick="switchTab('password')" id="tab-password" class="tab-btn pb-4 px-4 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap">
+                🔑 Password Management
+            </button>
+            <button onclick="switchTab('2fa')" id="tab-2fa" class="tab-btn pb-4 px-4 border-b-2 border-transparent text-gray-600 font-semibold hover:text-gray-900 whitespace-nowrap">
+                📱 Two-Factor Auth
+            </button>
+            <button onclick="switchTab('activity')" id="tab-activity" class="tab-btn pb-4 px-4 border-b-2 border-transparent text-gray-600 font-semibold hover:text-gray-900 whitespace-nowrap">
+                📊 Activity Logs
+            </button>
+            <button onclick="switchTab('encryption')" id="tab-encryption" class="tab-btn pb-4 px-4 border-b-2 border-transparent text-gray-600 font-semibold hover:text-gray-900 whitespace-nowrap">
+                🛡️ Encryption
+            </button>
+            <button onclick="switchTab('access')" id="tab-access" class="tab-btn pb-4 px-4 border-b-2 border-transparent text-gray-600 font-semibold hover:text-gray-900 whitespace-nowrap">
+                🚪 Access Control
+            </button>
+        </div>
+
+        <!-- Tab 1: Password Management -->
+        <div id="tab-password-content" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">Password Management</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Change Password -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Ubah Password</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Password Lama</label>
+                            <input type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter current password">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Password Baru</label>
+                            <input type="password" id="newPass" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Min 12 karakter, huruf, angka, simbol" onkeyup="checkPasswordStrength()">
+                            <div id="strengthMeter" class="mt-2 h-2 bg-gray-200 rounded-lg overflow-hidden">
+                                <div id="strengthBar" class="h-full bg-red-500 w-0 transition-all"></div>
+                            </div>
+                            <p id="strengthText" class="text-xs text-gray-600 mt-1">Weak</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Password</label>
+                            <input type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Confirm new password">
+                        </div>
+                        <button onclick="changePassword()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm">
+                            ✓ Update Password
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Password Policy -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Password Policy</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-start gap-2">
+                            <span class="text-green-600">✓</span>
+                            <span class="text-gray-700">Minimum 12 karakter</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-green-600">✓</span>
+                            <span class="text-gray-700">Minimal 1 huruf besar</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-green-600">✓</span>
+                            <span class="text-gray-700">Minimal 1 angka</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-green-600">✓</span>
+                            <span class="text-gray-700">Minimal 1 simbol (!@#$%)</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-orange-600">⚠️</span>
+                            <span class="text-gray-700">Password expires setiap 90 hari</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reset Request History -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="font-bold text-gray-900 mb-4">Password Change History</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between border-b border-gray-200 pb-2">
+                        <span class="text-gray-700">Last changed: 2026-03-15 14:30</span>
+                        <span class="text-gray-600">42 days ago</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-200 pb-2">
+                        <span class="text-gray-700">Previous: 2025-12-30 09:15</span>
+                        <span class="text-gray-600">127 days ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Two-Factor Authentication -->
+        <div id="tab-2fa-content" style="display:none" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">Two-Factor Authentication (2FA)</h2>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="font-bold text-gray-900">2FA Status</h3>
+                        <p class="text-sm text-gray-600 mt-1">Protect your account with 2FA</p>
+                    </div>
+                    <span class="security-level bg-green-100 text-green-700">✓ ENABLED</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="border border-green-200 bg-green-50 rounded-lg p-4">
+                        <p class="font-semibold text-gray-900">📱 Authenticator App</p>
+                        <p class="text-sm text-gray-600 mt-1">Google Authenticator / Authy</p>
+                        <p class="text-xs text-green-700 mt-2">✓ Active</p>
+                    </div>
+
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="font-semibold text-gray-900">📧 Email Verification</p>
+                        <p class="text-sm text-gray-600 mt-1">owner@lunomi.local</p>
+                        <p class="text-xs text-green-700 mt-2">✓ Verified</p>
+                    </div>
+
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="font-semibold text-gray-900">📱 SMS (Optional)</p>
+                        <p class="text-sm text-gray-600 mt-1">+62 812-3456-7890</p>
+                        <button onclick="setupSMS()" class="text-blue-600 text-sm font-semibold hover:text-blue-800 mt-2">Setup SMS 2FA</button>
+                    </div>
+
+                    <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-4">
+                        <p class="font-bold text-yellow-900">🔑 Backup Codes</p>
+                        <p class="text-sm text-yellow-800 mt-1">Simpan kode backup untuk akses jika kehilangan authenticator</p>
+                        <button onclick="showBackupCodes()" class="text-yellow-700 text-sm font-semibold hover:text-yellow-900 mt-2">View Backup Codes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Activity Logs -->
+        <div id="tab-activity-content" style="display:none" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">Activity Logs (Audit Trail)</h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="border-b border-gray-200">
+                        <tr>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">Waktu</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">User</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">Action</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">Details</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-900">IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab 4: Encryption -->
+        <div id="tab-encryption-content" style="display:none" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">Data Encryption & Protection</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Encryption Standards</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-start gap-2">
+                            <span class="text-green-600 text-lg">✓</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">TLS 1.3</p>
+                                <p class="text-gray-600">Semua komunikasi terenkripsi end-to-end</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-green-600 text-lg">✓</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">AES-256 Encryption</p>
+                                <p class="text-gray-600">Password dan sensitive data dienkripsi</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-green-600 text-lg">✓</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Database Encryption</p>
+                                <p class="text-gray-600">Database at-rest terenkripsi</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-green-600 text-lg">✓</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">PCI DSS Compliant</p>
+                                <p class="text-gray-600">Memenuhi standar keamanan pembayaran</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Certificates & Status</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="border-b border-gray-200 pb-3">
+                            <p class="font-semibold text-gray-900">SSL Certificate</p>
+                            <p class="text-gray-600">lunomi.vercel.app</p>
+                            <p class="text-xs text-green-700 mt-1">✓ Valid until 2027-05-01</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Security Audit</p>
+                            <p class="text-gray-600">Last audit: 2026-04-15</p>
+                            <p class="text-xs text-green-700 mt-1">✓ No issues found</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Access Control -->
+        <div id="tab-access-content" style="display:none" class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900">Access Control & Permissions</h2>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="font-bold text-gray-900 mb-4">Role-Based Access Control (RBAC)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="border-b border-gray-200">
+                            <tr>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Role</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Dashboard</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">POS</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Finance</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Reports</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900">Settings</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rbacTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Trusted Devices -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="font-bold text-gray-900 mb-4">Trusted Devices</h3>
+                <div class="space-y-3" id="trustedDevices"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ACTIVITIES = [
+            {t:'2026-05-01 14:30',u:'owner@lunomi.local',a:'Login',d:'Successful login',ip:'122.144.85.10'},
+            {t:'2026-05-01 14:25',u:'manager@lunomi.local',a:'Create Invoice',d:'Invoice INV-001 created',ip:'192.168.1.100'},
+            {t:'2026-05-01 14:15',u:'owner@lunomi.local',a:'Export Report',d:'Financial report exported',ip:'122.144.85.10'},
+            {t:'2026-05-01 13:45',u:'kasir@lunomi.local',a:'Process Payment',d:'Payment Rp 250K received',ip:'192.168.1.50'},
+            {t:'2026-05-01 13:20',u:'owner@lunomi.local',a:'Change Setting',d:'Tax setting updated',ip:'122.144.85.10'}
+        ];
+
+        const RBAC_DATA = [
+            {r:'Super Admin (Owner)',d:'✓',p:'✓',f:'✓',rp:'✓',s:'✓'},
+            {r:'Manager',d:'✓',p:'✓',f:'Limited',rp:'Limited',s:'Limited'},
+            {r:'Kasir',d:'✗',p:'✓',f:'✗',rp:'✗',s:'✗'},
+            {r:'Kitchen',d:'✗',p:'Limited',f:'✗',rp:'✗',s:'✗'}
+        ];
+
+        const TRUSTED_DEVICES = [
+            {n:'MacBook Pro (Owner)',l:'Jakarta',ip:'122.144.85.10',last:'2026-05-01 14:30',st:'trusted'},
+            {n:'iPhone 14',l:'Jakarta',ip:'122.144.90.20',last:'2026-04-30 19:45',st:'trusted'},
+            {n:'iPad (Office)',l:'Jakarta',ip:'192.168.1.100',last:'2026-04-28 09:30',st:'trusted'}
+        ];
+
+        function checkPasswordStrength() {
+            const pass = document.getElementById('newPass').value;
+            let strength = 0;
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+
+            if (pass.length >= 12) strength += 25;
+            if (/[A-Z]/.test(pass)) strength += 25;
+            if (/[0-9]/.test(pass)) strength += 25;
+            if (/[!@#$%^&*]/.test(pass)) strength += 25;
+
+            strengthBar.style.width = strength + '%';
+            let color = strength < 50 ? 'bg-red-500' : strength < 75 ? 'bg-yellow-500' : 'bg-green-500';
+            let text = strength < 50 ? 'Weak' : strength < 75 ? 'Medium' : 'Strong';
+
+            strengthBar.className = 'h-full ' + color + ' transition-all';
+            strengthText.textContent = text;
+        }
+
+        function renderActivity() {
+            const html = document.getElementById('activityTable');
+            html.innerHTML = ACTIVITIES.map(a =>
+                '<tr class="border-b border-gray-200">' +
+                '<td class="py-3 px-4">' + a.t + '</td>' +
+                '<td class="py-3 px-4">' + a.u + '</td>' +
+                '<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-700">' + a.a + '</span></td>' +
+                '<td class="py-3 px-4 text-gray-600">' + a.d + '</td>' +
+                '<td class="py-3 px-4 font-mono text-xs">' + a.ip + '</td>' +
+                '</tr>'
+            ).join('');
+        }
+
+        function renderRBAC() {
+            const html = document.getElementById('rbacTable');
+            html.innerHTML = RBAC_DATA.map(r =>
+                '<tr class="border-b border-gray-200">' +
+                '<td class="py-3 px-4 font-semibold">' + r.r + '</td>' +
+                '<td class="py-3 px-4">' + r.d + '</td>' +
+                '<td class="py-3 px-4">' + r.p + '</td>' +
+                '<td class="py-3 px-4">' + r.f + '</td>' +
+                '<td class="py-3 px-4">' + r.rp + '</td>' +
+                '<td class="py-3 px-4">' + r.s + '</td>' +
+                '</tr>'
+            ).join('');
+        }
+
+        function renderTrustedDevices() {
+            const html = document.getElementById('trustedDevices');
+            html.innerHTML = TRUSTED_DEVICES.map(d =>
+                '<div class="border border-gray-200 rounded-lg p-4">' +
+                '<div class="flex justify-between items-start mb-2">' +
+                '<div><p class="font-semibold text-gray-900">' + d.n + '</p>' +
+                '<p class="text-sm text-gray-600">' + d.l + ' | ' + d.ip + '</p></div>' +
+                '<span class="security-level bg-green-100 text-green-700">Trusted</span></div>' +
+                '<p class="text-xs text-gray-600">Last accessed: ' + d.last + '</p>' +
+                '<button class="text-red-600 text-xs font-semibold hover:text-red-800 mt-2">Revoke Access</button>' +
+                '</div>'
+            ).join('');
+        }
+
+        function switchTab(tab) {
+            const tabs = ['password', '2fa', 'activity', 'encryption', 'access'];
+            tabs.forEach(t => {
+                document.getElementById('tab-' + t + '-content').style.display = t === tab ? 'block' : 'none';
+            });
+
+            document.querySelectorAll('.tab-btn').forEach((b, i) => {
+                if (tabs[i] === tab) {
+                    b.classList.add('border-blue-600', 'text-blue-600');
+                    b.classList.remove('border-transparent', 'text-gray-600');
+                } else {
+                    b.classList.remove('border-blue-600', 'text-blue-600');
+                    b.classList.add('border-transparent', 'text-gray-600');
+                }
+            });
+
+            if (tab === 'activity') renderActivity();
+            else if (tab === 'access') { renderRBAC(); renderTrustedDevices(); }
+        }
+
+        function changePassword() { alert('✓ Password berhasil diubah'); }
+        function setupSMS() { alert('📱 SMS 2FA setup - verify nomor Anda'); }
+        function showBackupCodes() { alert('🔑 Backup codes:\n1A2B3C4D5E6F\n7G8H9I0J1K2L\n3M4N5O6P7Q8R'); }
+
+        function logout() {
+            localStorage.removeItem('lunomi_session');
+            window.location.href = 'index.html';
+        }
+
+        function checkSession() {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+        });
+    </script>
+</body>
+</html>
