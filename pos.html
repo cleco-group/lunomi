@@ -396,11 +396,12 @@
             const v=parseFloat(document.getElementById('diskonValue').value)||0;
             const err=document.getElementById('diskonError');
             const sub=cart.reduce((s,i)=>s+(i.p*i.q),0);
+            const gross=sub+Math.round(sub*0.1);
             err.classList.add('hidden');
             if(v<=0){err.textContent='Masukkan jumlah diskon yang valid.';err.classList.remove('hidden');return;}
             if(type==='percent'&&v>100){err.textContent='Persentase tidak boleh lebih dari 100%.';err.classList.remove('hidden');return;}
-            if(type==='nominal'&&v>=sub){err.textContent='Diskon tidak boleh melebihi subtotal.';err.classList.remove('hidden');return;}
-            disco=type==='percent'?Math.round(sub*v/100):Math.round(v);
+            if(type==='nominal'&&v>=gross){err.textContent='Diskon tidak boleh melebihi total tagihan.';err.classList.remove('hidden');return;}
+            disco=type==='percent'?Math.round(gross*v/100):Math.round(v);
             calc();closeDiskon();
             showToast(`Diskon ${type==='percent'?v+'%':rp(disco)} diterapkan`,'success');
         }
@@ -462,7 +463,7 @@
                     </div></div>`).join('');
         }
 
-        function logout(){if(!confirm('Yakin ingin logout?'))return;localStorage.removeItem('lunomi_session');window.location.href='index.html';}
+        function logout(){if(!confirm('Yakin ingin logout?'))return;localStorage.removeItem('lunomi_session');localStorage.removeItem('lunomi_outlet');window.location.href='index.html';}
 
         document.addEventListener('DOMContentLoaded',()=>{
             try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}document.getElementById('kasirName').textContent=JSON.parse(s).user.name;}

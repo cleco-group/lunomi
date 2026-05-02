@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Registrasi Outlet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 80% 60% at 20% 0%,rgba(99,102,241,.35) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 100%,rgba(59,130,246,.3) 0%,transparent 60%);overflow-x:hidden;}
+        .glass{background:rgba(255,255,255,.07);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:white;transition:all .2s;}
+        .input-glass::placeholder{color:rgba(255,255,255,.35);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.7);background:rgba(255,255,255,.1);box-shadow:0 0 0 3px rgba(99,102,241,.2);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(99,102,241,.4);}
+        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(99,102,241,.5);}
+        .btn-primary:disabled{opacity:.55;transform:none;cursor:not-allowed;}
+        .outlet-card{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);cursor:pointer;transition:all .2s;}
+        .outlet-card:hover{background:rgba(255,255,255,.1);}
+        .outlet-card.selected{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.7);box-shadow:0 0 16px rgba(99,102,241,.25);}
+        .step-dot{width:2rem;height:2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;transition:all .3s;}
+        .step-done{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;}
+        .step-active{background:rgba(99,102,241,.3);border:2px solid #6366f1;color:#a5b4fc;}
+        .step-pending{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);color:rgba(255,255,255,.35);}
+        .error-msg{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+        .success-glass{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac;}
+        .pw-strength{height:4px;border-radius:2px;transition:all .3s;}
+        label{display:block;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+    </style>
+</head>
+<body class="relative">
+<div class="min-h-screen flex items-center justify-center p-4 relative z-10">
+    <div class="w-full max-w-lg">
+        <!-- Logo -->
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl glass mb-3 shadow-lg"><span class="text-2xl">🏪</span></div>
+            <h1 class="text-2xl font-extrabold text-white">Daftar Outlet Baru</h1>
+            <p class="text-sm mt-1" style="color:rgba(255,255,255,.45)">Bergabung dengan ekosistem Lunomi POS</p>
+        </div>
+
+        <!-- Stepper -->
+        <div class="flex items-center justify-center gap-0 mb-6">
+            <div class="flex flex-col items-center gap-1">
+                <div id="dot1" class="step-dot step-active">1</div>
+                <span class="text-xs" style="color:rgba(255,255,255,.45)">Outlet</span>
+            </div>
+            <div id="line1" class="h-0.5 w-16 mx-1 mb-4 transition-all" style="background:rgba(255,255,255,.15)"></div>
+            <div class="flex flex-col items-center gap-1">
+                <div id="dot2" class="step-dot step-pending">2</div>
+                <span class="text-xs" style="color:rgba(255,255,255,.45)">Data Admin</span>
+            </div>
+            <div id="line2" class="h-0.5 w-16 mx-1 mb-4 transition-all" style="background:rgba(255,255,255,.15)"></div>
+            <div class="flex flex-col items-center gap-1">
+                <div id="dot3" class="step-dot step-pending">3</div>
+                <span class="text-xs" style="color:rgba(255,255,255,.45)">Review</span>
+            </div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div id="step1" class="glass rounded-3xl p-7 shadow-2xl">
+            <h2 class="font-bold text-white mb-1">Pilih Outlet</h2>
+            <p class="text-xs mb-5" style="color:rgba(255,255,255,.4)">Pilih outlet tempat kamu akan menjadi admin</p>
+            <div class="space-y-3" id="outletOptions">
+                <div class="outlet-card rounded-2xl p-4 flex items-center gap-3" data-id="outlet_cleco_pii" data-name="Cleco Pii" onclick="selectOutlet(this)">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:rgba(99,102,241,.2)">🏪</div>
+                    <div class="flex-1"><div class="font-semibold text-white text-sm">Cleco Pii</div><div class="text-xs mt-0.5" style="color:rgba(255,255,255,.4)">Jl. Sudirman No. 12</div></div>
+                    <div id="chk_outlet_cleco_pii" class="text-indigo-400 hidden text-lg">✓</div>
+                </div>
+                <div class="outlet-card rounded-2xl p-4 flex items-center gap-3" data-id="outlet_resep_bunce" data-name="Resep Bunce" onclick="selectOutlet(this)">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:rgba(245,158,11,.2)">🍳</div>
+                    <div class="flex-1"><div class="font-semibold text-white text-sm">Resep Bunce</div><div class="text-xs mt-0.5" style="color:rgba(255,255,255,.4)">Jl. Gatot Subroto No. 5</div></div>
+                    <div id="chk_outlet_resep_bunce" class="text-indigo-400 hidden text-lg">✓</div>
+                </div>
+                <div class="outlet-card rounded-2xl p-4 flex items-center gap-3" data-id="outlet_baby_joy" data-name="Baby Joy" onclick="selectOutlet(this)">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:rgba(236,72,153,.2)">🍼</div>
+                    <div class="flex-1"><div class="font-semibold text-white text-sm">Baby Joy</div><div class="text-xs mt-0.5" style="color:rgba(255,255,255,.4)">Jl. Thamrin No. 8</div></div>
+                    <div id="chk_outlet_baby_joy" class="text-indigo-400 hidden text-lg">✓</div>
+                </div>
+            </div>
+            <div id="err1" class="hidden mt-3 px-4 py-2 rounded-xl error-msg text-xs">Pilih outlet terlebih dahulu.</div>
+            <button onclick="goStep2()" class="btn-primary w-full py-3 rounded-xl text-sm mt-5">Lanjut →</button>
+            <p class="text-center mt-3 text-xs" style="color:rgba(255,255,255,.35)">Sudah punya akun? <a href="index.html" class="text-indigo-400 hover:underline">Masuk</a></p>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="step2" class="glass rounded-3xl p-7 shadow-2xl hidden">
+            <h2 class="font-bold text-white mb-1">Data Admin</h2>
+            <p class="text-xs mb-5" style="color:rgba(255,255,255,.4)">Buat akun admin untuk outlet <span id="selectedOutletName" class="text-indigo-400 font-semibold"></span></p>
+            <div id="err2" class="hidden mb-4 px-4 py-2 rounded-xl error-msg text-xs flex items-center gap-2"><span>⚠</span><span id="err2Text"></span></div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-semibold mb-1.5" style="color:rgba(255,255,255,.5)">Nama Lengkap</label>
+                    <input id="regName" type="text" placeholder="Nama lengkap admin" class="input-glass w-full px-4 py-3 rounded-xl text-sm" oninput="clearErr2()">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5" style="color:rgba(255,255,255,.5)">Email</label>
+                    <input id="regEmail" type="email" placeholder="admin@outlet.com" class="input-glass w-full px-4 py-3 rounded-xl text-sm" oninput="clearErr2()">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5" style="color:rgba(255,255,255,.5)">Nomor HP</label>
+                    <input id="regPhone" type="tel" placeholder="08xxxxxxxxxx" class="input-glass w-full px-4 py-3 rounded-xl text-sm" oninput="clearErr2()">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5" style="color:rgba(255,255,255,.5)">Password</label>
+                    <div class="relative">
+                        <input id="regPw" type="password" placeholder="Min. 8 karakter, huruf besar & angka" class="input-glass w-full px-4 py-3 pr-12 rounded-xl text-sm" oninput="checkPw()">
+                        <button type="button" onclick="togglePw('regPw','eyePw')" id="eyePw" class="absolute right-3 top-1/2 -translate-y-1/2 text-base opacity-50 hover:opacity-90 transition">👁️</button>
+                    </div>
+                    <div class="mt-2 flex gap-1">
+                        <div id="pw1" class="pw-strength flex-1" style="background:rgba(255,255,255,.1)"></div>
+                        <div id="pw2" class="pw-strength flex-1" style="background:rgba(255,255,255,.1)"></div>
+                        <div id="pw3" class="pw-strength flex-1" style="background:rgba(255,255,255,.1)"></div>
+                        <div id="pw4" class="pw-strength flex-1" style="background:rgba(255,255,255,.1)"></div>
+                    </div>
+                    <p id="pwHint" class="text-xs mt-1" style="color:rgba(255,255,255,.3)">Masukkan password</p>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5" style="color:rgba(255,255,255,.5)">Konfirmasi Password</label>
+                    <div class="relative">
+                        <input id="regPw2" type="password" placeholder="Ulangi password" class="input-glass w-full px-4 py-3 pr-12 rounded-xl text-sm" oninput="clearErr2()">
+                        <button type="button" onclick="togglePw('regPw2','eyePw2')" id="eyePw2" class="absolute right-3 top-1/2 -translate-y-1/2 text-base opacity-50 hover:opacity-90 transition">👁️</button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button onclick="goStep1()" class="flex-1 py-3 rounded-xl text-sm font-semibold transition" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">← Kembali</button>
+                <button onclick="goStep3()" class="btn-primary flex-1 py-3 rounded-xl text-sm">Review →</button>
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div id="step3" class="glass rounded-3xl p-7 shadow-2xl hidden">
+            <h2 class="font-bold text-white mb-1">Review & Konfirmasi</h2>
+            <p class="text-xs mb-5" style="color:rgba(255,255,255,.4)">Periksa data sebelum mendaftar</p>
+            <div class="space-y-3 mb-5">
+                <div class="glass-card rounded-xl p-4">
+                    <p class="text-xs font-semibold mb-2 uppercase tracking-widest" style="color:rgba(255,255,255,.35)">Outlet</p>
+                    <p id="rev_outlet" class="text-white font-semibold text-sm"></p>
+                </div>
+                <div class="glass-card rounded-xl p-4 space-y-2">
+                    <p class="text-xs font-semibold mb-2 uppercase tracking-widest" style="color:rgba(255,255,255,.35)">Data Admin</p>
+                    <div class="flex justify-between text-sm"><span style="color:rgba(255,255,255,.5)">Nama</span><span id="rev_name" class="text-white font-medium"></span></div>
+                    <div class="flex justify-between text-sm"><span style="color:rgba(255,255,255,.5)">Email</span><span id="rev_email" class="text-white font-medium"></span></div>
+                    <div class="flex justify-between text-sm"><span style="color:rgba(255,255,255,.5)">HP</span><span id="rev_phone" class="text-white font-medium"></span></div>
+                    <div class="flex justify-between text-sm"><span style="color:rgba(255,255,255,.5)">Password</span><span class="text-white font-medium">••••••••</span></div>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="goStep2back()" class="flex-1 py-3 rounded-xl text-sm font-semibold transition" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">← Edit</button>
+                <button id="submitBtn" onclick="submitReg()" class="btn-primary flex-1 py-3 rounded-xl text-sm">Daftar Sekarang</button>
+            </div>
+        </div>
+
+        <!-- SUCCESS MODAL -->
+        <div id="successModal" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4" style="background:rgba(0,0,0,.7);backdrop-filter:blur(6px)">
+            <div class="glass rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
+                <div class="text-5xl mb-4">🎉</div>
+                <h2 class="text-xl font-extrabold text-white mb-2">Pendaftaran Berhasil!</h2>
+                <p class="text-sm mb-1" style="color:rgba(255,255,255,.6)">Akun admin telah dibuat untuk</p>
+                <p id="suc_outlet" class="font-bold text-indigo-400 mb-4"></p>
+                <div class="success-glass rounded-xl p-3 text-xs mb-5 text-left space-y-1">
+                    <div id="suc_email" class="flex justify-between"><span style="color:rgba(255,255,255,.5)">Email</span><span class="font-semibold"></span></div>
+                    <div class="flex justify-between"><span style="color:rgba(255,255,255,.5)">Role</span><span class="font-semibold">Admin Outlet</span></div>
+                    <div class="flex justify-between"><span style="color:rgba(255,255,255,.5)">Status</span><span class="font-semibold text-green-400">Aktif</span></div>
+                </div>
+                <button onclick="window.location.href='index.html'" class="btn-primary w-full py-3 rounded-xl text-sm">Lanjut ke Login →</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let selectedOutlet = null;
+    const formData = {};
+
+    function selectOutlet(el){
+        document.querySelectorAll('.outlet-card').forEach(c=>{
+            c.classList.remove('selected');
+            c.querySelector('[id^="chk_"]').classList.add('hidden');
+        });
+        el.classList.add('selected');
+        el.querySelector('[id^="chk_"]').classList.remove('hidden');
+        selectedOutlet = {id: el.dataset.id, name: el.dataset.name};
+        document.getElementById('err1').classList.add('hidden');
+    }
+
+    function setStep(n){
+        [1,2,3].forEach(i=>{
+            document.getElementById('step'+i).classList.add('hidden');
+            const dot = document.getElementById('dot'+i);
+            if(i < n){ dot.className='step-dot step-done'; dot.textContent='✓'; }
+            else if(i === n){ dot.className='step-dot step-active'; dot.textContent=i; }
+            else{ dot.className='step-dot step-pending'; dot.textContent=i; }
+        });
+        [1,2].forEach(i=>{
+            const line = document.getElementById('line'+i);
+            line.style.background = i < n ? 'linear-gradient(90deg,#6366f1,#4f46e5)' : 'rgba(255,255,255,.15)';
+        });
+        document.getElementById('step'+n).classList.remove('hidden');
+    }
+
+    function goStep2(){
+        if(!selectedOutlet){ document.getElementById('err1').classList.remove('hidden'); return; }
+        formData.outlet = selectedOutlet;
+        document.getElementById('selectedOutletName').textContent = selectedOutlet.name;
+        setStep(2);
+    }
+    function goStep1(){ setStep(1); }
+
+    function checkPw(){
+        const pw = document.getElementById('regPw').value;
+        let score = 0;
+        if(pw.length >= 8) score++;
+        if(/[A-Z]/.test(pw)) score++;
+        if(/[0-9]/.test(pw)) score++;
+        if(/[^A-Za-z0-9]/.test(pw)) score++;
+        const colors = ['#ef4444','#f97316','#eab308','#22c55e'];
+        const hints = ['Terlalu pendek','Lemah','Cukup','Kuat 💪'];
+        [1,2,3,4].forEach(i=>{
+            const el = document.getElementById('pw'+i);
+            el.style.background = i<=score ? colors[score-1] : 'rgba(255,255,255,.1)';
+        });
+        document.getElementById('pwHint').textContent = score > 0 ? hints[score-1] : 'Masukkan password';
+        document.getElementById('pwHint').style.color = score > 0 ? colors[score-1] : 'rgba(255,255,255,.3)';
+    }
+
+    function togglePw(id, btnId){
+        const el = document.getElementById(id);
+        el.type = el.type==='password' ? 'text' : 'password';
+        document.getElementById(btnId).textContent = el.type==='password' ? '👁️' : '🙈';
+    }
+
+    function clearErr2(){ document.getElementById('err2').classList.add('hidden'); }
+    function showErr2(msg){ document.getElementById('err2Text').textContent=msg; document.getElementById('err2').classList.remove('hidden'); }
+
+    function goStep3(){
+        const name  = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const pw    = document.getElementById('regPw').value;
+        const pw2   = document.getElementById('regPw2').value;
+
+        if(!name){ showErr2('Nama lengkap harus diisi.'); return; }
+        if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showErr2('Format email tidak valid.'); return; }
+        if(!phone || !/^08\d{8,11}$/.test(phone)){ showErr2('Format HP tidak valid. Contoh: 0812xxxxxxxx'); return; }
+        if(pw.length < 8){ showErr2('Password minimal 8 karakter.'); return; }
+        if(!/[A-Z]/.test(pw)){ showErr2('Password harus mengandung huruf kapital.'); return; }
+        if(!/[0-9]/.test(pw)){ showErr2('Password harus mengandung angka.'); return; }
+        if(pw !== pw2){ showErr2('Konfirmasi password tidak cocok.'); return; }
+
+        formData.name=name; formData.email=email; formData.phone=phone; formData.pw=pw;
+        document.getElementById('rev_outlet').textContent = formData.outlet.name;
+        document.getElementById('rev_name').textContent  = name;
+        document.getElementById('rev_email').textContent = email;
+        document.getElementById('rev_phone').textContent = phone;
+        setStep(3);
+    }
+    function goStep2back(){ setStep(2); }
+
+    function submitReg(){
+        const btn = document.getElementById('submitBtn');
+        btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Mendaftar...';
+        setTimeout(()=>{
+            const regs = JSON.parse(localStorage.getItem('lunomi_registrations')||'[]');
+            regs.push({
+                outlet: formData.outlet, name: formData.name,
+                email: formData.email, phone: formData.phone,
+                role: 'admin', status: 'active',
+                createdAt: new Date().toISOString()
+            });
+            localStorage.setItem('lunomi_registrations', JSON.stringify(regs));
+            document.getElementById('suc_outlet').textContent = formData.outlet.name;
+            const emailCells = document.getElementById('suc_email').querySelectorAll('span');
+            if(emailCells[1]) emailCells[1].textContent = formData.email;
+            document.getElementById('successModal').classList.remove('hidden');
+        }, 1200);
+    }
+</script>
+</body>
+</html>
