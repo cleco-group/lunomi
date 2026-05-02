@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Master Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .prod-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:1rem;transition:all .2s;cursor:pointer;}
+        .prod-card:hover{background:rgba(255,255,255,.08);border-color:rgba(99,102,241,.3);}
+        .cat-btn{padding:.4rem .9rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);transition:all .2s;background:transparent;}
+        .cat-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.6);color:white;}
+        .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(4px);}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+        .toggle{width:2.5rem;height:1.25rem;border-radius:999px;position:relative;cursor:pointer;transition:background .2s;}
+        .toggle.on{background:#6366f1;} .toggle.off{background:rgba(255,255,255,.15);}
+        .toggle::after{content:'';position:absolute;width:.9rem;height:.9rem;border-radius:50%;background:white;top:50%;transform:translateY(-50%);transition:left .2s;}
+        .toggle.on::after{left:calc(100% - .95rem);} .toggle.off::after{left:.15rem;}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>🍽️</span></div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Master Menu</div>
+                <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
+            </div>
+        </div>
+        <button onclick="openAddModal()" class="btn-primary px-4 py-2 rounded-xl text-xs">+ Tambah Menu</button>
+    </div>
+</nav>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex flex-wrap gap-3 items-center mb-5">
+        <input id="searchInput" type="text" placeholder="🔍  Cari menu..." class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[180px]" oninput="renderGrid()">
+        <div class="flex gap-2 flex-wrap" id="catFilters"></div>
+    </div>
+    <div id="prodGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    <div id="emptyState" class="hidden py-16 text-center text-sm" style="color:rgba(255,255,255,.3)">Tidak ada menu ditemukan.</div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="prodModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl">
+        <div class="flex items-center justify-between mb-5">
+            <h2 id="modalTitle" class="font-bold text-white">Tambah Menu Baru</h2>
+            <button onclick="closeModal()" style="color:rgba(255,255,255,.4)" class="hover:text-white text-xl">×</button>
+        </div>
+        <div class="space-y-4">
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Nama Menu</label>
+                <input id="pName" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="cth: Nasi Goreng Special"></div>
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Kategori</label>
+                <select id="pCat" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm">
+                    <option>Makanan</option><option>Minuman</option><option>Snack</option><option>Dessert</option>
+                </select></div>
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Harga (Rp)</label>
+                <input id="pPrice" type="number" min="0" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="0"></div>
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Emoji / Icon</label>
+                <input id="pEmoji" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="🍛"></div>
+            <div class="flex items-center justify-between">
+                <label class="text-xs font-semibold" style="color:rgba(255,255,255,.5)">Tersedia</label>
+                <div id="availToggle" class="toggle on" onclick="toggleAvail()"></div>
+            </div>
+        </div>
+        <div id="pErr" class="hidden mt-3 px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;"></div>
+        <div class="flex gap-3 mt-5">
+            <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="saveProduct()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan</button>
+        </div>
+    </div>
+</div>
+<div id="toast" class="toast toast-success"></div>
+<script>
+    let products = [
+        {id:1,  name:'Nasi Goreng',       cat:'Makanan',  price:22000, emoji:'🍳', avail:true},
+        {id:2,  name:'Mie Ayam',          cat:'Makanan',  price:18000, emoji:'🍜', avail:true},
+        {id:3,  name:'Soto Ayam',         cat:'Makanan',  price:20000, emoji:'🥘', avail:true},
+        {id:4,  name:'Ayam Bakar',        cat:'Makanan',  price:28000, emoji:'🍗', avail:true},
+        {id:5,  name:'Es Teh Manis',      cat:'Minuman',  price:8000,  emoji:'🧊', avail:true},
+        {id:6,  name:'Es Jeruk',          cat:'Minuman',  price:10000, emoji:'🍊', avail:true},
+        {id:7,  name:'Jus Alpukat',       cat:'Minuman',  price:15000, emoji:'🥑', avail:true},
+        {id:8,  name:'Kentang Goreng',    cat:'Snack',    price:12000, emoji:'🍟', avail:true},
+        {id:9,  name:'Pisang Goreng',     cat:'Snack',    price:10000, emoji:'🍌', avail:false},
+        {id:10, name:'Es Krim Vanilla',   cat:'Dessert',  price:14000, emoji:'🍦', avail:true},
+    ];
+    const CATS = ['Semua','Makanan','Minuman','Snack','Dessert'];
+    let activeCat = 'Semua', editingId = null, isAvail = true;
+
+    function rp(n){return'Rp '+n.toLocaleString('id-ID');}
+
+    function initFilters(){
+        document.getElementById('catFilters').innerHTML = CATS.map(c=>`
+            <button class="cat-btn${c==='Semua'?' active':''}" onclick="setCat('${c}',this)">${c}</button>`).join('');
+    }
+    function setCat(c, btn){
+        activeCat = c;
+        document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        renderGrid();
+    }
+    function renderGrid(){
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = products.filter(p=>(activeCat==='Semua'||p.cat===activeCat)&&(!q||p.name.toLowerCase().includes(q)));
+        const grid = document.getElementById('prodGrid');
+        const empty = document.getElementById('emptyState');
+        if(!filtered.length){grid.innerHTML='';empty.classList.remove('hidden');return;}
+        empty.classList.add('hidden');
+        grid.innerHTML = filtered.map(p=>`
+            <div class="prod-card p-4" onclick="editProduct(${p.id})">
+                <div class="text-3xl mb-3">${p.emoji||'🍽️'}</div>
+                <div class="font-bold text-white text-sm mb-1">${p.name}</div>
+                <div class="text-xs mb-2" style="color:rgba(255,255,255,.4)">${p.cat}</div>
+                <div class="flex items-center justify-between">
+                    <span class="font-extrabold text-indigo-400 text-sm">${rp(p.price)}</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full font-bold ${p.avail?'text-green-400':'text-red-400'}" style="background:${p.avail?'rgba(34,197,94,.1)':'rgba(239,68,68,.1)'}">${p.avail?'Tersedia':'Habis'}</span>
+                </div>
+            </div>`).join('');
+    }
+
+    function toggleAvail(){ isAvail=!isAvail; const el=document.getElementById('availToggle'); el.className=`toggle ${isAvail?'on':'off'}`; }
+
+    function openAddModal(){
+        editingId=null; isAvail=true;
+        document.getElementById('modalTitle').textContent='Tambah Menu Baru';
+        ['pName','pPrice','pEmoji'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('pCat').value='Makanan';
+        document.getElementById('availToggle').className='toggle on';
+        document.getElementById('pErr').classList.add('hidden');
+        document.getElementById('prodModal').classList.remove('hidden');
+    }
+    function editProduct(id){
+        const p=products.find(x=>x.id===id); editingId=id; isAvail=p.avail;
+        document.getElementById('modalTitle').textContent='Edit Menu';
+        document.getElementById('pName').value  = p.name;
+        document.getElementById('pCat').value   = p.cat;
+        document.getElementById('pPrice').value = p.price;
+        document.getElementById('pEmoji').value = p.emoji||'';
+        document.getElementById('availToggle').className=`toggle ${isAvail?'on':'off'}`;
+        document.getElementById('pErr').classList.add('hidden');
+        document.getElementById('prodModal').classList.remove('hidden');
+    }
+    function closeModal(){ document.getElementById('prodModal').classList.add('hidden'); }
+    function saveProduct(){
+        const name  = document.getElementById('pName').value.trim();
+        const price = parseInt(document.getElementById('pPrice').value)||0;
+        const err   = document.getElementById('pErr');
+        if(!name){err.textContent='Nama menu harus diisi.';err.classList.remove('hidden');return;}
+        if(price<1){err.textContent='Harga harus lebih dari 0.';err.classList.remove('hidden');return;}
+        const data = {name, cat:document.getElementById('pCat').value, price, emoji:document.getElementById('pEmoji').value||'🍽️', avail:isAvail};
+        if(editingId){ Object.assign(products.find(p=>p.id===editingId), data); showToast('Menu diupdate'); }
+        else { products.unshift({id:Date.now(),...data}); showToast('Menu ditambahkan'); }
+        closeModal(); renderGrid();
+    }
+    function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        if(outlet)document.getElementById('outletLabel').textContent=outlet.name;}
+        catch(e){window.location.href='index.html';}
+        initFilters(); renderGrid();
+    });
+</script>
+</body>
+</html>

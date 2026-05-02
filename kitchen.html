@@ -297,7 +297,7 @@
             document.getElementById('timeNow').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
         }
 
-        function logout(){if(!confirm('Yakin ingin logout dari KDS?'))return;localStorage.removeItem('lunomi_session');window.location.href='index.html';}
+        function logout(){if(!confirm('Yakin ingin logout dari KDS?'))return;localStorage.removeItem('lunomi_session');localStorage.removeItem('lunomi_outlet');window.location.href='index.html';}
 
         function checkSession(){
             try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return false;}JSON.parse(s);return true;}
