@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Invoice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .status-paid{background:rgba(34,197,94,.12);color:#4ade80;}
+        .status-pending{background:rgba(245,158,11,.12);color:#fbbf24;}
+        .status-sent{background:rgba(59,130,246,.12);color:#60a5fa;}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.06);}
+        .row-item:hover{background:rgba(255,255,255,.03);}
+        .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(4px);}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+        @media print{.no-print{display:none!important;}}
+    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40 no-print">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>🧧</span></div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Manajemen Invoice</div>
+                <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
+            </div>
+        </div>
+        <button onclick="openCreateModal()" class="btn-primary px-4 py-2 rounded-xl text-xs">+ Buat Invoice</button>
+    </div>
+</nav>
+<div class="max-w-6xl mx-auto px-4 py-6 no-print">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Invoice</div><div class="text-2xl font-extrabold text-white" id="statTotal">5</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(34,197,94,.7)">Lunas</div><div class="text-2xl font-extrabold text-green-400" id="statPaid">3</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(245,158,11,.7)">Menunggu</div><div class="text-2xl font-extrabold text-amber-400" id="statPending">1</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(59,130,246,.7)">Terkirim</div><div class="text-2xl font-extrabold text-blue-400" id="statSent">1</div></div>
+    </div>
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead><tr style="border-bottom:1px solid rgba(255,255,255,.1)">
+                    <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">No. Invoice</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Customer</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Tanggal</th>
+                    <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Total</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Status</th>
+                    <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Aksi</th>
+                </tr></thead>
+                <tbody id="invoiceBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="createModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-screen overflow-y-auto">
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="font-bold text-white">Buat Invoice Baru</h2>
+            <button onclick="closeCreate()" style="color:rgba(255,255,255,.4)" class="hover:text-white text-xl">×</button>
+        </div>
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">No. Invoice</label>
+                    <input id="invNo" type="text" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" readonly></div>
+                <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Tanggal</label>
+                    <input id="invDate" type="date" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm"></div>
+            </div>
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Customer / Perusahaan</label>
+                <input id="invCust" type="text" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="cth: PT Sejahtera"></div>
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-semibold" style="color:rgba(255,255,255,.5)">Item</label>
+                    <button onclick="addInvItem()" class="text-xs text-indigo-400 hover:underline">+ Tambah Item</button>
+                </div>
+                <div id="invItems" class="space-y-2"></div>
+            </div>
+            <div class="glass-card rounded-xl p-3 space-y-1.5 text-sm">
+                <div class="flex justify-between"><span style="color:rgba(255,255,255,.5)">Subtotal</span><span id="invSub" class="font-semibold text-white">Rp 0</span></div>
+                <div class="flex justify-between"><span style="color:rgba(255,255,255,.5)">PPN 10%</span><span id="invPpn" class="font-semibold text-white">Rp 0</span></div>
+                <div class="flex justify-between pt-1" style="border-top:1px solid rgba(255,255,255,.1)"><span class="font-bold text-white">Total</span><span id="invTotal" class="font-extrabold text-white">Rp 0</span></div>
+            </div>
+        </div>
+        <div id="invErr" class="hidden mt-3 px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;"></div>
+        <div class="flex gap-3 mt-5">
+            <button onclick="closeCreate()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="saveInvoice()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan Invoice</button>
+        </div>
+    </div>
+</div>
+
+<div id="previewModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-lg shadow-2xl">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-white">Preview Invoice</h2>
+            <button onclick="closePreview()" style="color:rgba(255,255,255,.4)" class="hover:text-white text-xl">×</button>
+        </div>
+        <div id="previewContent" class="space-y-3 text-sm"></div>
+        <div class="flex gap-2 mt-5 flex-wrap">
+            <button onclick="printInvoice()" class="btn-primary px-4 py-2.5 rounded-xl text-xs flex-1">🖨️ Print / PDF</button>
+            <button onclick="mockAction('Email')" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex-1" style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc">📧 Kirim Email</button>
+            <button onclick="mockAction('WhatsApp')" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex-1" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#4ade80">💬 WhatsApp</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast toast-success"></div>
+<script>
+    let invoices = [
+        {id:'INV-202605-001', cust:'PT Sejahtera',      date:'2026-05-01', sub:44000,  ppn:4400,  total:48400,  status:'paid'},
+        {id:'INV-202605-002', cust:'CV Maju Jaya',      date:'2026-05-01', sub:132000, ppn:13200, total:145200, status:'paid'},
+        {id:'INV-202604-018', cust:'Budi Santoso',      date:'2026-04-28', sub:88000,  ppn:8800,  total:96800,  status:'sent'},
+        {id:'INV-202604-017', cust:'PT Berkah Mandiri', date:'2026-04-25', sub:220000, ppn:22000, total:242000, status:'paid'},
+        {id:'INV-202604-016', cust:'Ahmad Fauzi',       date:'2026-04-20', sub:55000,  ppn:5500,  total:60500,  status:'pending'},
+    ];
+    let invItemsList = [];
+
+    function genInvNo(){
+        const d=new Date(); const m=String(d.getMonth()+1).padStart(2,'0');
+        return `INV-${d.getFullYear()}${m}-${String(invoices.length+1).padStart(3,'0')}`;
+    }
+    function rp(n){return'Rp '+n.toLocaleString('id-ID');}
+
+    function renderTable(){
+        document.getElementById('invoiceBody').innerHTML = invoices.map(inv=>`
+            <tr class="row-item">
+                <td class="px-5 py-3.5 font-mono text-xs font-bold text-white">${inv.id}</td>
+                <td class="px-4 py-3.5 font-semibold text-white text-sm">${inv.cust}</td>
+                <td class="px-4 py-3.5 text-sm" style="color:rgba(255,255,255,.5)">${inv.date}</td>
+                <td class="px-4 py-3.5 text-right font-bold text-white">${rp(inv.total)}</td>
+                <td class="px-4 py-3.5"><span class="px-2.5 py-1 rounded-full text-xs font-bold status-${inv.status}">${{paid:'✓ Lunas',pending:'⏱ Menunggu',sent:'📨 Terkirim'}[inv.status]}</span></td>
+                <td class="px-4 py-3.5 text-center flex gap-1 justify-center">
+                    <button onclick="previewInv('${inv.id}')" class="text-xs px-2.5 py-1.5 rounded-lg font-semibold" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)">Preview</button>
+                    ${inv.status!=='paid'?`<button onclick="markPaid('${inv.id}')" class="text-xs px-2.5 py-1.5 rounded-lg font-semibold" style="background:rgba(34,197,94,.1);color:#4ade80">Lunas</button>`:''}
+                </td>
+            </tr>`).join('');
+        updateStats();
+    }
+    function updateStats(){
+        document.getElementById('statTotal').textContent   = invoices.length;
+        document.getElementById('statPaid').textContent    = invoices.filter(i=>i.status==='paid').length;
+        document.getElementById('statPending').textContent = invoices.filter(i=>i.status==='pending').length;
+        document.getElementById('statSent').textContent    = invoices.filter(i=>i.status==='sent').length;
+    }
+
+    function addInvItem(){
+        const idx = invItemsList.length;
+        invItemsList.push({name:'',qty:1,price:0});
+        const el = document.createElement('div');
+        el.className='flex gap-2 items-center';
+        el.id='invItem_'+idx;
+        el.innerHTML=`
+            <input type="text" placeholder="Nama item" class="input-glass flex-1 px-3 py-2 rounded-lg text-xs" oninput="updateInvCalc()">
+            <input type="number" placeholder="Qty" min="1" value="1" class="input-glass w-14 px-2 py-2 rounded-lg text-xs text-center" oninput="updateInvCalc()" inputmode="numeric">
+            <input type="number" placeholder="Harga" min="0" class="input-glass w-28 px-3 py-2 rounded-lg text-xs" oninput="updateInvCalc()" inputmode="numeric">
+            <button onclick="removeInvItem(${idx})" class="text-red-400 hover:text-red-300 text-lg leading-none">×</button>`;
+        document.getElementById('invItems').appendChild(el);
+    }
+    function removeInvItem(idx){
+        const el=document.getElementById('invItem_'+idx); if(el) el.remove(); updateInvCalc();
+    }
+    function updateInvCalc(){
+        let sub=0;
+        document.querySelectorAll('#invItems > div').forEach(row=>{
+            const inputs=row.querySelectorAll('input');
+            const qty=parseInt(inputs[1].value)||1;
+            const price=parseInt(inputs[2].value)||0;
+            sub+=qty*price;
+        });
+        const ppn=Math.round(sub*0.1);
+        document.getElementById('invSub').textContent=rp(sub);
+        document.getElementById('invPpn').textContent=rp(ppn);
+        document.getElementById('invTotal').textContent=rp(sub+ppn);
+    }
+
+    function openCreateModal(){
+        invItemsList=[];
+        document.getElementById('invItems').innerHTML='';
+        document.getElementById('invNo').value=genInvNo();
+        document.getElementById('invDate').value=new Date().toISOString().slice(0,10);
+        document.getElementById('invCust').value='';
+        document.getElementById('invErr').classList.add('hidden');
+        ['invSub','invPpn','invTotal'].forEach(id=>document.getElementById(id).textContent='Rp 0');
+        addInvItem();
+        document.getElementById('createModal').classList.remove('hidden');
+    }
+    function closeCreate(){ document.getElementById('createModal').classList.add('hidden'); }
+
+    function saveInvoice(){
+        const cust=document.getElementById('invCust').value.trim();
+        const err=document.getElementById('invErr');
+        if(!cust){err.textContent='Nama customer harus diisi.';err.classList.remove('hidden');return;}
+        const subText=document.getElementById('invSub').textContent;
+        const sub=parseInt(subText.replace(/[^\d]/g,''))||0;
+        if(sub===0){err.textContent='Tambahkan minimal 1 item dengan harga.';err.classList.remove('hidden');return;}
+        const ppn=Math.round(sub*0.1);
+        invoices.unshift({
+            id:document.getElementById('invNo').value,
+            cust, date:document.getElementById('invDate').value,
+            sub, ppn, total:sub+ppn, status:'pending'
+        });
+        closeCreate(); renderTable(); showToast('Invoice berhasil dibuat');
+    }
+
+    function previewInv(id){
+        const inv=invoices.find(x=>x.id===id);
+        document.getElementById('previewContent').innerHTML=`
+            <div class="glass-card rounded-xl p-4">
+                <div class="flex justify-between mb-4">
+                    <div><div class="font-extrabold text-white text-lg">INVOICE</div><div class="text-xs mt-0.5" style="color:rgba(255,255,255,.4)">${inv.id}</div></div>
+                    <div class="text-right"><div class="font-bold text-white">Lunomi POS</div><div class="text-xs" style="color:rgba(255,255,255,.4)">${inv.date}</div></div>
+                </div>
+                <div class="mb-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Kepada:</div><div class="font-bold text-white">${inv.cust}</div></div>
+                <div class="space-y-1.5 pt-3 border-t" style="border-color:rgba(255,255,255,.1)">
+                    <div class="flex justify-between text-sm"><span style="color:rgba(255,255,255,.5)">Subtotal</span><span class="text-white">${rp(inv.sub)}</span></div>
+                    <div class="flex justify-between text-sm"><span style="color:rgba(255,255,255,.5)">PPN 10%</span><span class="text-white">${rp(inv.ppn)}</span></div>
+                    <div class="flex justify-between font-bold pt-1 border-t" style="border-color:rgba(255,255,255,.1)"><span class="text-white">TOTAL</span><span class="text-indigo-400 text-base">${rp(inv.total)}</span></div>
+                </div>
+            </div>`;
+        document.getElementById('previewModal').classList.remove('hidden');
+    }
+    function closePreview(){ document.getElementById('previewModal').classList.add('hidden'); }
+    function printInvoice(){ window.print(); }
+    function mockAction(type){ showToast(`${type} dikirim (simulasi)`); }
+    function markPaid(id){
+        invoices.find(x=>x.id===id).status='paid';
+        renderTable(); showToast('Invoice ditandai lunas');
+    }
+    function showToast(msg){
+        const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'),2500);
+    }
+    document.addEventListener('DOMContentLoaded',()=>{
+        try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        if(outlet)document.getElementById('outletLabel').textContent=outlet.name;}
+        catch(e){window.location.href='index.html';}
+        renderTable();
+    });
+</script>
+</body>
+</html>
