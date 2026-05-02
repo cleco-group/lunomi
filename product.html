@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
-        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}
         .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
         .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
         .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
@@ -28,6 +28,7 @@
         .toggle.on{background:#6366f1;} .toggle.off{background:rgba(255,255,255,.15);}
         .toggle::after{content:'';position:absolute;width:.9rem;height:.9rem;border-radius:50%;background:white;top:50%;transform:translateY(-50%);transition:left .2s;}
         .toggle.on::after{left:calc(100% - .95rem);} .toggle.off::after{left:.15rem;}
+    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
@@ -68,7 +69,7 @@
                     <option>Makanan</option><option>Minuman</option><option>Snack</option><option>Dessert</option>
                 </select></div>
             <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Harga (Rp)</label>
-                <input id="pPrice" type="number" min="0" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="0"></div>
+                <input id="pPrice" type="number" min="0" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="0" inputmode="numeric"></div>
             <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Emoji / Icon</label>
                 <input id="pEmoji" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="🍛"></div>
             <div class="flex items-center justify-between">

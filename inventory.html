@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
-        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
         .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
         .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
         .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
@@ -25,6 +25,7 @@
         .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;}
         .toast.show{transform:translateY(0);opacity:1;}
         .toast-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
@@ -105,9 +106,9 @@
                 </select></div>
             <div class="grid grid-cols-2 gap-3">
                 <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Stok Saat Ini</label>
-                    <input id="mStock" type="number" min="0" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="0"></div>
+                    <input id="mStock" type="number" min="0" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="0" inputmode="numeric"></div>
                 <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Stok Maksimal</label>
-                    <input id="mMax" type="number" min="1" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="100"></div>
+                    <input id="mMax" type="number" min="1" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="100" inputmode="numeric"></div>
             </div>
             <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Satuan</label>
                 <input id="mUnit" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="cth: kg, liter, porsi"></div>
