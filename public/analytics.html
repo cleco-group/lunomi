@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);}
+        .metric-card{position:relative;overflow:hidden;}
+        .metric-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+        .mc-blue::before{background:#3b82f6;} .mc-green::before{background:#22c55e;}
+        .mc-amber::before{background:#f59e0b;} .mc-purple::before{background:#a78bfa;}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.06);}
+        .row-item:hover{background:rgba(255,255,255,.03);}
+        .period-btn{padding:.4rem .9rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);transition:all .2s;background:transparent;}
+        .period-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.6);color:white;}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>📈</span></div>
+            <div><div class="font-extrabold text-white text-sm">Analytics</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+        </div>
+        <div class="flex gap-1">
+            <button class="period-btn active" onclick="setPeriod('7d',this)">7H</button>
+            <button class="period-btn" onclick="setPeriod('30d',this)">30H</button>
+            <button class="period-btn" onclick="setPeriod('90d',this)">3B</button>
+            <button class="period-btn" onclick="setPeriod('1y',this)">1T</button>
+        </div>
+    </div>
+</nav>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card metric-card mc-blue rounded-2xl p-4 pl-5"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Pendapatan</div><div id="kpi_rev" class="text-xl font-extrabold text-white">Rp 52.3 jt</div><div class="text-xs mt-1 text-blue-400" id="kpi_rev_d">↑ 12%</div></div>
+        <div class="glass-card metric-card mc-green rounded-2xl p-4 pl-5"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Transaksi</div><div id="kpi_trx" class="text-xl font-extrabold text-white">1.285</div><div class="text-xs mt-1 text-green-400" id="kpi_trx_d">↑ 8%</div></div>
+        <div class="glass-card metric-card mc-amber rounded-2xl p-4 pl-5"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Rata-rata Order</div><div id="kpi_aov" class="text-xl font-extrabold text-white">Rp 40.7K</div><div class="text-xs mt-1 text-amber-400" id="kpi_aov_d">↑ 3%</div></div>
+        <div class="glass-card metric-card mc-purple rounded-2xl p-4 pl-5"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Customer Aktif</div><div id="kpi_cust" class="text-xl font-extrabold text-white">485</div><div class="text-xs mt-1 text-purple-400" id="kpi_cust_d">↑ 22 baru</div></div>
+    </div>
+    <div class="grid lg:grid-cols-3 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-5 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-sm text-white">📊 Tren Pendapatan</h3><span class="text-xs" style="color:rgba(255,255,255,.35)" id="chartPeriodLabel">7 Hari Terakhir</span></div>
+            <canvas id="revenueChart" height="120"></canvas>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+            <h3 class="font-bold text-sm text-white mb-4">💳 Metode Pembayaran</h3>
+            <canvas id="payChart" height="160"></canvas>
+            <div class="mt-3 space-y-1.5" id="payLegend"></div>
+        </div>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-4">
+        <div class="glass-card rounded-2xl p-5"><h3 class="font-bold text-sm text-white mb-4">🏆 Top 10 Produk</h3><div class="space-y-2.5" id="topProducts"></div></div>
+        <div class="glass-card rounded-2xl p-5">
+            <h3 class="font-bold text-sm text-white mb-4">🏪 Penjualan per Outlet</h3>
+            <table class="w-full text-sm"><thead><tr style="border-bottom:1px solid rgba(255,255,255,.08)"><th class="text-left pb-2 text-xs" style="color:rgba(255,255,255,.4)">Outlet</th><th class="text-right pb-2 text-xs" style="color:rgba(255,255,255,.4)">Pendapatan</th><th class="text-right pb-2 text-xs" style="color:rgba(255,255,255,.4)">Trx</th></tr></thead><tbody id="outletTable"></tbody></table>
+        </div>
+    </div>
+</div>
+<script>
+    const PERIOD_DATA = {
+        '7d': {label:'7 Hari Terakhir',rev:'Rp 12.4 jt',trx:'284',aov:'Rp 43.7K',cust:'98',revDelta:'↑ 15%',trxDelta:'↑ 11%',aovDelta:'↑ 4%',custDelta:'↑ 8 baru',labels:['Sen','Sel','Rab','Kam','Jum','Sab','Min'],data:[1.8,2.1,1.6,1.9,2.4,2.8,1.5]},
+        '30d':{label:'30 Hari Terakhir',rev:'Rp 52.3 jt',trx:'1.285',aov:'Rp 40.7K',cust:'485',revDelta:'↑ 12%',trxDelta:'↑ 8%',aovDelta:'↑ 3%',custDelta:'↑ 22 baru',labels:['Mg1','Mg2','Mg3','Mg4'],data:[12.1,14.8,11.9,13.5]},
+        '90d':{label:'3 Bulan Terakhir',rev:'Rp 148.7 jt',trx:'3.820',aov:'Rp 38.9K',cust:'485',revDelta:'↑ 9%',trxDelta:'↑ 6%',aovDelta:'↑ 2%',custDelta:'↑ 67 baru',labels:['Mar','Apr','Mei'],data:[44.2,51.8,52.7]},
+        '1y': {label:'Tahun Ini',rev:'Rp 512.4 jt',trx:'13.240',aov:'Rp 38.7K',cust:'485',revDelta:'↑ 21%',trxDelta:'↑ 18%',aovDelta:'↑ 3%',custDelta:'↑ 210 baru',labels:['Jan','Feb','Mar','Apr','Mei','Jun'],data:[75,82,91,94,101,69.4]}
+    };
+    const TOP_PRODUCTS = [{name:'Nasi Goreng',rev:'Rp 11.4 jt',qty:218,pct:82},{name:'Mie Ayam',rev:'Rp 8.2 jt',qty:164,pct:63},{name:'Soto Ayam',rev:'Rp 7.6 jt',qty:152,pct:58},{name:'Ayam Bakar',rev:'Rp 5.9 jt',qty:118,pct:45},{name:'Es Teh',rev:'Rp 4.1 jt',qty:512,pct:38}];
+    const OUTLETS = [{name:'Cleco Pii',rev:'Rp 22.8 jt',trx:542},{name:'Resep Bunce',rev:'Rp 18.4 jt',trx:461},{name:'Baby Joy',rev:'Rp 11.1 jt',trx:282}];
+    const PAY_DATA = {labels:['Tunai','E-Wallet','Kartu','Transfer'],data:[52,28,14,6],colors:['#3b82f6','#6366f1','#a78bfa','#06b6d4']};
+    let revenueChart, payChart, currentPeriod = '7d';
+    function setPeriod(p, btn){
+        currentPeriod = p;
+        document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active'); updateAll();
+    }
+    function updateAll(){
+        const d = PERIOD_DATA[currentPeriod];
+        document.getElementById('kpi_rev').textContent  = d.rev;
+        document.getElementById('kpi_trx').textContent  = d.trx;
+        document.getElementById('kpi_aov').textContent  = d.aov;
+        document.getElementById('kpi_cust').textContent = d.cust;
+        document.getElementById('kpi_rev_d').textContent  = d.revDelta;
+        document.getElementById('kpi_trx_d').textContent  = d.trxDelta;
+        document.getElementById('kpi_aov_d').textContent  = d.aovDelta;
+        document.getElementById('kpi_cust_d').textContent = d.custDelta;
+        document.getElementById('chartPeriodLabel').textContent = d.label;
+        if(revenueChart){ revenueChart.data.labels = d.labels; revenueChart.data.datasets[0].data = d.data; revenueChart.update(); }
+    }
+    function initCharts(){
+        const chartOpts = {responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)',font:{size:11},callback:v=>v+'jt'}}}};
+        revenueChart = new Chart(document.getElementById('revenueChart'), {type:'line',data:{labels:PERIOD_DATA['7d'].labels,datasets:[{data:PERIOD_DATA['7d'].data,borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.1)',borderWidth:2,fill:true,tension:.4,pointBackgroundColor:'#6366f1',pointRadius:4}]},options:{...chartOpts,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` Rp ${c.raw}jt`}}}}});
+        payChart = new Chart(document.getElementById('payChart'), {type:'doughnut',data:{labels:PAY_DATA.labels,datasets:[{data:PAY_DATA.data,backgroundColor:PAY_DATA.colors.map(c=>c+'cc'),borderColor:PAY_DATA.colors,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},cutout:'65%'}});
+        document.getElementById('payLegend').innerHTML = PAY_DATA.labels.map((l,i)=>`<div class="flex items-center justify-between text-xs"><div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full" style="background:${PAY_DATA.colors[i]}"></div><span style="color:rgba(255,255,255,.6)">${l}</span></div><span class="font-bold text-white">${PAY_DATA.data[i]}%</span></div>`).join('');
+        document.getElementById('topProducts').innerHTML = TOP_PRODUCTS.map((p,i)=>`<div class="flex items-center gap-3"><span class="w-4 text-xs font-bold" style="color:rgba(255,255,255,.3)">${i+1}</span><div class="flex-1"><div class="flex justify-between text-sm mb-1"><span class="font-semibold text-white">${p.name}</span><span class="font-bold text-white">${p.rev}</span></div><div class="h-1.5 rounded-full" style="background:rgba(255,255,255,.1)"><div class="h-full rounded-full bg-indigo-500" style="width:${p.pct}%"></div></div></div></div>`).join('');
+        document.getElementById('outletTable').innerHTML = OUTLETS.map(o=>`<tr class="row-item"><td class="py-2.5 font-semibold text-white text-sm">${o.name}</td><td class="py-2.5 text-right font-bold text-white text-sm">${o.rev}</td><td class="py-2.5 text-right text-sm" style="color:rgba(255,255,255,.5)">${o.trx.toLocaleString()}</td></tr>`).join('');
+    }
+    document.addEventListener('DOMContentLoaded',()=>{
+        try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        if(outlet)document.getElementById('outletLabel').textContent=outlet.name;}
+        catch(e){window.location.href='index.html';}
+        initCharts();
+    });
+</script>
+</body>
+</html>
