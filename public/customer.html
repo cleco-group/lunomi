@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Customer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .tier-platinum{background:rgba(139,92,246,.15);color:#c4b5fd;}
+        .tier-gold{background:rgba(245,158,11,.15);color:#fcd34d;}
+        .tier-silver{background:rgba(148,163,184,.15);color:#cbd5e1;}
+        .tier-bronze{background:rgba(217,119,6,.15);color:#fbbf24;}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.06);transition:background .15s;}
+        .row-item:hover{background:rgba(255,255,255,.03);}
+        .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(4px);}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+        .filter-btn{padding:.4rem .9rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);}
+        .filter-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.6);color:white;}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>👥</span></div>
+            <div><div class="font-extrabold text-white text-sm">Customer</div><div class="text-xs" style="color:rgba(255,255,255,.4)" id="outletLabel">Semua Outlet</div></div>
+        </div>
+        <button onclick="openAddModal()" class="btn-primary px-4 py-2 rounded-xl text-xs flex items-center gap-2">+ Tambah Customer</button>
+    </div>
+</nav>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Customer</div><div class="text-2xl font-extrabold text-white">485</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(139,92,246,.7)">Platinum</div><div class="text-2xl font-extrabold text-purple-400">45</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(245,158,11,.7)">Gold</div><div class="text-2xl font-extrabold text-amber-400">128</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Silver + Bronze</div><div class="text-2xl font-extrabold text-slate-300">312</div></div>
+    </div>
+    <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
+        <input id="searchInput" type="text" placeholder="🔍  Cari nama / nomor HP..." class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[200px]" oninput="renderTable()">
+        <div class="flex gap-2 flex-wrap">
+            <button class="filter-btn active" onclick="setTier('all',this)">Semua</button>
+            <button class="filter-btn" onclick="setTier('Platinum',this)">💎 Platinum</button>
+            <button class="filter-btn" onclick="setTier('Gold',this)">🥇 Gold</button>
+            <button class="filter-btn" onclick="setTier('Silver',this)">🥈 Silver</button>
+            <button class="filter-btn" onclick="setTier('Bronze',this)">🥉 Bronze</button>
+        </div>
+    </div>
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead><tr style="border-bottom:1px solid rgba(255,255,255,.1)">
+                    <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Nama</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Kontak</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Tier</th>
+                    <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Total Belanja</th>
+                    <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Poin</th>
+                    <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Aksi</th>
+                </tr></thead>
+                <tbody id="custBody"></tbody>
+            </table>
+        </div>
+        <div id="emptyState" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Tidak ada customer ditemukan.</div>
+    </div>
+</div>
+<div id="addModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl">
+        <div class="flex items-center justify-between mb-5"><h2 class="font-bold text-white">Tambah Customer Baru</h2><button onclick="closeModal()" style="color:rgba(255,255,255,.4)" class="hover:text-white text-xl">×</button></div>
+        <div class="space-y-4">
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Nama Lengkap</label><input id="cName" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="Nama customer"></div>
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Nomor HP</label><input id="cPhone" type="tel" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="08xxxxxxxxxx"></div>
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Email (opsional)</label><input id="cEmail" type="email" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="email@contoh.com"></div>
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Alamat (opsional)</label><input id="cAddr" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="Alamat customer"></div>
+        </div>
+        <div id="cErr" class="hidden mt-3 px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;"></div>
+        <div class="flex gap-3 mt-5">
+            <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="saveCustomer()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan</button>
+        </div>
+    </div>
+</div>
+<div id="toast" class="toast toast-success"></div>
+<script>
+    const MOCK = [
+        {id:1,name:'Budi Santoso',phone:'0812-1234-5678',email:'budi@gmail.com',tier:'Platinum',total:12500000,points:1250},
+        {id:2,name:'Siti Rahayu',phone:'0813-2345-6789',email:'siti@gmail.com',tier:'Gold',total:7800000,points:780},
+        {id:3,name:'Ahmad Fauzi',phone:'0857-3456-7890',email:'',tier:'Gold',total:6200000,points:620},
+        {id:4,name:'Dewi Lestari',phone:'0878-4567-8901',email:'dewi@gmail.com',tier:'Silver',total:3100000,points:310},
+        {id:5,name:'Eko Prasetyo',phone:'0811-5678-9012',email:'',tier:'Silver',total:2800000,points:280},
+        {id:6,name:'Fina Maharani',phone:'0819-6789-0123',email:'fina@gmail.com',tier:'Bronze',total:900000,points:90},
+        {id:7,name:'Gilang Ramadan',phone:'0856-7890-1234',email:'',tier:'Bronze',total:450000,points:45},
+        {id:8,name:'Hani Kusuma',phone:'0821-8901-2345',email:'hani@gmail.com',tier:'Platinum',total:18200000,points:1820},
+    ];
+    let customers = [...MOCK];
+    let activeTier = 'all';
+    function setTier(t,btn){activeTier=t;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTable();}
+    function tierCls(t){return{Platinum:'tier-platinum',Gold:'tier-gold',Silver:'tier-silver',Bronze:'tier-bronze'}[t]||'';}
+    function rp(n){return'Rp '+n.toLocaleString('id-ID');}
+    function renderTable(){
+        const q=document.getElementById('searchInput').value.toLowerCase();
+        const filtered=customers.filter(c=>(activeTier==='all'||c.tier===activeTier)&&(!q||c.name.toLowerCase().includes(q)||c.phone.includes(q)));
+        const tbody=document.getElementById('custBody');
+        if(!filtered.length){tbody.innerHTML='';document.getElementById('emptyState').classList.remove('hidden');return;}
+        document.getElementById('emptyState').classList.add('hidden');
+        tbody.innerHTML=filtered.map(c=>`<tr class="row-item"><td class="px-5 py-3.5"><div class="font-semibold text-white">${c.name}</div>${c.email?`<div class="text-xs mt-0.5" style="color:rgba(255,255,255,.35)">${c.email}</div>`:''}</td><td class="px-4 py-3.5 text-sm" style="color:rgba(255,255,255,.6)">${c.phone}</td><td class="px-4 py-3.5"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${tierCls(c.tier)}">${c.tier}</span></td><td class="px-4 py-3.5 text-right font-semibold text-white">${rp(c.total)}</td><td class="px-4 py-3.5 text-right text-indigo-400 font-bold">${c.points.toLocaleString()}</td><td class="px-4 py-3.5 text-center"><button onclick="viewDetail(${c.id})" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition hover:bg-white hover:text-gray-900" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)">Detail</button></td></tr>`).join('');
+    }
+    function openAddModal(){['cName','cPhone','cEmail','cAddr'].forEach(id=>document.getElementById(id).value='');document.getElementById('cErr').classList.add('hidden');document.getElementById('addModal').classList.remove('hidden');}
+    function closeModal(){document.getElementById('addModal').classList.add('hidden');}
+    function saveCustomer(){
+        const name=document.getElementById('cName').value.trim();
+        const phone=document.getElementById('cPhone').value.trim();
+        const err=document.getElementById('cErr');
+        if(!name){err.textContent='Nama harus diisi.';err.classList.remove('hidden');return;}
+        if(!phone||!/^08\d{8,11}$/.test(phone.replace(/-/g,''))){err.textContent='Format HP tidak valid.';err.classList.remove('hidden');return;}
+        customers.unshift({id:Date.now(),name,phone,email:document.getElementById('cEmail').value.trim(),tier:'Bronze',total:0,points:0});
+        closeModal();renderTable();showToast('Customer berhasil ditambahkan');
+    }
+    function viewDetail(id){const c=customers.find(x=>x.id===id);alert(`👤 ${c.name}\n📱 ${c.phone}\n🏆 Tier: ${c.tier}\n💰 Total: ${rp(c.total)}\n⭐ Poin: ${c.points}`);}
+    function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+    document.addEventListener('DOMContentLoaded',()=>{
+        try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        if(outlet)document.getElementById('outletLabel').textContent=outlet.name;}
+        catch(e){window.location.href='index.html';}
+        renderTable();
+    });
+</script>
+</body>
+</html>
