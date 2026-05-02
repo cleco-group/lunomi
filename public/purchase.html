@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Pembelian Barang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.06);transition:background .15s;}
+        .row-item:hover{background:rgba(255,255,255,.03);}
+        .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(8px);}
+        .modal-box{background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:1.25rem;}
+        .tab-btn{padding:.5rem 1.2rem;border-radius:9999px;font-size:.78rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;transition:all .2s;}
+        .tab-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.6);color:white;}
+        .po-line{display:grid;grid-template-columns:1fr 80px 120px 32px;gap:.5rem;align-items:center;}
+        @media(max-width:640px){.po-line{grid-template-columns:1fr 70px 100px 28px;}}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>🛒</span></div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Pembelian Barang</div>
+                <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
+            </div>
+        </div>
+        <button onclick="openPOModal()" class="btn-primary px-4 py-2 rounded-xl text-xs flex items-center gap-1.5">+ Buat PO</button>
+    </div>
+</nav>
+
+<div class="max-w-4xl mx-auto px-4 py-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Bulan Ini</div>
+            <div class="text-xl font-extrabold text-white" id="statMonthTotal">Rp 0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Jumlah PO</div>
+            <div class="text-xl font-extrabold text-white" id="statCount">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 col-span-2 sm:col-span-1">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Supplier Aktif</div>
+            <div class="text-xl font-extrabold text-white" id="statSupplier">0</div>
+        </div>
+    </div>
+
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="px-5 py-4 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <h3 class="font-bold text-sm text-white">📋 Riwayat Pembelian</h3>
+            <input type="text" id="searchPO" placeholder="Cari supplier..." oninput="renderHistory()"
+                class="input-glass px-3 py-1.5 rounded-lg text-xs w-40">
+        </div>
+        <div id="historyList" class="divide-y" style="divide-color:rgba(255,255,255,.06)"></div>
+        <div id="historyEmpty" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Belum ada riwayat pembelian.</div>
+    </div>
+</div>
+
+<div id="poModal" class="modal-overlay hidden fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4">
+    <div class="modal-box w-full max-w-lg shadow-2xl max-h-[90vh] flex flex-col">
+        <div class="flex items-center justify-between px-6 pt-5 pb-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <h2 class="font-bold text-white">🛒 Buat Purchase Order</h2>
+            <button onclick="closePOModal()" style="color:rgba(255,255,255,.4)" class="hover:text-white transition text-xl font-bold">×</button>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Supplier</label>
+                    <input id="poSupplier" type="text" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="Nama supplier">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Tanggal</label>
+                    <input id="poDate" type="date" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
+                </div>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <label class="text-xs font-semibold" style="color:rgba(255,255,255,.5)">Item yang Dibeli</label>
+                    <button onclick="addPOLine()" class="text-xs px-3 py-1 rounded-lg font-semibold" style="background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.4);color:#a5b4fc">+ Tambah Item</button>
+                </div>
+                <div class="po-line text-xs font-semibold mb-1 px-1" style="color:rgba(255,255,255,.35)">
+                    <span>Item</span><span class="text-center">Qty</span><span class="text-right">Harga/Satuan</span><span></span>
+                </div>
+                <div id="poLines" class="space-y-2"></div>
+            </div>
+            <div class="rounded-xl px-4 py-3 flex justify-between items-center" style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2)">
+                <span class="text-sm font-semibold" style="color:rgba(255,255,255,.7)">Total PO</span>
+                <span id="poTotal" class="font-extrabold text-white">Rp 0</span>
+            </div>
+            <div>
+                <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Catatan</label>
+                <textarea id="poNote" rows="2" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm resize-none" placeholder="Opsional..."></textarea>
+            </div>
+            <div id="poError" class="hidden px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;"></div>
+        </div>
+        <div class="px-6 pb-5 pt-3 flex gap-3" style="border-top:1px solid rgba(255,255,255,.08)">
+            <button onclick="closePOModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="savePO()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan & Update Stok</button>
+        </div>
+    </div>
+</div>
+
+<div id="detailModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div class="modal-box w-full max-w-md shadow-2xl">
+        <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <h2 class="font-bold text-white text-sm" id="detailTitle">Detail PO</h2>
+            <button onclick="closeDetailModal()" style="color:rgba(255,255,255,.4)" class="hover:text-white text-xl font-bold">×</button>
+        </div>
+        <div id="detailBody" class="px-6 py-5 space-y-3 max-h-96 overflow-y-auto"></div>
+    </div>
+</div>
+
+<div id="toast" class="hidden fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all" style="opacity:0"></div>
+
+<script>
+    const RAW_ITEMS = [
+        {id:1, name:'Nasi (Beras)',     unit:'kg'},
+        {id:2, name:'Ayam Fillet',      unit:'kg'},
+        {id:3, name:'Mie Kuning',       unit:'kg'},
+        {id:4, name:'Soto Ayam Presto', unit:'porsi'},
+        {id:5, name:'Es Batu',          unit:'kg'},
+        {id:6, name:'Teh Celup',        unit:'box'},
+        {id:7, name:'Minyak Goreng',    unit:'liter'},
+        {id:8, name:'Kecap Manis',      unit:'botol'},
+    ];
+
+    function getPurchases(){return JSON.parse(localStorage.getItem('lunomi_purchases')||'[]');}
+    function savePurchases(p){localStorage.setItem('lunomi_purchases',JSON.stringify(p));}
+    function getRawStock(){
+        const s=localStorage.getItem('lunomi_raw_stock');
+        if(s) return JSON.parse(s);
+        const d={};
+        RAW_ITEMS.forEach(i=>{d[i.id]={qty:0,unit:i.unit};});
+        return d;
+    }
+    function saveRawStock(s){localStorage.setItem('lunomi_raw_stock',JSON.stringify(s));}
+
+    function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
+
+    let poLines=[];
+    let toastTimer=null;
+
+    function showToast(msg,type='success'){
+        clearTimeout(toastTimer);
+        const C={success:'rgba(34,197,94,.9)',error:'rgba(239,68,68,.9)',info:'rgba(99,102,241,.9)'};
+        const t=document.getElementById('toast');
+        t.style.background=C[type]||C.info;
+        t.innerHTML=`<span>${type==='success'?'✓':type==='error'?'✕':'ℹ️'}</span><span>${msg}</span>`;
+        t.classList.remove('hidden');t.style.opacity='1';
+        toastTimer=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.classList.add('hidden'),300);},3000);
+    }
+
+    function openPOModal(){
+        poLines=[];
+        document.getElementById('poSupplier').value='';
+        document.getElementById('poDate').value=new Date().toISOString().split('T')[0];
+        document.getElementById('poNote').value='';
+        document.getElementById('poError').classList.add('hidden');
+        addPOLine();
+        renderPOLines();
+        document.getElementById('poModal').classList.remove('hidden');
+    }
+    function closePOModal(){document.getElementById('poModal').classList.add('hidden');}
+
+    function addPOLine(){
+        poLines.push({itemId:RAW_ITEMS[0].id,qty:1,price:0});
+        renderPOLines();
+    }
+    function removePOLine(i){
+        poLines.splice(i,1);
+        renderPOLines();
+    }
+
+    function renderPOLines(){
+        const opts=RAW_ITEMS.map(i=>`<option value="${i.id}">${i.name} (${i.unit})</option>`).join('');
+        document.getElementById('poLines').innerHTML=poLines.map((l,i)=>`
+            <div class="po-line">
+                <select onchange="poLines[${i}].itemId=parseInt(this.value);calcPOTotal()"
+                    class="input-glass px-2 py-2 rounded-lg text-xs">${opts.replace(`value="${l.itemId}"`,`value="${l.itemId}" selected`)}</select>
+                <input type="number" min="1" value="${l.qty}" inputmode="numeric"
+                    oninput="poLines[${i}].qty=parseFloat(this.value)||0;calcPOTotal()"
+                    class="input-glass px-2 py-2 rounded-lg text-xs text-center" placeholder="Qty">
+                <input type="number" min="0" value="${l.price||\'\'}" inputmode="numeric"
+                    oninput="poLines[${i}].price=parseFloat(this.value)||0;calcPOTotal()"
+                    class="input-glass px-2 py-2 rounded-lg text-xs text-right" placeholder="Harga">
+                <button onclick="removePOLine(${i})" class="text-red-400 hover:text-red-300 font-bold text-lg leading-none"
+                    style="${poLines.length===1?'opacity:.3;pointer-events:none':''}">×</button>
+            </div>`).join('');
+        calcPOTotal();
+    }
+
+    function calcPOTotal(){
+        const total=poLines.reduce((s,l)=>s+(l.qty*l.price),0);
+        document.getElementById('poTotal').textContent=rp(total);
+    }
+
+    function savePO(){
+        const supplier=document.getElementById('poSupplier').value.trim();
+        const date=document.getElementById('poDate').value;
+        const note=document.getElementById('poNote').value.trim();
+        const err=document.getElementById('poError');
+        if(!supplier){err.textContent='Nama supplier harus diisi.';err.classList.remove('hidden');return;}
+        if(!date){err.textContent='Tanggal harus diisi.';err.classList.remove('hidden');return;}
+        if(!poLines.length||poLines.every(l=>l.qty<=0)){err.textContent='Tambahkan minimal 1 item.';err.classList.remove('hidden');return;}
+
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        const total=poLines.reduce((s,l)=>s+(l.qty*l.price),0);
+        const items=poLines.filter(l=>l.qty>0).map(l=>{
+            const item=RAW_ITEMS.find(r=>r.id===l.itemId);
+            return{id:l.itemId,name:item?item.name:'-',unit:item?item.unit:'-',qty:l.qty,price:l.price,subtotal:l.qty*l.price};
+        });
+        const po={
+            id:'PO-'+Date.now(),
+            date,supplier,note,total,items,
+            outlet_id:outlet?outlet.id:''
+        };
+
+        const stk=getRawStock();
+        items.forEach(i=>{
+            if(!stk[i.id]) stk[i.id]={qty:0,unit:i.unit};
+            stk[i.id].qty=+(stk[i.id].qty+i.qty).toFixed(2);
+        });
+        saveRawStock(stk);
+
+        const purchases=getPurchases();
+        purchases.unshift(po);
+        savePurchases(purchases);
+
+        closePOModal();
+        renderHistory();
+        updateStats();
+        showToast('PO berhasil disimpan & stok diperbarui!','success');
+    }
+
+    function renderHistory(){
+        const q=(document.getElementById('searchPO').value||'').toLowerCase();
+        const pos=getPurchases().filter(p=>!q||p.supplier.toLowerCase().includes(q)||p.id.toLowerCase().includes(q));
+        const list=document.getElementById('historyList');
+        const empty=document.getElementById('historyEmpty');
+        if(!pos.length){list.innerHTML='';empty.classList.remove('hidden');return;}
+        empty.classList.add('hidden');
+        list.innerHTML=pos.map(p=>`
+            <div class="row-item px-5 py-3.5 flex items-center justify-between cursor-pointer" onclick="showDetail('${p.id}')">
+                <div>
+                    <div class="font-semibold text-white text-sm">${p.supplier}</div>
+                    <div class="text-xs mt-0.5" style="color:rgba(255,255,255,.4)">${p.id} · ${p.date} · ${p.items.length} item</div>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-white text-sm">${rp(p.total)}</div>
+                    <div class="text-xs mt-0.5 text-green-400">✓ Diterima</div>
+                </div>
+            </div>`).join('');
+    }
+
+    function showDetail(id){
+        const p=getPurchases().find(x=>x.id===id);
+        if(!p) return;
+        document.getElementById('detailTitle').textContent=`${p.id} — ${p.supplier}`;
+        document.getElementById('detailBody').innerHTML=`
+            <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                <div style="color:rgba(255,255,255,.5)">Tanggal</div><div class="font-semibold text-white">${p.date}</div>
+                <div style="color:rgba(255,255,255,.5)">Supplier</div><div class="font-semibold text-white">${p.supplier}</div>
+                ${p.note?`<div style="color:rgba(255,255,255,.5)">Catatan</div><div class="font-semibold text-white">${p.note}</div>`:''}
+            </div>
+            <div class="space-y-2">
+                ${p.items.map(i=>`<div class="flex justify-between text-sm py-1.5" style="border-bottom:1px solid rgba(255,255,255,.06)">
+                    <div><div class="font-semibold text-white">${i.name}</div><div class="text-xs" style="color:rgba(255,255,255,.4)">${i.qty} ${i.unit} × ${rp(i.price)}</div></div>
+                    <div class="font-bold text-white">${rp(i.subtotal)}</div>
+                </div>`).join('')}
+            </div>
+            <div class="flex justify-between font-extrabold text-white mt-3 pt-3" style="border-top:1px solid rgba(255,255,255,.1)">
+                <span>Total</span><span>${rp(p.total)}</span>
+            </div>`;
+        document.getElementById('detailModal').classList.remove('hidden');
+    }
+    function closeDetailModal(){document.getElementById('detailModal').classList.add('hidden');}
+
+    function updateStats(){
+        const pos=getPurchases();
+        const now=new Date();
+        const monthTotal=pos.filter(p=>{const d=new Date(p.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).reduce((s,p)=>s+p.total,0);
+        const suppliers=new Set(pos.map(p=>p.supplier)).size;
+        document.getElementById('statMonthTotal').textContent=rp(monthTotal);
+        document.getElementById('statCount').textContent=pos.length;
+        document.getElementById('statSupplier').textContent=suppliers;
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        try{
+            const s=localStorage.getItem('lunomi_session');
+            if(!s){window.location.href='index.html';return;}
+            const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+            if(o) document.getElementById('outletLabel').textContent=o.name;
+        }catch(e){window.location.href='index.html';}
+        renderHistory();
+        updateStats();
+    });
+</script>
+</body>
+</html>
