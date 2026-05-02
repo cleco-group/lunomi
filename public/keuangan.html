@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Laporan Keuangan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .tab-btn{padding:.5rem 1rem;border-radius:.75rem;font-size:.8rem;font-weight:600;cursor:pointer;color:rgba(255,255,255,.5);transition:all .2s;border:none;background:transparent;}
+        .tab-btn.active{background:rgba(99,102,241,.2);color:white;border:1px solid rgba(99,102,241,.4);}
+        .metric-card{position:relative;overflow:hidden;}
+        .metric-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+        .metric-blue::before{background:#3b82f6;}
+        .metric-green::before{background:#22c55e;}
+        .metric-red::before{background:#ef4444;}
+        .metric-amber::before{background:#f59e0b;}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.06);}
+        .row-item:hover{background:rgba(255,255,255,.03);}
+    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>💰</span></div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Laporan Keuangan</div>
+                <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
+            </div>
+        </div>
+        <select id="periodeSelect" class="input-glass px-3 py-2 rounded-xl text-xs" onchange="render()">
+            <option value="today">Hari Ini</option>
+            <option value="week">7 Hari</option>
+            <option value="month" selected>30 Hari</option>
+            <option value="year">Tahun Ini</option>
+        </select>
+    </div>
+</nav>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
+        <button class="tab-btn active" onclick="switchTab('ringkasan',this)">📊 Ringkasan</button>
+        <button class="tab-btn" onclick="switchTab('transaksi',this)">📋 Transaksi</button>
+        <button class="tab-btn" onclick="switchTab('pengeluaran',this)">💸 Pengeluaran</button>
+        <button class="tab-btn" onclick="switchTab('laba',this)">📈 Laba Rugi</button>
+    </div>
+
+    <div id="tab-ringkasan">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="glass-card metric-card metric-blue rounded-2xl p-4 pl-5">
+                <div class="text-xs mb-1" style="color:rgba(255,255,255,.45)">Total Pendapatan</div>
+                <div id="m_revenue" class="text-xl font-extrabold text-white">Rp 52.3 jt</div>
+                <div class="text-xs mt-1 text-blue-400">↑ 12% vs periode lalu</div>
+            </div>
+            <div class="glass-card metric-card metric-red rounded-2xl p-4 pl-5">
+                <div class="text-xs mb-1" style="color:rgba(255,255,255,.45)">Total Pengeluaran</div>
+                <div id="m_expense" class="text-xl font-extrabold text-white">Rp 31.8 jt</div>
+                <div class="text-xs mt-1 text-red-400">↑ 8% vs periode lalu</div>
+            </div>
+            <div class="glass-card metric-card metric-green rounded-2xl p-4 pl-5">
+                <div class="text-xs mb-1" style="color:rgba(255,255,255,.45)">Laba Bersih</div>
+                <div id="m_profit" class="text-xl font-extrabold text-white">Rp 20.5 jt</div>
+                <div class="text-xs mt-1 text-green-400">↑ 18% vs periode lalu</div>
+            </div>
+            <div class="glass-card metric-card metric-amber rounded-2xl p-4 pl-5">
+                <div class="text-xs mb-1" style="color:rgba(255,255,255,.45)">Total Transaksi</div>
+                <div id="m_trx" class="text-xl font-extrabold text-white">1.285</div>
+                <div class="text-xs mt-1 text-amber-400">Avg Rp 40.7K/trx</div>
+            </div>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-5">
+                <h3 class="font-bold text-sm mb-4 text-white">💳 Metode Pembayaran</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3"><div class="text-sm w-28" style="color:rgba(255,255,255,.6)">💵 Tunai</div><div class="flex-1 h-2 rounded-full" style="background:rgba(255,255,255,.1)"><div class="h-full rounded-full bg-blue-500" style="width:52%"></div></div><div class="text-sm font-bold w-10 text-right text-white">52%</div></div>
+                    <div class="flex items-center gap-3"><div class="text-sm w-28" style="color:rgba(255,255,255,.6)">📱 E-Wallet</div><div class="flex-1 h-2 rounded-full" style="background:rgba(255,255,255,.1)"><div class="h-full rounded-full bg-indigo-500" style="width:28%"></div></div><div class="text-sm font-bold w-10 text-right text-white">28%</div></div>
+                    <div class="flex items-center gap-3"><div class="text-sm w-28" style="color:rgba(255,255,255,.6)">💳 Kartu</div><div class="flex-1 h-2 rounded-full" style="background:rgba(255,255,255,.1)"><div class="h-full rounded-full bg-purple-500" style="width:14%"></div></div><div class="text-sm font-bold w-10 text-right text-white">14%</div></div>
+                    <div class="flex items-center gap-3"><div class="text-sm w-28" style="color:rgba(255,255,255,.6)">🏦 Transfer</div><div class="flex-1 h-2 rounded-full" style="background:rgba(255,255,255,.1)"><div class="h-full rounded-full bg-cyan-500" style="width:6%"></div></div><div class="text-sm font-bold w-10 text-right text-white">6%</div></div>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-5">
+                <h3 class="font-bold text-sm mb-4 text-white">🏆 Top 5 Produk</h3>
+                <div class="space-y-2.5" id="top5Produk"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-transaksi" class="hidden">
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr style="border-bottom:1px solid rgba(255,255,255,.1)">
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Waktu</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">ID Transaksi</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Metode</th>
+                        <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Jumlah</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Status</th>
+                    </tr></thead>
+                    <tbody id="trxBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-pengeluaran" class="hidden">
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr style="border-bottom:1px solid rgba(255,255,255,.1)">
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase" style="color:rgba(255,255,255,.4)">Tanggal</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase" style="color:rgba(255,255,255,.4)">Keterangan</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase" style="color:rgba(255,255,255,.4)">Kategori</th>
+                        <th class="text-right px-4 py-3 text-xs font-semibold uppercase" style="color:rgba(255,255,255,.4)">Jumlah</th>
+                    </tr></thead>
+                    <tbody id="expBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-laba" class="hidden">
+        <div class="glass-card rounded-2xl p-6">
+            <h3 class="font-bold text-white mb-5">Laporan Laba Rugi</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span class="font-semibold text-white">Pendapatan Kotor</span><span class="font-bold text-white">Rp 52.345.000</span></div>
+                <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(255,255,255,.5)">PPN (10%)</span><span style="color:rgba(255,255,255,.6)">Rp 5.234.500</span></div>
+                <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(255,255,255,.5)">Pendapatan Bersih</span><span style="color:rgba(255,255,255,.8)">Rp 47.110.500</span></div>
+                <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(239,68,68,.8)">HPP (Harga Pokok)</span><span class="text-red-400">- Rp 18.500.000</span></div>
+                <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(239,68,68,.8)">Biaya Operasional</span><span class="text-red-400">- Rp 8.100.000</span></div>
+                <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(239,68,68,.8)">Gaji Karyawan</span><span class="text-red-400">- Rp 5.200.000</span></div>
+                <div class="flex justify-between py-3 mt-2 rounded-xl px-3" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)"><span class="font-extrabold text-white">LABA BERSIH</span><span class="font-extrabold text-green-400">Rp 15.310.500</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const TABS = ['ringkasan','transaksi','pengeluaran','laba'];
+    function switchTab(t, btn){
+        TABS.forEach(id=>document.getElementById('tab-'+id).classList.add('hidden'));
+        document.getElementById('tab-'+t).classList.remove('hidden');
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        if(t==='transaksi') renderTrx();
+        if(t==='pengeluaran') renderExp();
+    }
+    function rp(n){return'Rp '+n.toLocaleString('id-ID');}
+    const TRX=[
+        {time:'09:14',id:'TRX-20260502-1234',method:'💵 Tunai',  amount:57200, status:'paid'},
+        {time:'10:22',id:'TRX-20260502-2345',method:'📱 GoPay',  amount:44000, status:'paid'},
+        {time:'11:05',id:'TRX-20260502-3456',method:'💳 BCA',    amount:88000, status:'paid'},
+        {time:'11:47',id:'TRX-20260502-4567',method:'💵 Tunai',  amount:33000, status:'paid'},
+        {time:'12:30',id:'TRX-20260502-5678',method:'📱 OVO',    amount:121000,status:'paid'},
+        {time:'13:15',id:'TRX-20260502-6789',method:'🏦 Transfer',amount:275000,status:'pending'},
+    ];
+    const EXP=[
+        {date:'2026-05-01',desc:'Beli Bahan Baku',   cat:'HPP',           amount:3200000},
+        {date:'2026-05-01',desc:'Gaji Karyawan',      cat:'SDM',           amount:5200000},
+        {date:'2026-05-02',desc:'Listrik & Air',      cat:'Operasional',   amount:850000},
+        {date:'2026-05-02',desc:'Beli Minyak Goreng', cat:'HPP',           amount:420000},
+        {date:'2026-05-02',desc:'Marketing Online',   cat:'Pemasaran',     amount:300000},
+    ];
+    function renderTrx(){
+        document.getElementById('trxBody').innerHTML=TRX.map(t=>`
+            <tr class="row-item">
+                <td class="px-5 py-3 text-sm" style="color:rgba(255,255,255,.5)">${t.time}</td>
+                <td class="px-4 py-3 font-mono text-xs text-white">${t.id}</td>
+                <td class="px-4 py-3 text-sm" style="color:rgba(255,255,255,.7)">${t.method}</td>
+                <td class="px-4 py-3 text-right font-bold text-white">${rp(t.amount)}</td>
+                <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${t.status==='paid'?'text-green-400':'text-amber-400'}" style="background:${t.status==='paid'?'rgba(34,197,94,.12)':'rgba(245,158,11,.12)'}">${t.status==='paid'?'✓ Lunas':'⏱ Pending'}</span></td>
+            </tr>`).join('');
+    }
+    function renderExp(){
+        document.getElementById('expBody').innerHTML=EXP.map(e=>`
+            <tr class="row-item">
+                <td class="px-5 py-3 text-sm" style="color:rgba(255,255,255,.5)">${e.date}</td>
+                <td class="px-4 py-3 font-semibold text-white text-sm">${e.desc}</td>
+                <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold" style="background:rgba(239,68,68,.1);color:#f87171">${e.cat}</span></td>
+                <td class="px-4 py-3 text-right font-bold text-red-400">- ${rp(e.amount)}</td>
+            </tr>`).join('');
+    }
+    const TOP5 = [['Nasi Goreng','Rp 11.4 jt',218],['Mie Ayam','Rp 8.2 jt',164],['Es Teh','Rp 4.1 jt',512],['Soto Ayam','Rp 7.6 jt',152],['Ayam Bakar','Rp 5.9 jt',118]];
+    function renderTop5(){
+        document.getElementById('top5Produk').innerHTML = TOP5.map((p,i)=>`
+            <div class="flex items-center gap-3">
+                <span class="w-5 text-xs font-bold" style="color:rgba(255,255,255,.3)">${i+1}</span>
+                <div class="flex-1"><div class="text-sm font-semibold text-white">${p[0]}</div></div>
+                <div class="text-right"><div class="text-sm font-bold text-white">${p[1]}</div><div class="text-xs" style="color:rgba(255,255,255,.35)">${p[2]} porsi</div></div>
+            </div>`).join('');
+    }
+    function render(){}
+    document.addEventListener('DOMContentLoaded',()=>{
+        try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        if(outlet)document.getElementById('outletLabel').textContent=outlet.name;}
+        catch(e){window.location.href='index.html';}
+        renderTop5();
+    });
+</script>
+</body>
+</html>
