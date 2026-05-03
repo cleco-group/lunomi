@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; font-family:'Material Symbols Outlined'; }
+
         body {
             background: #020617;
             background-image:
@@ -19,53 +21,114 @@
             min-height: 100vh;
             color: white;
         }
-        .glass-nav { background: rgba(2,6,23,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
-        .glass-card-accent { background: rgba(99,102,241,0.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(99,102,241,0.25); }
-        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+
+        .glass-nav {
+            background: rgba(2,6,23,0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .glass-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .glass-card-accent {
+            background: rgba(99,102,241,0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(99,102,241,0.25);
+        }
+        .glass-input {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: white;
+        }
         .glass-input::placeholder { color: rgba(255,255,255,0.3); }
         .glass-input:focus { outline:none; border-color:rgba(99,102,241,0.6); box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
-        .metric-card { background: rgba(255,255,255,0.04); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); transition: transform 0.2s, box-shadow 0.2s; }
+
+        .metric-card {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
         .metric-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
         .metric-blue   { border-left: 3px solid #3b82f6; box-shadow: inset 3px 0 20px rgba(59,130,246,0.08); }
         .metric-green  { border-left: 3px solid #22c55e; box-shadow: inset 3px 0 20px rgba(34,197,94,0.08); }
         .metric-red    { border-left: 3px solid #ef4444; box-shadow: inset 3px 0 20px rgba(239,68,68,0.08); }
         .metric-amber  { border-left: 3px solid #f59e0b; box-shadow: inset 3px 0 20px rgba(245,158,11,0.08); }
+
         .dot { display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px; }
         .dot.active   { background:#22c55e; animation:pulse 2s infinite; }
         .dot.thinking { background:#f59e0b; animation:pulse 1s infinite; }
         .dot.idle     { background:#374151; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        .agent-badge { font-size:0.65rem; padding:0.15rem 0.5rem; border-radius:9999px; font-weight:600; }
+
+        .agent-badge {
+            font-size:0.65rem;
+            padding:0.15rem 0.5rem;
+            border-radius:9999px;
+            font-weight:600;
+        }
+
         #toast { transition:opacity 0.3s; pointer-events:none; }
-        .qa-btn { display:flex; align-items:center; gap:0.6rem; padding:0.75rem 1rem; border-radius:0.75rem; font-size:0.85rem; font-weight:600; transition: all 0.15s; text-align:left; width:100%; border: 1px solid rgba(255,255,255,0.07); }
-        .qa-btn-active { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.9); }
+
+        .qa-btn {
+            display:flex; align-items:center; gap:0.6rem;
+            padding:0.75rem 1rem; border-radius:0.75rem;
+            font-size:0.85rem; font-weight:600;
+            transition: all 0.15s;
+            text-align:left; width:100%;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .qa-btn-active {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.9);
+        }
         .qa-btn-active:hover { background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.3); color:white; }
-        .qa-btn-soon { background: rgba(255,255,255,0.02); color: rgba(255,255,255,0.3); cursor: default; }
+        .qa-btn-soon {
+            background: rgba(255,255,255,0.02);
+            color: rgba(255,255,255,0.3);
+            cursor: default;
+        }
+
         .act-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px; }
+
         .chat-enter { animation: fadeUp 0.25s ease; }
         @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
         @keyframes spin { to{transform:rotate(360deg)} }
         .spin { animation:spin 0.6s linear; }
-        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
+
+    <!-- Toast -->
     <div id="toast" class="fixed top-4 right-4 z-[100] hidden">
         <div id="toastInner" class="px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold text-white flex items-center gap-2 glass-card"></div>
     </div>
+
+    <!-- Navbar -->
     <nav class="glass-nav sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span class="text-lg">🏪</span></div>
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+                        <span class="text-lg">🏪</span>
+                    </div>
                     <div>
                         <div class="font-extrabold text-white text-base leading-none">Lunomi</div>
                         <div class="text-xs leading-none mt-0.5" id="clockDisplay" style="color:rgba(255,255,255,0.4)"><span id="outletBadge"></span></div>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="openChatAI()" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition" style="background:linear-gradient(135deg,#6366f1,#7c3aed);box-shadow:0 4px 16px rgba(99,102,241,0.35)">
+                    <button onclick="openChatAI()"
+                        class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition"
+                        style="background:linear-gradient(135deg,#6366f1,#7c3aed);box-shadow:0 4px 16px rgba(99,102,241,0.35)">
                         <span>💬</span><span class="hidden sm:inline">Tanya Lunomi</span>
                     </button>
                     <button onclick="logout()" class="text-sm font-medium transition" style="color:rgba(255,255,255,0.45)" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">Logout</button>
@@ -73,54 +136,125 @@
             </div>
         </div>
     </nav>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Header -->
         <div class="mb-8">
             <h2 class="text-2xl font-extrabold text-white">Dashboard Utama</h2>
             <p class="text-sm mt-1" style="color:rgba(255,255,255,0.45)">Selamat datang, <span id="userName" class="text-white font-semibold">Owner</span>! Lihat ringkasan bisnis hari ini.</p>
         </div>
+
+        <!-- CEO Orchestrator + Sub Agents -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+            <!-- CEO Card -->
             <div class="lg:col-span-2 glass-card-accent rounded-2xl p-6">
                 <div class="flex items-start justify-between mb-4">
                     <div>
-                        <div class="flex items-center gap-2 mb-1"><span class="text-xl">🤖</span><h3 class="font-bold text-white text-base">CEO Orchestrator</h3></div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xl">🤖</span>
+                            <h3 class="font-bold text-white text-base">CEO Orchestrator</h3>
+                        </div>
                         <p class="text-xs" style="color:rgba(255,255,255,0.4)">AI Assistant koordinasi multi-agent</p>
                     </div>
                     <div class="text-right">
-                        <div class="flex items-center justify-end gap-1.5"><span class="dot active"></span><span class="text-xs font-semibold text-emerald-400">ACTIVE</span></div>
+                        <div class="flex items-center justify-end gap-1.5">
+                            <span class="dot active"></span>
+                            <span class="text-xs font-semibold text-emerald-400">ACTIVE</span>
+                        </div>
                         <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.35)">Siap membantu</p>
                     </div>
                 </div>
+
+                <!-- Chat area -->
                 <div id="chatArea" class="rounded-xl p-4 mb-3 space-y-3 overflow-y-auto" style="background:rgba(0,0,0,0.2);min-height:5rem;max-height:11rem">
                     <div class="flex gap-2 chat-enter">
                         <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div>
-                        <div class="rounded-xl px-3 py-2 text-sm max-w-xs" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">Halo! Ada 3 alert penting — stok ayam menipis, 1 outlet offline, absensi terlambat. Perlu bantuan?</div>
+                        <div class="rounded-xl px-3 py-2 text-sm max-w-xs" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">
+                            Halo! Ada 3 alert penting — stok ayam menipis, 1 outlet offline, absensi terlambat. Perlu bantuan?
+                        </div>
                     </div>
                 </div>
+
+                <!-- AI Input -->
                 <div class="flex gap-2">
-                    <input type="text" id="aiInput" placeholder="Tanya apapun tentang bisnis Anda..." class="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm" onkeypress="if(event.key==='Enter')sendAIMessage()">
-                    <button onclick="sendAIMessage()" class="px-4 py-2.5 rounded-xl font-semibold text-white transition flex items-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 4px 14px rgba(99,102,241,0.35)"><span class="material-symbols-outlined text-sm">send</span></button>
+                    <input type="text" id="aiInput" placeholder="Tanya apapun tentang bisnis Anda..."
+                        class="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm" onkeypress="if(event.key==='Enter')sendAIMessage()">
+                    <button onclick="sendAIMessage()" class="px-4 py-2.5 rounded-xl font-semibold text-white transition flex items-center"
+                        style="background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 4px 14px rgba(99,102,241,0.35)">
+                        <span class="material-symbols-outlined text-sm">send</span>
+                    </button>
                 </div>
             </div>
+
+            <!-- Sub-Agents -->
             <div class="glass-card rounded-2xl p-6">
                 <h4 class="font-bold text-white text-sm mb-4">6 Sub-Agents</h4>
                 <div class="space-y-3" id="agentList"></div>
             </div>
         </div>
+
+        <!-- Metrics Grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="metric-card metric-blue rounded-2xl p-5"><div class="flex justify-between items-start"><div><p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Penjualan Hari Ini</p><p class="text-2xl font-extrabold text-white">Rp 24.5M</p><p class="text-xs mt-1.5 font-semibold text-emerald-400">↑ 12% dari kemarin</p></div><span class="text-2xl opacity-70">💰</span></div></div>
-            <div class="metric-card metric-green rounded-2xl p-5"><div class="flex justify-between items-start"><div><p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Transaksi</p><p class="text-2xl font-extrabold text-white">128</p><p class="text-xs mt-1.5 font-semibold text-emerald-400">↑ 8 dari kemarin</p></div><span class="text-2xl opacity-70">📊</span></div></div>
-            <div class="metric-card metric-red rounded-2xl p-5"><div class="flex justify-between items-start"><div><p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Stok Alert</p><p class="text-2xl font-extrabold text-white">5</p><p class="text-xs mt-1.5 font-semibold text-red-400">⚠️ Perlu reorder</p></div><span class="text-2xl opacity-70">🚨</span></div></div>
-            <div class="metric-card metric-amber rounded-2xl p-5"><div class="flex justify-between items-start"><div><p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Outlet Online</p><p class="text-2xl font-extrabold text-white">3/4</p><p class="text-xs mt-1.5 font-semibold text-amber-400">1 offline</p></div><span class="text-2xl opacity-70">🏪</span></div></div>
+            <div class="metric-card metric-blue rounded-2xl p-5">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Penjualan Hari Ini</p>
+                        <p class="text-2xl font-extrabold text-white">Rp 24.5M</p>
+                        <p class="text-xs mt-1.5 font-semibold text-emerald-400">↑ 12% dari kemarin</p>
+                    </div>
+                    <span class="text-2xl opacity-70">💰</span>
+                </div>
+            </div>
+            <div class="metric-card metric-green rounded-2xl p-5">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Transaksi</p>
+                        <p class="text-2xl font-extrabold text-white">128</p>
+                        <p class="text-xs mt-1.5 font-semibold text-emerald-400">↑ 8 dari kemarin</p>
+                    </div>
+                    <span class="text-2xl opacity-70">📊</span>
+                </div>
+            </div>
+            <div class="metric-card metric-red rounded-2xl p-5">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Stok Alert</p>
+                        <p class="text-2xl font-extrabold text-white">5</p>
+                        <p class="text-xs mt-1.5 font-semibold text-red-400">⚠️ Perlu reorder</p>
+                    </div>
+                    <span class="text-2xl opacity-70">🚨</span>
+                </div>
+            </div>
+            <div class="metric-card metric-amber rounded-2xl p-5">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Outlet Online</p>
+                        <p class="text-2xl font-extrabold text-white">3/4</p>
+                        <p class="text-xs mt-1.5 font-semibold text-amber-400">1 offline</p>
+                    </div>
+                    <span class="text-2xl opacity-70">🏪</span>
+                </div>
+            </div>
         </div>
+
+        <!-- OPEX + Revenue Target Row -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <!-- OPEX Card -->
             <div class="glass-card rounded-2xl p-5">
                 <div class="flex items-center justify-between mb-4">
-                    <div><p class="text-xs font-medium mb-1" style="color:rgba(255,255,255,0.45)">Pengeluaran OPEX Bulan Ini</p><p class="text-2xl font-extrabold text-white" id="opexTotal">Rp 0</p><p class="text-xs mt-1 font-semibold" id="opexSub" style="color:rgba(255,255,255,0.4)">0 catatan</p></div>
-                    <button onclick="window.location.href='expense.html'" class="text-2xl opacity-70 hover:opacity-100 transition">💸</button>
+                    <div>
+                        <p class="text-xs font-medium mb-1" style="color:rgba(255,255,255,0.45)">Pengeluaran OPEX Bulan Ini</p>
+                        <p class="text-2xl font-extrabold text-white" id="opexTotal">Rp 0</p>
+                        <p class="text-xs mt-1 font-semibold" id="opexSub" style="color:rgba(255,255,255,0.4)">0 catatan</p>
+                    </div>
+                    <button onclick="window.location.href='expense.html'" class="text-2xl opacity-70 hover:opacity-100 transition" title="Kelola OPEX">💸</button>
                 </div>
                 <div class="space-y-1.5" id="opexBreakdown"></div>
                 <button onclick="window.location.href='expense.html'" class="mt-3 w-full py-2 rounded-xl text-xs font-semibold text-center transition" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6)">+ Catat Pengeluaran</button>
             </div>
+
+            <!-- Revenue Target Card -->
             <div class="glass-card rounded-2xl p-5">
                 <div class="flex items-center justify-between mb-3">
                     <p class="text-xs font-medium" style="color:rgba(255,255,255,0.45)">Target Revenue Bulanan</p>
@@ -128,13 +262,23 @@
                 </div>
                 <div id="targetDisplay">
                     <p class="text-2xl font-extrabold text-white mb-1" id="targetAmount">Rp 0</p>
-                    <div class="flex items-center justify-between text-xs mb-1.5"><span style="color:rgba(255,255,255,.4)">Pencapaian bulan ini</span><span class="font-bold" id="targetPct" style="color:#a5b4fc">0%</span></div>
-                    <div class="w-full h-2.5 rounded-full" style="background:rgba(255,255,255,.08)"><div id="targetBar" class="h-full rounded-full transition-all" style="width:0%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div>
-                    <div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.35)"><span>Rp 0</span><span id="targetGoal">Target: Rp 0</span></div>
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span style="color:rgba(255,255,255,.4)">Pencapaian bulan ini</span>
+                        <span class="font-bold" id="targetPct" style="color:#a5b4fc">0%</span>
+                    </div>
+                    <div class="w-full h-2.5 rounded-full" style="background:rgba(255,255,255,.08)">
+                        <div id="targetBar" class="h-full rounded-full transition-all" style="width:0%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div>
+                    </div>
+                    <div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.35)">
+                        <span>Rp 0</span>
+                        <span id="targetGoal">Target: Rp 0</span>
+                    </div>
                 </div>
                 <div id="targetEditForm" class="hidden mt-2">
                     <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Target Pendapatan (Rp)</label>
-                    <input type="number" id="targetInput" inputmode="numeric" min="0" class="w-full px-3 py-2.5 rounded-xl text-sm mb-3" placeholder="cth: 50000000" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;">
+                    <input type="number" id="targetInput" inputmode="numeric" min="0"
+                        class="w-full px-3 py-2.5 rounded-xl text-sm mb-3" placeholder="cth: 50000000"
+                        style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;">
                     <div class="flex gap-2">
                         <button onclick="toggleTargetEdit()" class="flex-1 py-2 rounded-xl text-xs font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)">Batal</button>
                         <button onclick="saveTarget()" class="flex-1 py-2 rounded-xl text-xs font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">Simpan</button>
@@ -142,56 +286,116 @@
                 </div>
             </div>
         </div>
+
+        <!-- Activity Log + Quick Actions -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <!-- Activity Log -->
             <div class="lg:col-span-2 glass-card rounded-2xl p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-bold text-white text-sm">📋 HO Activity Log</h3>
-                    <button id="refreshBtn" onclick="refreshActivityLog()" style="color:rgba(255,255,255,0.4)" class="hover:text-white transition"><span class="material-symbols-outlined text-lg">refresh</span></button>
+                    <button id="refreshBtn" onclick="refreshActivityLog()" title="Refresh"
+                        style="color:rgba(255,255,255,0.4)" class="hover:text-white transition">
+                        <span class="material-symbols-outlined text-lg">refresh</span>
+                    </button>
                 </div>
                 <div id="activityLog" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
             </div>
+
+            <!-- Quick Actions -->
             <div class="glass-card rounded-2xl p-6">
                 <h3 class="font-bold text-white text-sm mb-4">⚡ Quick Actions</h3>
                 <div class="space-y-1.5">
-                    <button onclick="window.location.href='pos.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-blue-400 text-base">point_of_sale</span>Buka POS Kasir</button>
-                    <button onclick="window.location.href='kitchen.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-orange-400 text-base">soup_kitchen</span>Kitchen Display</button>
-                    <button onclick="window.location.href='inventory.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-green-400 text-base">inventory_2</span>Cek Inventory</button>
-                    <button onclick="window.location.href='keuangan.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-emerald-400 text-base">account_balance</span>Laporan Keuangan</button>
-                    <button onclick="window.location.href='customer.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-purple-400 text-base">group</span>Customer</button>
-                    <button onclick="window.location.href='invoice.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-cyan-400 text-base">receipt_long</span>Invoice</button>
-                    <button onclick="window.location.href='hr.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-pink-400 text-base">badge</span>Kelola Karyawan</button>
-                    <button onclick="window.location.href='product.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-orange-400 text-base">restaurant_menu</span>Master Menu</button>
-                    <button onclick="window.location.href='analytics.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-teal-400 text-base">bar_chart</span>Analytics</button>
-                    <button onclick="window.location.href='expense.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-red-400 text-base">payments</span>Pengeluaran OPEX</button>
-                    <button onclick="window.location.href='purchase.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-indigo-400 text-base">shopping_cart</span>Pembelian Barang</button>
-                    <button onclick="window.location.href='stockopname.html'" class="qa-btn qa-btn-active"><span class="material-symbols-outlined text-yellow-400 text-base">fact_check</span>Stock Opname</button>
+                    <button onclick="window.location.href='pos.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-blue-400 text-base">point_of_sale</span>
+                        Buka POS Kasir
+                    </button>
+                    <button onclick="window.location.href='kitchen.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-orange-400 text-base">soup_kitchen</span>
+                        Kitchen Display
+                    </button>
+                    <button onclick="window.location.href='inventory.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-green-400 text-base">inventory_2</span>
+                        Cek Inventory
+                    </button>
+                    <button onclick="window.location.href='keuangan.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-emerald-400 text-base">account_balance</span>
+                        Laporan Keuangan
+                    </button>
+                    <button onclick="window.location.href='customer.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-purple-400 text-base">group</span>
+                        Customer
+                    </button>
+                    <button onclick="window.location.href='invoice.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-cyan-400 text-base">receipt_long</span>
+                        Invoice
+                    </button>
+                    <button onclick="window.location.href='hr.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-pink-400 text-base">badge</span>
+                        Kelola Karyawan
+                    </button>
+                    <button onclick="window.location.href='product.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-orange-400 text-base">restaurant_menu</span>
+                        Master Menu
+                    </button>
+                    <button onclick="window.location.href='analytics.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-teal-400 text-base">bar_chart</span>
+                        Analytics
+                    </button>
+                    <button onclick="window.location.href='expense.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-red-400 text-base">payments</span>
+                        Pengeluaran OPEX
+                    </button>
+                    <button onclick="window.location.href='purchase.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-indigo-400 text-base">shopping_cart</span>
+                        Pembelian Barang
+                    </button>
+                    <button onclick="window.location.href='stockopname.html'" class="qa-btn qa-btn-active">
+                        <span class="material-symbols-outlined text-yellow-400 text-base">fact_check</span>
+                        Stock Opname
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- AI Chat Modal -->
     <div id="aiChatModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px)">
         <div class="glass-card rounded-2xl w-full sm:max-w-2xl flex flex-col" style="height:70vh;max-height:500px">
             <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color:rgba(255,255,255,0.08)">
-                <div class="flex items-center gap-2"><span class="dot active"></span><h2 class="font-bold text-white">Tanya Lunomi</h2></div>
-                <button onclick="closeChatAI()" style="color:rgba(255,255,255,0.45)" class="hover:text-white transition"><span class="material-symbols-outlined">close</span></button>
+                <div class="flex items-center gap-2">
+                    <span class="dot active"></span>
+                    <h2 class="font-bold text-white">Tanya Lunomi</h2>
+                </div>
+                <button onclick="closeChatAI()" style="color:rgba(255,255,255,0.45)" class="hover:text-white transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
             </div>
             <div id="modalChatArea" class="flex-1 overflow-y-auto p-5 space-y-3">
-                <div class="flex gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div><div class="rounded-xl px-3 py-2 text-sm max-w-sm" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">Halo! Saya CEO Orchestrator Lunomi. Apa yang bisa saya bantu?</div></div>
+                <div class="flex gap-2">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div>
+                    <div class="rounded-xl px-3 py-2 text-sm max-w-sm" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">Halo! Saya CEO Orchestrator Lunomi. Apa yang bisa saya bantu?</div>
+                </div>
             </div>
             <div class="px-5 py-4 border-t flex gap-2" style="border-color:rgba(255,255,255,0.08)">
-                <input type="text" id="modalAiInput" placeholder="Ketik pertanyaan..." class="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm" onkeypress="if(event.key==='Enter')sendModalAI()">
-                <button onclick="sendModalAI()" class="px-4 py-2.5 rounded-xl text-white flex items-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span class="material-symbols-outlined text-sm">send</span></button>
+                <input type="text" id="modalAiInput" placeholder="Ketik pertanyaan..."
+                    class="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm" onkeypress="if(event.key==='Enter')sendModalAI()">
+                <button onclick="sendModalAI()" class="px-4 py-2.5 rounded-xl text-white flex items-center"
+                    style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+                    <span class="material-symbols-outlined text-sm">send</span>
+                </button>
             </div>
         </div>
     </div>
+
     <script>
         const ACTIVITIES = [
-            {color:'#22c55e', title:'FIN AI - Laporan Tutup Kas', desc:'Tutup kas outlet Jl. Sudirman: Rp 12.3M ✓', time:'10 menit lalu'},
-            {color:'#3b82f6', title:'OPS AI - Stok Bahan Baku Alert', desc:'Daging ayam kurang 5kg, stok di bawah minimum', time:'25 menit lalu'},
-            {color:'#f59e0b', title:'HR AI - Absensi Alert', desc:'Staff Roni belum clock-in, shift dimulai 30 menit lalu', time:'15 menit lalu'},
-            {color:'#22c55e', title:'MKT AI - Promo Campaign Published', desc:'Promo "Diskon 30% untuk Menu Pilihan" live di semua outlet', time:'45 menit lalu'},
-            {color:'#a78bfa', title:'CEO Orchestrator - Daily Brief', desc:'Penjualan ↑ 12%, Inventory OK, 1 outlet offline', time:'2 jam lalu'},
+            {color:'#22c55e', title:'FIN AI - Laporan Tutup Kas',       desc:'Tutup kas outlet Jl. Sudirman: Rp 12.3M ✓',                           time:'10 menit lalu'},
+            {color:'#3b82f6', title:'OPS AI - Stok Bahan Baku Alert',   desc:'Daging ayam kurang 5kg, stok di bawah minimum',                        time:'25 menit lalu'},
+            {color:'#f59e0b', title:'HR AI - Absensi Alert',            desc:'Staff Roni belum clock-in, shift dimulai 30 menit lalu',               time:'15 menit lalu'},
+            {color:'#22c55e', title:'MKT AI - Promo Campaign Published', desc:'Promo "Diskon 30% untuk Menu Pilihan" live di semua outlet',           time:'45 menit lalu'},
+            {color:'#a78bfa', title:'CEO Orchestrator - Daily Brief',   desc:'Penjualan ↑ 12%, Inventory OK, 1 outlet offline',                      time:'2 jam lalu'},
         ];
+
         const AGENTS = [
             {code:'FIN AI', label:'Finance',  status:'active'},
             {code:'HR AI',  label:'Payroll',  status:'active'},
@@ -200,6 +404,7 @@
             {code:'IT AI',  label:'Standby',  status:'idle'},
             {code:'DES AI', label:'Standby',  status:'idle'},
         ];
+
         const AI_REPLIES = [
             'Berdasarkan data hari ini, penjualan sedang di atas rata-rata. Outlet Sudirman perlu perhatian karena stok menipis.',
             'OPS AI sedang memproses laporan stok. Estimasi selesai 5 menit lagi.',
@@ -208,6 +413,7 @@
             'Semua sistem berjalan normal. Ada hal lain yang perlu dicek?'
         ];
         let aiIdx = 0, toastTimer = null;
+
         function showToast(msg, type='info') {
             clearTimeout(toastTimer);
             const colors = {info:'rgba(99,102,241,0.9)',success:'rgba(34,197,94,0.9)',warning:'rgba(245,158,11,0.9)',error:'rgba(239,68,68,0.9)'};
@@ -219,53 +425,82 @@
             toast.classList.remove('hidden'); toast.style.opacity = '1';
             toastTimer = setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>toast.classList.add('hidden'),300); }, 3000);
         }
+
+        function showComingSoon(name) { showToast(`${name} sedang dalam pengembangan`, 'info'); }
+
         function renderAgents() {
             document.getElementById('agentList').innerHTML = AGENTS.map(a => {
                 const badgeBg = a.status==='active' ? 'rgba(34,197,94,0.15)' : a.status==='thinking' ? 'rgba(245,158,11,0.15)' : 'rgba(55,65,81,0.4)';
                 const badgeColor = a.status==='active' ? '#4ade80' : a.status==='thinking' ? '#fbbf24' : 'rgba(255,255,255,0.3)';
-                return `<div class="flex items-center justify-between text-sm"><div class="flex items-center gap-2"><span class="dot ${a.status}"></span><span class="font-medium text-white">${a.code}</span></div><span class="agent-badge" style="background:${badgeBg};color:${badgeColor}">${a.label}</span></div>`;
+                return `<div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="dot ${a.status}"></span>
+                        <span class="font-medium text-white">${a.code}</span>
+                    </div>
+                    <span class="agent-badge" style="background:${badgeBg};color:${badgeColor}">${a.label}</span>
+                </div>`;
             }).join('');
         }
+
         function renderActivityLog() {
             document.getElementById('activityLog').innerHTML = ACTIVITIES.map((a,i) =>
-                `<div class="flex gap-3 ${i < ACTIVITIES.length-1 ? 'pb-3 border-b' : ''}" style="border-color:rgba(255,255,255,0.06)"><div class="act-dot" style="background:${a.color};margin-top:6px"></div><div class="flex-1"><p class="text-sm font-semibold text-white">${a.title}</p><p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.5)">${a.desc}</p><p class="text-xs mt-1" style="color:rgba(255,255,255,0.3)">${a.time}</p></div></div>`
+                `<div class="flex gap-3 ${i < ACTIVITIES.length-1 ? 'pb-3 border-b' : ''}" style="border-color:rgba(255,255,255,0.06)">
+                    <div class="act-dot" style="background:${a.color};margin-top:6px"></div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-white">${a.title}</p>
+                        <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.5)">${a.desc}</p>
+                        <p class="text-xs mt-1" style="color:rgba(255,255,255,0.3)">${a.time}</p>
+                    </div>
+                </div>`
             ).join('');
         }
+
         function refreshActivityLog() {
             const icon = document.getElementById('refreshBtn').querySelector('span');
-            icon.classList.add('spin'); showToast('Activity log diperbarui', 'success');
+            icon.classList.add('spin');
+            showToast('Activity log diperbarui', 'success');
             setTimeout(()=>icon.classList.remove('spin'), 600);
         }
+
         function appendChat(area, role, text) {
             const isBot = role==='bot';
             const div = document.createElement('div');
             div.className = 'flex gap-2 chat-enter' + (isBot ? '' : ' justify-end');
             div.innerHTML = isBot
-                ? `<div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div><div class="rounded-xl px-3 py-2 text-sm max-w-xs" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">${text}</div>`
+                ? `<div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div>
+                   <div class="rounded-xl px-3 py-2 text-sm max-w-xs" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">${text}</div>`
                 : `<div class="rounded-xl px-3 py-2 text-sm max-w-xs text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">${text}</div>`;
-            area.appendChild(div); area.scrollTop = area.scrollHeight;
+            area.appendChild(div);
+            area.scrollTop = area.scrollHeight;
         }
+
         function sendAIMessage() {
             const inp = document.getElementById('aiInput');
             const msg = inp.value.trim(); if (!msg) return;
             appendChat(document.getElementById('chatArea'), 'user', msg); inp.value = '';
             setTimeout(()=>{ appendChat(document.getElementById('chatArea'), 'bot', AI_REPLIES[aiIdx++ % AI_REPLIES.length]); }, 700);
         }
+
         function sendModalAI() {
             const inp = document.getElementById('modalAiInput');
             const msg = inp.value.trim(); if (!msg) return;
             appendChat(document.getElementById('modalChatArea'), 'user', msg); inp.value = '';
             setTimeout(()=>{ appendChat(document.getElementById('modalChatArea'), 'bot', AI_REPLIES[aiIdx++ % AI_REPLIES.length]); }, 700);
         }
+
         function openChatAI()  { document.getElementById('aiChatModal').classList.remove('hidden'); document.getElementById('modalAiInput').focus(); }
         function closeChatAI() { document.getElementById('aiChatModal').classList.add('hidden'); }
+
         function updateClock() {
             const n = new Date();
             const days = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
             const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
-            document.getElementById('clockDisplay').textContent = `${days[n.getDay()]} ${n.getDate()} ${months[n.getMonth()]} · ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+            document.getElementById('clockDisplay').textContent =
+                `${days[n.getDay()]} ${n.getDate()} ${months[n.getMonth()]} · ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
         }
+
         function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
+
         function loadOpexData() {
             const exps = JSON.parse(localStorage.getItem('lunomi_expenses') || '[]');
             const nowMonth = new Date().toISOString().slice(0,7);
@@ -277,9 +512,13 @@
             month.forEach(e => { cats[e.cat] = (cats[e.cat]||0) + e.amount; });
             const top3 = Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,3);
             document.getElementById('opexBreakdown').innerHTML = top3.map(([cat,amt]) =>
-                `<div class="flex justify-between text-xs"><span style="color:rgba(255,255,255,0.45)">${cat}</span><span class="font-semibold text-white">${rp(amt)}</span></div>`
+                `<div class="flex justify-between text-xs">
+                    <span style="color:rgba(255,255,255,0.45)">${cat}</span>
+                    <span class="font-semibold text-white">${rp(amt)}</span>
+                </div>`
             ).join('') || '<div class="text-xs" style="color:rgba(255,255,255,0.3)">Belum ada pengeluaran</div>';
         }
+
         function loadRevenueTarget() {
             const tgt = JSON.parse(localStorage.getItem('lunomi_revenue_target') || '{"amount":0}');
             const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
@@ -290,9 +529,17 @@
             document.getElementById('targetAmount').textContent = rp(goal);
             document.getElementById('targetPct').textContent = pct + '%';
             document.getElementById('targetBar').style.width = pct + '%';
-            document.getElementById('targetBar').style.background = pct >= 100 ? 'linear-gradient(90deg,#22c55e,#4ade80)' : pct >= 70 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'linear-gradient(90deg,#6366f1,#818cf8)';
+            document.getElementById('targetBar').style.background = pct >= 100
+                ? 'linear-gradient(90deg,#22c55e,#4ade80)'
+                : pct >= 70 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)'
+                : 'linear-gradient(90deg,#6366f1,#818cf8)';
             document.getElementById('targetGoal').textContent = 'Target: ' + rp(goal);
+            if(goal > 0) {
+                const el = document.querySelector('#targetDisplay .flex.justify-between.mt-1\\.5 span:first-child');
+                if(el) el.textContent = rp(achieved);
+            }
         }
+
         function toggleTargetEdit() {
             const form = document.getElementById('targetEditForm');
             const display = document.getElementById('targetDisplay');
@@ -301,20 +548,32 @@
             if(isHidden) {
                 const tgt = JSON.parse(localStorage.getItem('lunomi_revenue_target') || '{"amount":0}');
                 document.getElementById('targetInput').value = tgt.amount || '';
-                form.classList.remove('hidden'); display.classList.add('hidden'); btn.textContent = 'Batal';
-            } else { form.classList.add('hidden'); display.classList.remove('hidden'); btn.textContent = 'Edit'; }
+                form.classList.remove('hidden');
+                display.classList.add('hidden');
+                btn.textContent = 'Batal';
+            } else {
+                form.classList.add('hidden');
+                display.classList.remove('hidden');
+                btn.textContent = 'Edit';
+            }
         }
+
         function saveTarget() {
             const v = parseFloat(document.getElementById('targetInput').value) || 0;
             if(v <= 0) { showToast('Masukkan target yang valid', 'warning'); return; }
             localStorage.setItem('lunomi_revenue_target', JSON.stringify({amount:v, period:'monthly'}));
-            toggleTargetEdit(); loadRevenueTarget(); showToast('Target revenue disimpan!', 'success');
+            toggleTargetEdit();
+            loadRevenueTarget();
+            showToast('Target revenue disimpan!', 'success');
         }
+
         function logout() {
             if (!confirm('Yakin ingin logout?')) return;
-            localStorage.removeItem('lunomi_session'); localStorage.removeItem('lunomi_outlet');
+            localStorage.removeItem('lunomi_session');
+            localStorage.removeItem('lunomi_outlet');
             window.location.href = 'index.html';
         }
+
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 const s = localStorage.getItem('lunomi_session');
@@ -326,8 +585,12 @@
                 if (outlet && outletEl) outletEl.textContent = '🏪 ' + outlet.name;
                 else if (outletEl) outletEl.textContent = 'POS Dashboard';
             } catch(e) { window.location.href = 'index.html'; return; }
-            renderAgents(); renderActivityLog(); updateClock(); setInterval(updateClock, 60000);
-            loadOpexData(); loadRevenueTarget();
+            renderAgents();
+            renderActivityLog();
+            updateClock();
+            setInterval(updateClock, 60000);
+            loadOpexData();
+            loadRevenueTarget();
         });
     </script>
 </body>
