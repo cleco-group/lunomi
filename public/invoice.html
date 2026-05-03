@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Invoice</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
@@ -44,12 +45,14 @@
     </div>
 </nav>
 <div class="max-w-6xl mx-auto px-4 py-6 no-print">
+    <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Invoice</div><div class="text-2xl font-extrabold text-white" id="statTotal">5</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(34,197,94,.7)">Lunas</div><div class="text-2xl font-extrabold text-green-400" id="statPaid">3</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(245,158,11,.7)">Menunggu</div><div class="text-2xl font-extrabold text-amber-400" id="statPending">1</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(59,130,246,.7)">Terkirim</div><div class="text-2xl font-extrabold text-blue-400" id="statSent">1</div></div>
     </div>
+    <!-- Table -->
     <div class="glass-card rounded-2xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -67,6 +70,7 @@
     </div>
 </div>
 
+<!-- Create Invoice Modal -->
 <div id="createModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="glass-card rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-screen overflow-y-auto">
         <div class="flex items-center justify-between mb-5">
@@ -103,6 +107,7 @@
     </div>
 </div>
 
+<!-- Preview Modal -->
 <div id="previewModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="glass-card rounded-3xl p-6 w-full max-w-lg shadow-2xl">
         <div class="flex items-center justify-between mb-4">

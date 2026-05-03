@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Stock Opname</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
@@ -42,11 +43,13 @@
 </nav>
 
 <div class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Tabs -->
     <div class="flex gap-2 mb-6">
         <button class="tab-btn active" id="tab-menu" onclick="switchTab('menu',this)">🍜 Stok Menu</button>
         <button class="tab-btn" id="tab-bahan" onclick="switchTab('bahan',this)">📦 Bahan Baku</button>
     </div>
 
+    <!-- Info bar -->
     <div class="glass-card rounded-2xl px-5 py-4 mb-5 flex flex-wrap items-center gap-4 justify-between">
         <div class="text-sm" style="color:rgba(255,255,255,.6)">Masukkan jumlah fisik yang dihitung untuk menyesuaikan stok sistem.</div>
         <button onclick="saveOpname()" class="btn-primary px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
@@ -54,6 +57,7 @@
         </button>
     </div>
 
+    <!-- Table header -->
     <div class="opname-row px-2 text-xs font-semibold" style="color:rgba(255,255,255,.35);border-bottom:1px solid rgba(255,255,255,.12)">
         <span>Nama Item</span>
         <span class="text-center">Sistem</span>
@@ -61,8 +65,10 @@
         <span class="text-center">Selisih</span>
     </div>
 
+    <!-- Rows -->
     <div id="opnameRows" class="px-2"></div>
 
+    <!-- Summary -->
     <div class="glass-card rounded-2xl p-5 mt-5 grid grid-cols-3 gap-4 text-center">
         <div>
             <div class="text-2xl font-extrabold text-green-400" id="sumPlus">0</div>
@@ -92,7 +98,7 @@
         {id:7,  n:'Jus',         e:'🧃', unit:'gelas'},
         {id:8,  n:'Smoothie',    e:'🥤', unit:'gelas'},
         {id:9,  n:'Roti Goreng', e:'🥐', unit:'pcs'},
-        {id:10, n:'Lumpia',      e:'🥟', unit:'pcs'},
+        {id:10, n:'Lumpia',      e:'🦟', unit:'pcs'},
         {id:11, n:'Kue Lapis',   e:'🍰', unit:'pcs'},
         {id:12, n:'Bika Ambon',  e:'🍮', unit:'pcs'},
     ];

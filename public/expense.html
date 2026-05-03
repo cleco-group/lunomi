@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Pengeluaran OPEX</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
@@ -41,6 +42,7 @@
 </nav>
 
 <div class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Metrics -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div class="metric-card rounded-2xl p-4" style="border-left:3px solid #f87171">
             <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Hari Ini</div>
@@ -60,13 +62,14 @@
         </div>
     </div>
 
+    <!-- Filter -->
     <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
         <input id="searchExp" type="text" placeholder="🔍  Cari deskripsi..." oninput="renderList()"
             class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[160px]">
         <select id="filterCat" onchange="renderList()" class="input-glass px-3 py-2 rounded-xl text-sm">
             <option value="all">Semua Kategori</option>
-            <option>Gaji & Upah</option>
-            <option>Listrik & Air</option>
+            <option>Gaji &amp; Upah</option>
+            <option>Listrik &amp; Air</option>
             <option>Sewa</option>
             <option>Bahan Baku</option>
             <option>Marketing</option>
@@ -78,12 +81,14 @@
         </select>
     </div>
 
+    <!-- List -->
     <div class="glass-card rounded-2xl overflow-hidden">
         <div id="expenseList" class="divide-y" style="divide-color:rgba(255,255,255,.06)"></div>
         <div id="emptyState" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Belum ada catatan pengeluaran.</div>
     </div>
 </div>
 
+<!-- Add Modal -->
 <div id="addModal" class="modal-overlay hidden fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4">
     <div class="modal-box w-full max-w-md shadow-2xl">
         <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
@@ -99,8 +104,8 @@
                 <div>
                     <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Kategori</label>
                     <select id="expCat" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
-                        <option>Gaji & Upah</option>
-                        <option>Listrik & Air</option>
+                        <option>Gaji &amp; Upah</option>
+                        <option>Listrik &amp; Air</option>
                         <option>Sewa</option>
                         <option>Bahan Baku</option>
                         <option>Marketing</option>
