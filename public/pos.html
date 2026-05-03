@@ -5,18 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi POS - Kasir Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
-
-        /* Dark Modern — Financial Dashboard palette from UI/UX Pro Max skill
-           BG:#020617  Surface:#0F172A  Elevated:#1E293B  Accent:#3B82F6  CTA:#F97316 */
         body { background:#020617; color:white; }
-
-        /* Header */
         .top-bar { background:#0a0f1e; border-bottom:1px solid rgba(255,255,255,0.06); }
-
-        /* Product area */
         #productArea { background:#020617; }
         .cat-btn {
             padding:0.4rem 1rem; border-radius:9999px;
@@ -30,8 +24,6 @@
             background:rgba(59,130,246,0.2); border-color:rgba(59,130,246,0.6);
             color:#93c5fd; box-shadow:0 0 12px rgba(59,130,246,0.2);
         }
-
-        /* Product cards */
         .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:0.75rem; }
         .product-item {
             background:#0f172a; border:1px solid rgba(255,255,255,0.07);
@@ -43,8 +35,6 @@
             transform:translateY(-2px); box-shadow:0 6px 20px rgba(59,130,246,0.15);
         }
         .product-item:active { transform:scale(0.96); }
-
-        /* Cart sidebar */
         #cartSidebar { background:#0a0f1e; border-left:1px solid rgba(255,255,255,0.06); }
         @media(max-width:640px){
             .pos-layout { flex-direction:column; height:auto; }
@@ -60,11 +50,7 @@
             align-items:center; justify-content:center; transition:background 0.1s;
         }
         .qty-btn:hover { background:rgba(59,130,246,0.2); border-color:rgba(59,130,246,0.4); }
-
-        /* Summary area */
         #cartSummary { background:#0f172a; border-top:1px solid rgba(255,255,255,0.06); }
-
-        /* Buttons */
         .btn-pay {
             background:linear-gradient(135deg,#3b82f6,#2563eb);
             box-shadow:0 4px 16px rgba(59,130,246,0.35);
@@ -89,8 +75,6 @@
             color:#a78bfa; font-weight:600; border-radius:0.75rem; cursor:pointer; transition:all 0.15s;
         }
         .btn-purple:hover { background:rgba(139,92,246,0.2); }
-
-        /* Modal overlay */
         .modal-overlay {
             background:rgba(0,0,0,0.7);
             backdrop-filter:blur(8px);
@@ -121,11 +105,7 @@
             background:rgba(249,115,22,0.15); border-color:rgba(249,115,22,0.6);
             color:#fb923c; box-shadow:0 0 10px rgba(249,115,22,0.2);
         }
-
-        /* History item */
         .hist-item { background:#1e293b; border:1px solid rgba(255,255,255,0.07); border-radius:0.875rem; padding:1rem; }
-
-        /* Toast */
         #toast { transition:opacity 0.3s; pointer-events:none; }
     @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
@@ -302,7 +282,7 @@
             {id:7, n:'Jus',         c:'minuman',  p:15000, e:'🧃'},
             {id:8, n:'Smoothie',    c:'minuman',  p:18000, e:'🥤'},
             {id:9, n:'Roti Goreng', c:'snack',    p:10000, e:'🥐'},
-            {id:10,n:'Lumpia',      c:'snack',    p:12000, e:'🥟'},
+            {id:10,n:'Lumpia',      c:'snack',    p:12000, e:'🦟'},
             {id:11,n:'Kue Lapis',   c:'dessert',  p:25000, e:'🍰'},
             {id:12,n:'Bika Ambon',  c:'dessert',  p:20000, e:'🍮'}
         ];
