@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi KDS - Kitchen Display System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
@@ -12,39 +13,71 @@
         .top-bar { background:#0a0f1e; border-bottom:1px solid rgba(255,255,255,0.06); }
         .stats-bar { background:#0f172a; border-bottom:1px solid rgba(255,255,255,0.06); }
         .order-card { border-radius:0.875rem; transition:all 0.25s; border:1px solid rgba(255,255,255,0.07); }
-        .order-card.pending { background:#0f172a; border-left:3px solid rgba(99,102,241,0.6); }
-        .order-card.cooking { background:#130f00; border-left:3px solid rgba(245,158,11,0.7); }
-        .order-card.urgent { background:#1a0505; border-left:3px solid rgba(239,68,68,0.8); }
-        .order-card.ready { background:#031a0e; border-left:3px solid rgba(34,197,94,0.7); }
+        .order-card.pending {
+            background:#0f172a;
+            border-left:3px solid rgba(99,102,241,0.6);
+            box-shadow: inset 3px 0 20px rgba(99,102,241,0.05);
+        }
+        .order-card.cooking {
+            background:#130f00;
+            border-left:3px solid rgba(245,158,11,0.7);
+            box-shadow: inset 3px 0 20px rgba(245,158,11,0.08), 0 0 20px rgba(245,158,11,0.05);
+        }
+        .order-card.urgent {
+            background:#1a0505;
+            border-left:3px solid rgba(239,68,68,0.8);
+            box-shadow: inset 3px 0 20px rgba(239,68,68,0.1), 0 0 24px rgba(239,68,68,0.08);
+        }
+        .order-card.ready {
+            background:#031a0e;
+            border-left:3px solid rgba(34,197,94,0.7);
+            box-shadow: inset 3px 0 20px rgba(34,197,94,0.08);
+        }
         .timer { font-weight:800; font-size:1.15rem; font-variant-numeric:tabular-nums; }
-        .timer.urgent { color:#ef4444; animation:blink 1s infinite; }
+        .timer.urgent  { color:#ef4444; animation:blink 1s infinite; }
         .timer.warning { color:#f59e0b; }
-        .timer.ok { color:#34d399; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
-        .col-header { display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; font-weight:800; margin-bottom:0.75rem; padding-bottom:0.6rem; }
-        .col-pending { border-bottom:2px solid rgba(99,102,241,0.5); color:#a5b4fc; }
-        .col-cooking { border-bottom:2px solid rgba(245,158,11,0.5); color:#fcd34d; }
-        .col-ready   { border-bottom:2px solid rgba(34,197,94,0.5); color:#6ee7b7; }
-        .badge { font-size:0.65rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:9999px; margin-left:auto; }
-        .badge-pending { background:rgba(99,102,241,0.2); color:#a5b4fc; }
-        .badge-cooking { background:rgba(245,158,11,0.2); color:#fcd34d; }
-        .badge-ready   { background:rgba(34,197,94,0.2); color:#6ee7b7; }
-        .btn-cook { flex:1;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#fcd34d; }
-        .btn-done { flex:1;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:#6ee7b7; }
-        .btn-take { flex:1;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6); }
-        .btn-urgent-on  { padding:0.5rem 0.75rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#fca5a5; }
-        .btn-urgent-off { padding:0.5rem 0.75rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3); }
+        .timer.ok      { color:#34d399; }
+        @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0.35} }
+        .col-header {
+            display:flex; align-items:center; gap:0.5rem;
+            font-size:0.85rem; font-weight:800; margin-bottom:0.75rem;
+            padding-bottom:0.6rem;
+        }
+        .col-pending  { border-bottom:2px solid rgba(99,102,241,0.5); color:#a5b4fc; }
+        .col-cooking  { border-bottom:2px solid rgba(245,158,11,0.5); color:#fcd34d; }
+        .col-ready    { border-bottom:2px solid rgba(34,197,94,0.5);  color:#6ee7b7; }
+        .badge {
+            font-size:0.65rem; font-weight:700; padding:0.15rem 0.5rem;
+            border-radius:9999px; margin-left:auto;
+        }
+        .badge-pending  { background:rgba(99,102,241,0.2); color:#a5b4fc; }
+        .badge-cooking  { background:rgba(245,158,11,0.2); color:#fcd34d; }
+        .badge-ready    { background:rgba(34,197,94,0.2);  color:#6ee7b7; }
+        .btn-cook  { flex:1;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#fcd34d; }
+        .btn-cook:hover  { background:rgba(245,158,11,0.25); }
+        .btn-done  { flex:1;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:#6ee7b7; }
+        .btn-done:hover  { background:rgba(34,197,94,0.25); }
+        .btn-take  { flex:1;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6); }
+        .btn-take:hover  { background:rgba(255,255,255,0.1);color:white; }
+        .btn-urgent-on  { padding:0.5rem 0.75rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#fca5a5; }
+        .btn-urgent-off { padding:0.5rem 0.75rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3); }
+        .btn-urgent-on:hover  { background:rgba(239,68,68,0.3); }
+        .btn-urgent-off:hover { background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6); }
         .stat-pill { display:flex;align-items:center;gap:0.4rem;font-size:0.82rem; }
         .modal-overlay { background:rgba(0,0,0,0.75);backdrop-filter:blur(8px); }
         .modal-box { background:#0f172a;border:1px solid rgba(255,255,255,0.1);border-radius:1.25rem; }
         #toast { transition:opacity 0.3s; pointer-events:none; }
-        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
+
+    <!-- Toast -->
     <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] hidden">
         <div id="toastInner" class="px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold text-white flex items-center gap-2"></div>
     </div>
+
+    <!-- Header -->
     <div class="top-bar">
         <div class="max-w-7xl mx-auto px-5 py-3 flex justify-between items-center">
             <div>
@@ -57,12 +90,20 @@
                     <p class="text-xs" style="color:rgba(255,255,255,0.35)"><span id="kdsStatus" class="text-emerald-400">● ONLINE</span></p>
                 </div>
                 <div class="flex flex-col gap-1">
-                    <button onclick="window.location.href='dashboard.html'" class="px-3 py-1.5 text-xs font-semibold rounded-lg" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5)">Dashboard</button>
-                    <button onclick="logout()" class="px-3 py-1.5 text-xs font-semibold rounded-lg" style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.15);color:rgba(248,113,113,0.8)">Logout</button>
+                    <button onclick="window.location.href='dashboard.html'"
+                        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition"
+                        style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5)"
+                        onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Dashboard</button>
+                    <button onclick="logout()"
+                        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition"
+                        style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.15);color:rgba(248,113,113,0.8)"
+                        onmouseover="this.style.color='#fca5a5'" onmouseout="this.style.color='rgba(248,113,113,0.8)'">Logout</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Stats Bar -->
     <div class="stats-bar px-5 py-2.5">
         <div class="max-w-7xl mx-auto flex flex-wrap gap-5">
             <div class="stat-pill"><span style="color:rgba(255,255,255,0.4)">📋 Total</span><span class="font-bold" id="totalOrder">0</span></div>
@@ -72,129 +113,189 @@
             <div class="stat-pill"><span style="color:rgba(255,255,255,0.4)">🚨 Urgent</span><span class="font-bold text-red-400" id="urgentOrder">0</span></div>
         </div>
     </div>
+
+    <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 py-5 overflow-y-auto" style="height:calc(100vh - 112px)">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <div class="col-header col-pending"><span>📥 Order Masuk</span><span id="pendingBadge" class="badge badge-pending"></span></div>
+                <div class="col-header col-pending">
+                    <span>📥 Order Masuk</span>
+                    <span id="pendingBadge" class="badge badge-pending"></span>
+                </div>
                 <div id="incomingOrders" class="space-y-3"></div>
             </div>
             <div>
-                <div class="col-header col-cooking"><span>👨‍🍳 Sedang Dimasak</span><span id="cookingBadge" class="badge badge-cooking"></span></div>
+                <div class="col-header col-cooking">
+                    <span>👨‍🍳 Sedang Dimasak</span>
+                    <span id="cookingBadge" class="badge badge-cooking"></span>
+                </div>
                 <div id="cookingOrders" class="space-y-3"></div>
             </div>
             <div>
-                <div class="col-header col-ready"><span>✓ Siap Diambil</span><span id="readyBadge" class="badge badge-ready"></span></div>
+                <div class="col-header col-ready">
+                    <span>✓ Siap Diambil</span>
+                    <span id="readyBadge" class="badge badge-ready"></span>
+                </div>
                 <div id="readyOrders" class="space-y-3"></div>
             </div>
         </div>
     </div>
+
+    <!-- Pickup Confirm Modal -->
     <div id="pickupModal" style="display:none" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 p-4">
         <div class="modal-box p-6 max-w-sm w-full shadow-2xl">
             <h3 class="font-bold text-lg mb-2">📦 Konfirmasi Pengambilan</h3>
             <p class="text-sm mb-0.5" style="color:rgba(255,255,255,0.5)">Order: <span id="pickupOrderId" class="text-white font-semibold"></span></p>
             <p class="text-sm mb-5" style="color:rgba(255,255,255,0.5)">Item: <span id="pickupItems" style="color:rgba(255,255,255,0.75)"></span></p>
             <div class="flex gap-3">
-                <button onclick="closePickup()" class="flex-1 py-2.5 text-sm font-semibold rounded-xl" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)">Batal</button>
-                <button onclick="confirmPickup()" class="flex-1 py-2.5 text-sm font-bold rounded-xl text-white" style="background:linear-gradient(135deg,#059669,#047857)">✓ Konfirmasi Ambil</button>
+                <button onclick="closePickup()"
+                    class="flex-1 py-2.5 text-sm font-semibold rounded-xl transition"
+                    style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)"
+                    onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Batal</button>
+                <button onclick="confirmPickup()"
+                    class="flex-1 py-2.5 text-sm font-bold rounded-xl transition text-white"
+                    style="background:linear-gradient(135deg,#059669,#047857);box-shadow:0 4px 14px rgba(5,150,105,0.35)">✓ Konfirmasi Ambil</button>
             </div>
         </div>
     </div>
-    <script>
-        var ORDERS_INIT = [
-            {id:'ORD-001',time:'09:30',items:'Nasi Goreng x2, Mie Ayam',st:'pending',et:8,urgent:false},
-            {id:'ORD-002',time:'09:32',items:'Ikan Bakar, Soto Ayam',st:'pending',et:12,urgent:false},
-            {id:'ORD-003',time:'09:35',items:'Lumpia x3, Es Teh',st:'cooking',et:4,urgent:false},
-            {id:'ORD-004',time:'09:38',items:'Kue Lapis x2, Kopi',st:'cooking',et:2,urgent:false},
-            {id:'ORD-005',time:'09:40',items:'Roti Goreng x5',st:'ready',et:0,urgent:false},
-            {id:'ORD-006',time:'09:42',items:'Nasi Goreng — URGENT',st:'pending',et:6,urgent:true},
-            {id:'ORD-007',time:'09:45',items:'Smoothie, Jus',st:'ready',et:0,urgent:false},
-            {id:'ORD-008',time:'09:48',items:'Bika Ambon',st:'cooking',et:3,urgent:false}
-        ];
-        var orders = JSON.parse(JSON.stringify(ORDERS_INIT));
-        var elapsed = {}, intervalId = null, pickupTargetId = null, toastTimer = null;
 
-        function showToast(msg, type) {
-            type = type || 'success';
+    <script>
+        const ORDERS_INIT = [
+            {id:'ORD-001',time:'09:30',items:'Nasi Goreng x2, Mie Ayam',    st:'pending', et:8,  urgent:false},
+            {id:'ORD-002',time:'09:32',items:'Ikan Bakar, Soto Ayam',       st:'pending', et:12, urgent:false},
+            {id:'ORD-003',time:'09:35',items:'Lumpia x3, Es Teh',           st:'cooking', et:4,  urgent:false},
+            {id:'ORD-004',time:'09:38',items:'Kue Lapis x2, Kopi',          st:'cooking', et:2,  urgent:false},
+            {id:'ORD-005',time:'09:40',items:'Roti Goreng x5',              st:'ready',   et:0,  urgent:false},
+            {id:'ORD-006',time:'09:42',items:'Nasi Goreng — URGENT',        st:'pending', et:6,  urgent:true},
+            {id:'ORD-007',time:'09:45',items:'Smoothie, Jus',               st:'ready',   et:0,  urgent:false},
+            {id:'ORD-008',time:'09:48',items:'Bika Ambon',                  st:'cooking', et:3,  urgent:false}
+        ];
+
+        let orders=JSON.parse(JSON.stringify(ORDERS_INIT));
+        let elapsed={}, intervalId=null, pickupTargetId=null, toastTimer=null;
+
+        function showToast(msg,type='success'){
             clearTimeout(toastTimer);
-            var C = {success:'rgba(34,197,94,0.9)',info:'rgba(99,102,241,0.9)',warning:'rgba(245,158,11,0.9)',error:'rgba(239,68,68,0.9)'};
-            var I = {success:'✓',info:'ℹ️',warning:'⚠️',error:'✕'};
-            var inn = document.getElementById('toastInner');
-            inn.style.background = C[type];
-            inn.innerHTML = '<span>' + I[type] + '</span><span>' + msg + '</span>';
-            var t = document.getElementById('toast');
-            t.classList.remove('hidden'); t.style.opacity = '1';
-            toastTimer = setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.classList.add('hidden'); }, 300); }, 3000);
+            const C={success:'rgba(34,197,94,0.9)',info:'rgba(99,102,241,0.9)',warning:'rgba(245,158,11,0.9)',error:'rgba(239,68,68,0.9)'};
+            const I={success:'✓',info:'ℹ️',warning:'⚠️',error:'✕'};
+            const inn=document.getElementById('toastInner');
+            inn.style.background=C[type];inn.innerHTML=`<span>${I[type]}</span><span>${msg}</span>`;
+            const t=document.getElementById('toast');t.classList.remove('hidden');t.style.opacity='1';
+            toastTimer=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.classList.add('hidden'),300);},3000);
         }
 
-        function initElapsed() { orders.forEach(function(o){ elapsed[o.id] = 0; }); }
+        function initElapsed(){orders.forEach(o=>{elapsed[o.id]=0;});}
 
-        function tick() {
-            orders.forEach(function(o){ if(o.st==='cooking'||o.st==='pending') elapsed[o.id]=(elapsed[o.id]||0)+1; });
+        function tick(){
+            orders.forEach(o=>{if(o.st==='cooking'||o.st==='pending')elapsed[o.id]=(elapsed[o.id]||0)+1;});
             render();
         }
 
-        function render() {
-            var pending = orders.filter(function(o){ return o.st==='pending'; });
-            var cooking = orders.filter(function(o){ return o.st==='cooking'; });
-            var ready   = orders.filter(function(o){ return o.st==='ready'; });
-            var urgent  = orders.filter(function(o){ return o.urgent && o.st!=='ready'; });
-            document.getElementById('totalOrder').textContent   = orders.length;
-            document.getElementById('pendingOrder').textContent = pending.length;
-            document.getElementById('cookingOrder').textContent = cooking.length;
-            document.getElementById('readyOrder').textContent   = ready.length;
-            document.getElementById('urgentOrder').textContent  = urgent.length;
-            document.getElementById('pendingBadge').textContent = pending.length || '';
-            document.getElementById('cookingBadge').textContent = cooking.length || '';
-            document.getElementById('readyBadge').textContent   = ready.length || '';
-            var emptyHTML = function(msg){ return '<p style="color:rgba(255,255,255,0.2);font-size:0.82rem;text-align:center;padding:2rem 0">' + msg + '</p>'; };
-            document.getElementById('incomingOrders').innerHTML = pending.length===0 ? emptyHTML('Tidak ada order baru') : pending.map(renderCard).join('');
-            document.getElementById('cookingOrders').innerHTML  = cooking.length===0 ? emptyHTML('Semua selesai') : cooking.map(renderCard).join('');
-            document.getElementById('readyOrders').innerHTML    = ready.length===0   ? emptyHTML('Belum ada yang siap') : ready.map(renderCard).join('');
+        function render(){
+            const pending=orders.filter(o=>o.st==='pending');
+            const cooking=orders.filter(o=>o.st==='cooking');
+            const ready=orders.filter(o=>o.st==='ready');
+            const urgent=orders.filter(o=>o.urgent&&o.st!=='ready');
+
+            document.getElementById('totalOrder').textContent=orders.length;
+            document.getElementById('pendingOrder').textContent=pending.length;
+            document.getElementById('cookingOrder').textContent=cooking.length;
+            document.getElementById('readyOrder').textContent=ready.length;
+            document.getElementById('urgentOrder').textContent=urgent.length;
+            document.getElementById('pendingBadge').textContent=pending.length||'';
+            document.getElementById('cookingBadge').textContent=cooking.length||'';
+            document.getElementById('readyBadge').textContent=ready.length||'';
+
+            const emptyHTML=(msg)=>`<p style="color:rgba(255,255,255,0.2);font-size:0.82rem;text-align:center;padding:2rem 0">${msg}</p>`;
+            document.getElementById('incomingOrders').innerHTML=pending.length===0?emptyHTML('Tidak ada order baru'):pending.map(o=>renderCard(o)).join('');
+            document.getElementById('cookingOrders').innerHTML=cooking.length===0?emptyHTML('Semua selesai'):cooking.map(o=>renderCard(o)).join('');
+            document.getElementById('readyOrders').innerHTML=ready.length===0?emptyHTML('Belum ada yang siap'):ready.map(o=>renderCard(o)).join('');
         }
 
-        function renderCard(o) {
-            var el = elapsed[o.id] || 0;
-            var tc = (o.urgent && o.st!=='ready') ? 'urgent' : (el>600 ? 'warning' : 'ok');
-            var mins = Math.floor(el/60), secs = el%60;
-            var timerTxt = mins + ':' + String(secs).padStart(2,'0');
-            var cardClass = 'order-card ';
-            if(o.urgent && o.st!=='ready') cardClass += 'urgent';
-            else if(o.st==='cooking') cardClass += 'cooking';
-            else if(o.st==='ready')   cardClass += 'ready';
-            else cardClass += 'pending';
-            var urgentLabel = (o.urgent && o.st!=='ready') ? '<span style="font-size:0.6rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:4px;background:rgba(239,68,68,0.25);color:#fca5a5;margin-left:0.4rem">URGENT</span>' : '';
-            var action = '';
-            if(o.st==='pending')      action = '<button class="btn-cook" onclick="startCooking(\'' + o.id + '\')">&#9654; Mulai Masak</button>';
-            else if(o.st==='cooking') action = '<button class="btn-done" onclick="markReady(\'' + o.id + '\')">✓ Selesai</button>';
-            else                      action = '<button class="btn-take" onclick="requestPickup(\'' + o.id + '\')">📦 Ambil</button>';
-            var urgentToggle = (o.st!=='ready') ? '<button class="' + (o.urgent?'btn-urgent-on':'btn-urgent-off') + '" onclick="toggleUrgent(\'' + o.id + '\')">🚨</button>' : '';
-            return '<div class="' + cardClass + ' p-4">'
-                + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem">'
-                + '<div><div style="font-weight:800;font-size:0.9rem">' + o.id + urgentLabel + '</div>'
-                + '<div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:0.15rem">' + o.time + '</div></div>'
-                + '<div style="text-align:right"><div class="timer ' + tc + '">' + timerTxt + '</div>'
-                + '<div style="font-size:0.68rem;color:rgba(255,255,255,0.3);margin-top:0.1rem">' + (o.st==='ready'?'Siap':'Est: '+o.et+' min') + '</div></div></div>'
-                + '<div style="font-size:0.78rem;color:rgba(255,255,255,0.6);padding-top:0.5rem;margin-bottom:0.6rem;border-top:1px solid rgba(255,255,255,0.06)">' + o.items + '</div>'
-                + '<div style="display:flex;gap:0.4rem">' + action + urgentToggle + '</div></div>';
+        function renderCard(o){
+            const el=elapsed[o.id]||0;
+            const tc=o.urgent&&o.st!=='ready'?'urgent':el>600?'warning':'ok';
+            const mins=Math.floor(el/60),secs=el%60;
+            const timerTxt=`${mins}:${String(secs).padStart(2,'0')}`;
+
+            let cardClass='order-card ';
+            if(o.urgent&&o.st!=='ready') cardClass+='urgent';
+            else if(o.st==='cooking') cardClass+='cooking';
+            else if(o.st==='ready')   cardClass+='ready';
+            else cardClass+='pending';
+
+            const urgentLabel=o.urgent&&o.st!=='ready'
+                ?'<span style="font-size:0.6rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:4px;background:rgba(239,68,68,0.25);color:#fca5a5;margin-left:0.4rem">URGENT</span>'
+                :'';
+
+            let action='';
+            if(o.st==='pending')      action=`<button class="btn-cook" onclick="startCooking('${o.id}')">&#9654; Mulai Masak</button>`;
+            else if(o.st==='cooking') action=`<button class="btn-done" onclick="markReady('${o.id}')">&#10003; Selesai</button>`;
+            else                      action=`<button class="btn-take" onclick="requestPickup('${o.id}')">&#128230; Ambil</button>`;
+
+            const urgentToggle=o.st!=='ready'
+                ?`<button class="${o.urgent?'btn-urgent-on':'btn-urgent-off'}" onclick="toggleUrgent('${o.id}')" title="${o.urgent?'Hapus urgent':'Tandai urgent'}">🚨</button>`
+                :'';
+
+            return `<div class="${cardClass} p-4">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem">
+                    <div>
+                        <div style="font-weight:800;font-size:0.9rem">${o.id}${urgentLabel}</div>
+                        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:0.15rem">${o.time}</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div class="timer ${tc}">${timerTxt}</div>
+                        <div style="font-size:0.68rem;color:rgba(255,255,255,0.3);margin-top:0.1rem">${o.st==='ready'?'Siap':'Est: '+o.et+' min'}</div>
+                    </div>
+                </div>
+                <div style="font-size:0.78rem;color:rgba(255,255,255,0.6);padding-top:0.5rem;margin-bottom:0.6rem;border-top:1px solid rgba(255,255,255,0.06)">${o.items}</div>
+                <div style="display:flex;gap:0.4rem">${action}${urgentToggle}</div>
+            </div>`;
         }
 
-        function startCooking(id){ var o=orders.find(function(x){return x.id===id;}); if(o){o.st='cooking';showToast(id+' mulai dimasak','info');render();} }
-        function markReady(id){ var o=orders.find(function(x){return x.id===id;}); if(o){o.st='ready';showToast(id+' siap diambil!','success');render();} }
-        function requestPickup(id){ var o=orders.find(function(x){return x.id===id;}); if(!o)return; pickupTargetId=id; document.getElementById('pickupOrderId').textContent=id; document.getElementById('pickupItems').textContent=o.items; document.getElementById('pickupModal').style.display='flex'; }
-        function closePickup(){ pickupTargetId=null; document.getElementById('pickupModal').style.display='none'; }
-        function confirmPickup(){ if(!pickupTargetId)return; orders=orders.filter(function(x){return x.id!==pickupTargetId;}); showToast(pickupTargetId+' telah diambil','success'); closePickup(); render(); }
-        function toggleUrgent(id){ var o=orders.find(function(x){return x.id===id;}); if(o){o.urgent=!o.urgent;showToast(o.urgent?id+' ditandai URGENT':id+' urgent dihapus',o.urgent?'warning':'info');render();} }
-        function updateTime(){ var n=new Date(); document.getElementById('timeNow').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
-        function logout(){ if(!confirm('Yakin ingin logout dari KDS?'))return; localStorage.removeItem('lunomi_session'); localStorage.removeItem('lunomi_outlet'); window.location.href='index.html'; }
-        function checkSession(){ try{var s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return false;}JSON.parse(s);return true;}catch(e){window.location.href='index.html';return false;} }
+        function startCooking(id){const o=orders.find(x=>x.id===id);if(o){o.st='cooking';showToast(`${id} mulai dimasak`,'info');render();}}
+        function markReady(id){const o=orders.find(x=>x.id===id);if(o){o.st='ready';showToast(`${id} siap diambil!`,'success');render();}}
 
-        document.addEventListener('DOMContentLoaded', function(){
-            if(!checkSession()) return;
-            initElapsed(); render(); updateTime();
-            setInterval(updateTime, 1000);
-            intervalId = setInterval(tick, 1000);
+        function requestPickup(id){
+            const o=orders.find(x=>x.id===id);if(!o)return;
+            pickupTargetId=id;
+            document.getElementById('pickupOrderId').textContent=id;
+            document.getElementById('pickupItems').textContent=o.items;
+            document.getElementById('pickupModal').style.display='flex';
+        }
+        function closePickup(){pickupTargetId=null;document.getElementById('pickupModal').style.display='none';}
+        function confirmPickup(){
+            if(!pickupTargetId)return;
+            orders=orders.filter(x=>x.id!==pickupTargetId);
+            showToast(`${pickupTargetId} telah diambil`,'success');
+            closePickup();render();
+        }
+
+        function toggleUrgent(id){
+            const o=orders.find(x=>x.id===id);
+            if(o){o.urgent=!o.urgent;showToast(o.urgent?`${id} ditandai URGENT`:`${id} urgent dihapus`,o.urgent?'warning':'info');render();}
+        }
+
+        function updateTime(){
+            const n=new Date();
+            document.getElementById('timeNow').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+        }
+
+        function logout(){if(!confirm('Yakin ingin logout dari KDS?'))return;localStorage.removeItem('lunomi_session');localStorage.removeItem('lunomi_outlet');window.location.href='index.html';}
+
+        function checkSession(){
+            try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return false;}JSON.parse(s);return true;}
+            catch(e){window.location.href='index.html';return false;}
+        }
+
+        document.addEventListener('DOMContentLoaded',()=>{
+            if(!checkSession())return;
+            initElapsed();render();updateTime();
+            setInterval(updateTime,1000);
+            intervalId=setInterval(tick,1000);
         });
-        window.addEventListener('beforeunload', function(){ if(intervalId) clearInterval(intervalId); });
+
+        window.addEventListener('beforeunload',()=>{if(intervalId)clearInterval(intervalId);});
     </script>
 </body>
 </html>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Pembelian Barang</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
@@ -43,6 +44,7 @@
 </nav>
 
 <div class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
         <div class="glass-card rounded-2xl p-4">
             <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Bulan Ini</div>
@@ -58,6 +60,7 @@
         </div>
     </div>
 
+    <!-- Purchase History -->
     <div class="glass-card rounded-2xl overflow-hidden">
         <div class="px-5 py-4 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,.08)">
             <h3 class="font-bold text-sm text-white">📋 Riwayat Pembelian</h3>
@@ -69,6 +72,7 @@
     </div>
 </div>
 
+<!-- PO Modal -->
 <div id="poModal" class="modal-overlay hidden fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4">
     <div class="modal-box w-full max-w-lg shadow-2xl max-h-[90vh] flex flex-col">
         <div class="flex items-center justify-between px-6 pt-5 pb-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
@@ -108,11 +112,12 @@
         </div>
         <div class="px-6 pb-5 pt-3 flex gap-3" style="border-top:1px solid rgba(255,255,255,.08)">
             <button onclick="closePOModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
-            <button onclick="savePO()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan & Update Stok</button>
+            <button onclick="savePO()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan &amp; Update Stok</button>
         </div>
     </div>
 </div>
 
+<!-- Detail Modal -->
 <div id="detailModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="modal-box w-full max-w-md shadow-2xl">
         <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
@@ -147,7 +152,6 @@
         return d;
     }
     function saveRawStock(s){localStorage.setItem('lunomi_raw_stock',JSON.stringify(s));}
-
     function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
 
     let poLines=[];
