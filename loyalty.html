@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loyalty & CRM - Lunomi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .tier-silver { background: linear-gradient(135deg, #94a3b8, #475569); }
+        .tier-gold { background: linear-gradient(135deg, #fbbf24, #b45309); }
+        .tier-diamond { background: linear-gradient(135deg, #60a5fa, #1e40af); }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Loyalty & CRM</h1>
+                <p class="text-sm text-white/50">Kelola program keanggotaan dan referral pelanggan</p>
+            </div>
+            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-4 mb-8 border-b border-white/10 pb-px">
+            <button onclick="switchTab('membership')" id="tab-membership" class="px-4 py-2 text-sm font-bold border-b-2 border-indigo-500 text-white">Membership</button>
+            <button onclick="switchTab('referral')" id="tab-referral" class="px-4 py-2 text-sm font-bold border-b-2 border-transparent text-white/40 hover:text-white">Referral Program</button>
+            <button onclick="switchTab('rewards')" id="tab-rewards" class="px-4 py-2 text-sm font-bold border-b-2 border-transparent text-white/40 hover:text-white">Daily Rewards</button>
+        </div>
+
+        <!-- Membership Tab -->
+        <div id="content-membership" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="tier-silver p-6 rounded-3xl shadow-xl">
+                    <h4 class="text-white/70 text-xs font-bold uppercase mb-1">Tier Silver</h4>
+                    <h3 class="text-2xl font-black mb-4">Silver Member</h3>
+                    <p class="text-xs text-white/80 mb-4">Diskon 2% untuk semua menu. Minimal belanja Rp 0.</p>
+                    <div class="text-sm font-bold">1,240 Members</div>
+                </div>
+                <div class="tier-gold p-6 rounded-3xl shadow-xl">
+                    <h4 class="text-white/70 text-xs font-bold uppercase mb-1">Tier Gold</h4>
+                    <h3 class="text-2xl font-black mb-4">Gold Member</h3>
+                    <p class="text-xs text-white/80 mb-4">Diskon 5% + Free Dessert. Minimal belanja Rp 5jt/bulan.</p>
+                    <div class="text-sm font-bold">450 Members</div>
+                </div>
+                <div class="tier-diamond p-6 rounded-3xl shadow-xl">
+                    <h4 class="text-white/70 text-xs font-bold uppercase mb-1">Tier Diamond</h4>
+                    <h3 class="text-2xl font-black mb-4">Diamond Member</h3>
+                    <p class="text-xs text-white/80 mb-4">Diskon 10% + Priority Table. Minimal belanja Rp 15jt/bulan.</p>
+                    <div class="text-sm font-bold">82 Members</div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl overflow-hidden">
+                <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                    <h4 class="font-bold">Daftar Member Aktif</h4>
+                    <button class="text-xs text-indigo-400 font-bold">+ Tambah Member</button>
+                </div>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                            <th class="px-6 py-4">Nama Pelanggan</th>
+                            <th class="px-6 py-4">Tier</th>
+                            <th class="px-6 py-4">Total Poin</th>
+                            <th class="px-6 py-4 text-right">Total Belanja</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-sm">Andi Wijaya</div>
+                                <div class="text-[10px] text-white/40">ID: LNM-00124</div>
+                            </td>
+                            <td class="px-6 py-4"><span class="px-2 py-1 rounded-md bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase">Diamond</span></td>
+                            <td class="px-6 py-4 text-sm font-mono">12,450 pts</td>
+                            <td class="px-6 py-4 text-right text-sm font-mono">Rp 18,450,000</td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-sm">Siska Putri</div>
+                                <div class="text-[10px] text-white/40">ID: LNM-00156</div>
+                            </td>
+                            <td class="px-6 py-4"><span class="px-2 py-1 rounded-md bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase">Gold</span></td>
+                            <td class="px-6 py-4 text-sm font-mono">4,200 pts</td>
+                            <td class="px-6 py-4 text-right text-sm font-mono">Rp 6,200,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Referral Tab -->
+        <div id="content-referral" class="hidden space-y-6">
+            <div class="glass-card p-8 rounded-3xl text-center max-w-2xl mx-auto">
+                <div class="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="material-symbols-outlined text-4xl">share</span>
+                </div>
+                <h3 class="text-2xl font-extrabold mb-2">Program Referral Aktif</h3>
+                <p class="text-white/50 text-sm mb-8">Ajak teman bergabung dan dapatkan voucher Rp 25.000 untuk setiap teman yang melakukan transaksi pertama.</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-white/5 p-4 rounded-2xl">
+                        <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Referral</p>
+                        <p class="text-2xl font-black">156</p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-2xl">
+                        <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Voucher Diklaim</p>
+                        <p class="text-2xl font-black">Rp 3.9M</p>
+                    </div>
+                </div>
+                
+                <button class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-2xl font-bold transition">Atur Syarat & Ketentuan</button>
+            </div>
+        </div>
+
+        <!-- Daily Rewards Tab -->
+        <div id="content-rewards" class="hidden space-y-6">
+            <div class="grid grid-cols-7 gap-4">
+                <!-- 7 Days Calendar -->
+                <div class="glass-card p-4 rounded-2xl text-center border-indigo-500/50 border-2">
+                    <p class="text-[10px] font-bold text-indigo-400 uppercase mb-2">Day 1</p>
+                    <span class="material-symbols-outlined text-indigo-400 mb-2">check_circle</span>
+                    <p class="text-xs font-bold">10 Pts</p>
+                </div>
+                <div class="glass-card p-4 rounded-2xl text-center border-indigo-500/50 border-2">
+                    <p class="text-[10px] font-bold text-indigo-400 uppercase mb-2">Day 2</p>
+                    <span class="material-symbols-outlined text-indigo-400 mb-2">check_circle</span>
+                    <p class="text-xs font-bold">15 Pts</p>
+                </div>
+                <div class="glass-card p-4 rounded-2xl text-center">
+                    <p class="text-[10px] font-bold text-white/30 uppercase mb-2">Day 3</p>
+                    <span class="material-symbols-outlined text-white/20 mb-2">lock</span>
+                    <p class="text-xs font-bold text-white/30">20 Pts</p>
+                </div>
+                <!-- ... and so on -->
+            </div>
+            <div class="glass-card p-6 rounded-2xl">
+                <h4 class="font-bold mb-4">Pengaturan Hadiah Harian</h4>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
+                        <div>
+                            <p class="text-sm font-bold">Bonus Login Harian</p>
+                            <p class="text-xs text-white/40">Berikan poin setiap kali pelanggan membuka aplikasi</p>
+                        </div>
+                        <div class="w-12 h-6 bg-indigo-600 rounded-full relative">
+                            <div class="w-4 h-4 bg-white rounded-full absolute right-1 top-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            // Hide all
+            document.getElementById('content-membership').classList.add('hidden');
+            document.getElementById('content-referral').classList.add('hidden');
+            document.getElementById('content-rewards').classList.add('hidden');
+            
+            // Reset tabs
+            ['membership', 'referral', 'rewards'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                el.classList.remove('border-indigo-500');
+                el.classList.add('border-transparent');
+                el.classList.remove('text-white');
+                el.classList.add('text-white/40');
+            });
+
+            // Show active
+            document.getElementById('content-' + tab).classList.remove('hidden');
+            const activeTab = document.getElementById('tab-' + tab);
+            activeTab.classList.add('border-indigo-500');
+            activeTab.classList.remove('border-transparent');
+            activeTab.classList.add('text-white');
+            activeTab.classList.remove('text-white/40');
+        }
+    </script>
+</body>
+</html>

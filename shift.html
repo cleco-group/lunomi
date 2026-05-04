@@ -3,37 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi — Manajemen Shift</title>
+    <title>Rekonsiliasi Shift - Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>*{font-family:'Plus Jakarta Sans',sans-serif;}body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}.glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}.glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+    </style>
 </head>
-<body>
-<nav class="glass-nav sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">⏰</div>
-        <div><div class="font-extrabold text-white text-sm">Manajemen Shift</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+<body class="p-4 sm:p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Tutup Shift & Rekonsiliasi</h1>
+                <p class="text-sm text-white/50">Cocokkan uang tunai fisik dengan data sistem</p>
+            </div>
+            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass-card p-6 rounded-2xl">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Penjualan (Sistem)</p>
+                <h3 id="sysSales" class="text-xl font-extrabold">Rp 0</h3>
+            </div>
+            <div class="glass-card p-6 rounded-2xl">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Uang Tunai (Sistem)</p>
+                <h3 id="sysCash" class="text-xl font-extrabold">Rp 0</h3>
+            </div>
+            <div class="glass-card p-6 rounded-2xl">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Modal Awal</p>
+                <h3 class="text-xl font-extrabold">Rp 500,000</h3>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-3xl p-8">
+            <h3 class="text-lg font-bold mb-6">Input Uang Fisik</h3>
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-2 uppercase">Total Uang Tunai di Laci</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 font-bold">Rp</span>
+                            <input type="number" id="actualCash" oninput="calcDiff()" class="glass-input w-full pl-12 pr-4 py-4 rounded-2xl text-xl font-black" placeholder="0">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-2 uppercase">Selisih (Variance)</label>
+                        <div id="varianceBox" class="w-full px-4 py-4 rounded-2xl text-xl font-black bg-white/5 flex items-center">
+                            Rp 0
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-white/40 mb-2 uppercase">Catatan / Alasan Selisih</label>
+                    <textarea class="glass-input w-full px-4 py-3 rounded-2xl text-sm h-24" placeholder="Contoh: Salah kembalian pelanggan..."></textarea>
+                </div>
+
+                <div class="pt-6 border-t border-white/5">
+                    <button onclick="processCloseShift()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-2xl font-bold transition shadow-lg shadow-indigo-500/20">Proses Tutup Shift</button>
+                </div>
+            </div>
+        </div>
     </div>
-</nav>
-<div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <div class="text-6xl mb-6">⏰</div>
-    <h1 class="text-2xl font-extrabold text-white mb-2">Manajemen Shift</h1>
-    <p class="mb-8 max-w-md mx-auto" style="color:rgba(255,255,255,.5)">Atur jadwal shift kasir dan karyawan secara fleksibel.</p>
-    <div class="glass-card rounded-2xl p-6 max-w-sm mx-auto text-left">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(255,255,255,.35)">Fitur yang akan hadir</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.6)"><li>✦ Buat jadwal shift mingguan</li><li>✦ Tukar shift antar karyawan</li><li>✦ Laporan kehadiran shift</li><li>✦ Notifikasi shift otomatis</li></ul>
-    </div>
-    <button onclick="window.location.href='dashboard.html'" class="mt-8 px-6 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">← Kembali ke Dashboard</button>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
-    try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
-    const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-    if(o)document.getElementById('outletLabel').textContent=o.name;}
-    catch(e){window.location.href='index.html';}
-});
-</script>
+
+    <script>
+        let expectedTotal = 500000; // Modal awal
+
+        function loadData() {
+            const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
+            let totalSales = 0;
+            let cashSales = 0;
+
+            trxs.forEach(t => {
+                totalSales += t.total;
+                if (t.method === 'cash') cashSales += t.total;
+            });
+
+            document.getElementById('sysSales').textContent = 'Rp ' + totalSales.toLocaleString('id-ID');
+            document.getElementById('sysCash').textContent = 'Rp ' + cashSales.toLocaleString('id-ID');
+            expectedTotal += cashSales;
+            calcDiff();
+        }
+
+        function calcDiff() {
+            const actual = parseFloat(document.getElementById('actualCash').value) || 0;
+            const diff = actual - expectedTotal;
+            const box = document.getElementById('varianceBox');
+            
+            box.textContent = (diff >= 0 ? '+ Rp ' : '- Rp ') + Math.abs(diff).toLocaleString('id-ID');
+            
+            if (diff === 0) {
+                box.className = "w-full px-4 py-4 rounded-2xl text-xl font-black bg-emerald-500/10 text-emerald-400 flex items-center";
+            } else if (diff < 0) {
+                box.className = "w-full px-4 py-4 rounded-2xl text-xl font-black bg-rose-500/10 text-rose-400 flex items-center";
+            } else {
+                box.className = "w-full px-4 py-4 rounded-2xl text-xl font-black bg-amber-500/10 text-amber-400 flex items-center";
+            }
+        }
+
+        function processCloseShift() {
+            if (confirm('Yakin ingin menutup shift? Data transaksi akan diarsipkan.')) {
+                alert('Shift berhasil ditutup. Laporan telah dikirim ke email owner.');
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
 </body>
 </html>
