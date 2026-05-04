@@ -20,9 +20,9 @@
                 radial-gradient(ellipse 40% 35% at 60% 40%,  rgba(139,92,246,0.12) 0%, transparent 70%);
             min-height: 100vh;
             color: white;
+            overflow-x: hidden;
         }
 
-        /* Glassmorphism — UI/UX Pro Max: backdrop-filter blur(16-20px), rgba white 6-12%, border rgba white 0.12 */
         .glass-nav {
             background: rgba(2,6,23,0.7);
             backdrop-filter: blur(20px);
@@ -49,561 +49,342 @@
         .glass-input::placeholder { color: rgba(255,255,255,0.3); }
         .glass-input:focus { outline:none; border-color:rgba(99,102,241,0.6); box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
 
-        /* Metric cards with colored left glow */
+        /* Sidebar Styles */
+        #sidebar {
+            width: 260px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(2,6,23,0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            z-index: 60;
+        }
+        #sidebar.collapsed {
+            width: 80px;
+        }
+        #sidebar.collapsed .sidebar-text, 
+        #sidebar.collapsed .sidebar-category {
+            display: none;
+        }
+        #sidebar.collapsed .sidebar-item {
+            justify-content: center;
+            padding: 0.75rem;
+        }
+        #sidebar.collapsed .sidebar-item span:first-child {
+            margin-right: 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.15s;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 0.25rem;
+        }
+        .sidebar-item:hover {
+            background: rgba(99,102,241,0.15);
+            border-color: rgba(99,102,241,0.3);
+            color: white;
+        }
+        .sidebar-category {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255,255,255,0.3);
+            margin: 1.5rem 0 0.5rem 1rem;
+        }
+
+        /* Main Content Adjustment */
+        #mainContent {
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Metric cards */
         .metric-card {
             background: rgba(255,255,255,0.04);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255,255,255,0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
         }
-        .metric-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-        .metric-blue   { border-left: 3px solid #3b82f6; box-shadow: inset 3px 0 20px rgba(59,130,246,0.08); }
-        .metric-green  { border-left: 3px solid #22c55e; box-shadow: inset 3px 0 20px rgba(34,197,94,0.08); }
-        .metric-red    { border-left: 3px solid #ef4444; box-shadow: inset 3px 0 20px rgba(239,68,68,0.08); }
-        .metric-amber  { border-left: 3px solid #f59e0b; box-shadow: inset 3px 0 20px rgba(245,158,11,0.08); }
+        .metric-card:hover { transform: translateY(-2px); }
+        .metric-blue   { border-left: 3px solid #3b82f6; }
+        .metric-green  { border-left: 3px solid #22c55e; }
+        .metric-red    { border-left: 3px solid #ef4444; }
+        .metric-amber  { border-left: 3px solid #f59e0b; }
 
-        /* Agent status dots */
         .dot { display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px; }
         .dot.active   { background:#22c55e; animation:pulse 2s infinite; }
-        .dot.thinking { background:#f59e0b; animation:pulse 1s infinite; }
-        .dot.idle     { background:#374151; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-        /* Agent badge */
-        .agent-badge {
-            font-size:0.65rem;
-            padding:0.15rem 0.5rem;
-            border-radius:9999px;
-            font-weight:600;
+        @media(max-width:768px){
+            #sidebar { position: fixed; left: -260px; }
+            #sidebar.mobile-open { left: 0; }
+            #mainContent { margin-left: 0 !important; }
         }
-
-        /* Toast */
-        #toast { transition:opacity 0.3s; pointer-events:none; }
-
-        /* Quick action buttons */
-        .qa-btn {
-            display:flex; align-items:center; gap:0.6rem;
-            padding:0.75rem 1rem; border-radius:0.75rem;
-            font-size:0.85rem; font-weight:600;
-            transition: all 0.15s;
-            text-align:left; width:100%;
-            border: 1px solid rgba(255,255,255,0.07);
-        }
-        .qa-btn-active {
-            background: rgba(255,255,255,0.05);
-            color: rgba(255,255,255,0.9);
-        }
-        .qa-btn-active:hover { background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.3); color:white; }
-        .qa-btn-soon {
-            background: rgba(255,255,255,0.02);
-            color: rgba(255,255,255,0.3);
-            cursor: default;
-        }
-
-        /* Activity dot */
-        .act-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px; }
-
-        /* Chat bubble */
-        .chat-enter { animation: fadeUp 0.25s ease; }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-
-        @keyframes spin { to{transform:rotate(360deg)} }
-        .spin { animation:spin 0.6s linear; }
-    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
-<body>
+<body class="flex">
 
-    <!-- Toast -->
-    <div id="toast" class="fixed top-4 right-4 z-[100] hidden">
-        <div id="toastInner" class="px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold text-white flex items-center gap-2 glass-card"></div>
-    </div>
-
-    <!-- Navbar -->
-    <nav class="glass-nav sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-                        <span class="text-lg">🏪</span>
-                    </div>
-                    <div>
-                        <div class="font-extrabold text-white text-base leading-none">Lunomi</div>
-                        <div class="text-xs leading-none mt-0.5" id="clockDisplay" style="color:rgba(255,255,255,0.4)"><span id="outletBadge"></span></div>
-                    </div>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed h-screen flex flex-col">
+        <div class="p-4 flex items-center justify-between border-b border-white/5">
+            <div class="flex items-center gap-3 sidebar-text">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+                    <span class="text-sm">🏪</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="openChatAI()"
-                        class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition"
-                        style="background:linear-gradient(135deg,#6366f1,#7c3aed);box-shadow:0 4px 16px rgba(99,102,241,0.35)">
-                        <span>💬</span><span class="hidden sm:inline">Tanya Lunomi</span>
-                    </button>
-                    <button onclick="logout()" class="text-sm font-medium transition" style="color:rgba(255,255,255,0.45)" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">Logout</button>
+                <span class="font-extrabold text-white text-lg">Lunomi</span>
+            </div>
+            <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-white/5 text-white/50 hover:text-white transition">
+                <span class="material-symbols-outlined" id="toggleIcon">menu_open</span>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-3 custom-scrollbar">
+            <!-- Operasional -->
+            <div class="sidebar-category">Operasional</div>
+            <a href="pos.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-blue-400 mr-3">point_of_sale</span>
+                <span class="sidebar-text">POS Kasir</span>
+            </a>
+            <a href="kitchen.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-orange-400 mr-3">soup_kitchen</span>
+                <span class="sidebar-text">Kitchen Display</span>
+            </a>
+            <a href="invoice.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-cyan-400 mr-3">receipt_long</span>
+                <span class="sidebar-text">Invoice</span>
+            </a>
+
+            <!-- Inventory & Produk -->
+            <div class="sidebar-category">Inventory & Produk</div>
+            <a href="inventory.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-green-400 mr-3">inventory_2</span>
+                <span class="sidebar-text">Stok Barang</span>
+            </a>
+            <a href="product.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-orange-400 mr-3">restaurant_menu</span>
+                <span class="sidebar-text">Master Menu</span>
+            </a>
+            <a href="recipe.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-yellow-400 mr-3">menu_book</span>
+                <span class="sidebar-text">Master Resep</span>
+            </a>
+            <a href="purchase.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-indigo-400 mr-3">shopping_cart</span>
+                <span class="sidebar-text">Pembelian</span>
+            </a>
+            <a href="stockopname.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-yellow-400 mr-3">fact_check</span>
+                <span class="sidebar-text">Stock Opname</span>
+            </a>
+
+            <!-- Keuangan & Analisa -->
+            <div class="sidebar-category">Keuangan & Analisa</div>
+            <a href="keuangan.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-emerald-400 mr-3">account_balance</span>
+                <span class="sidebar-text">Laporan Keuangan</span>
+            </a>
+            <a href="expense.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-red-400 mr-3">payments</span>
+                <span class="sidebar-text">Pengeluaran OPEX</span>
+            </a>
+            <a href="analytics.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-teal-400 mr-3">bar_chart</span>
+                <span class="sidebar-text">Analytics</span>
+            </a>
+
+            <!-- SDM & Pelanggan -->
+            <div class="sidebar-category">SDM & Pelanggan</div>
+            <a href="hr.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-pink-400 mr-3">badge</span>
+                <span class="sidebar-text">Karyawan</span>
+            </a>
+            <a href="customer.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-purple-400 mr-3">group</span>
+                <span class="sidebar-text">Customer</span>
+            </a>
+        </div>
+
+        <div class="p-4 border-t border-white/5">
+            <button onclick="logout()" class="sidebar-item w-full text-red-400 hover:bg-red-400/10">
+                <span class="material-symbols-outlined mr-3">logout</span>
+                <span class="sidebar-text">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="flex-1 ml-[260px] min-h-screen">
+        <!-- Navbar -->
+        <nav class="glass-nav sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleMobileSidebar()" class="sm:hidden text-white/50 hover:text-white">
+                            <span class="material-symbols-outlined">menu</span>
+                        </button>
+                        <div>
+                            <div class="font-extrabold text-white text-base leading-none">Dashboard</div>
+                            <div class="text-xs leading-none mt-0.5" style="color:rgba(255,255,255,0.4)"><span id="outletBadge"></span></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="openChatAI()"
+                            class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition"
+                            style="background:linear-gradient(135deg,#6366f1,#7c3aed);box-shadow:0 4px 16px rgba(99,102,241,0.35)">
+                            <span>💬</span><span class="hidden sm:inline">Tanya Lunomi</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-extrabold text-white">Ringkasan Bisnis</h2>
+                <p class="text-sm mt-1" style="color:rgba(255,255,255,0.45)">Selamat datang kembali, <span id="userName" class="text-white font-semibold">Owner</span>!</p>
+            </div>
 
-        <!-- Header -->
-        <div class="mb-8">
-            <h2 class="text-2xl font-extrabold text-white">Dashboard Utama</h2>
-            <p class="text-sm mt-1" style="color:rgba(255,255,255,0.45)">Selamat datang, <span id="userName" class="text-white font-semibold">Owner</span>! Lihat ringkasan bisnis hari ini.</p>
-        </div>
-
-        <!-- CEO Orchestrator + Sub Agents -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-            <!-- CEO Card -->
-            <div class="lg:col-span-2 glass-card-accent rounded-2xl p-6">
-                <div class="flex items-start justify-between mb-4">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
+            <!-- CEO Orchestrator -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+                <div class="lg:col-span-2 glass-card-accent rounded-2xl p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-2">
                             <span class="text-xl">🤖</span>
                             <h3 class="font-bold text-white text-base">CEO Orchestrator</h3>
                         </div>
-                        <p class="text-xs" style="color:rgba(255,255,255,0.4)">AI Assistant koordinasi multi-agent</p>
-                    </div>
-                    <div class="text-right">
-                        <div class="flex items-center justify-end gap-1.5">
+                        <div class="flex items-center gap-1.5">
                             <span class="dot active"></span>
                             <span class="text-xs font-semibold text-emerald-400">ACTIVE</span>
                         </div>
-                        <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.35)">Siap membantu</p>
                     </div>
-                </div>
-
-                <!-- Chat area -->
-                <div id="chatArea" class="rounded-xl p-4 mb-3 space-y-3 overflow-y-auto" style="background:rgba(0,0,0,0.2);min-height:5rem;max-height:11rem">
-                    <div class="flex gap-2 chat-enter">
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div>
-                        <div class="rounded-xl px-3 py-2 text-sm max-w-xs" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">
-                            Halo! Ada 3 alert penting — stok ayam menipis, 1 outlet offline, absensi terlambat. Perlu bantuan?
+                    <div id="chatArea" class="rounded-xl p-4 mb-3 space-y-3 overflow-y-auto" style="background:rgba(0,0,0,0.2);min-height:5rem;max-height:11rem">
+                        <div class="flex gap-2">
+                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div>
+                            <div class="rounded-xl px-3 py-2 text-sm max-w-xs" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">
+                                Halo! Ada 3 alert penting — stok ayam menipis, 1 outlet offline, absensi terlambat. Perlu bantuan?
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- AI Input -->
-                <div class="flex gap-2">
-                    <input type="text" id="aiInput" placeholder="Tanya apapun tentang bisnis Anda..."
-                        class="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm" onkeypress="if(event.key==='Enter')sendAIMessage()">
-                    <button onclick="sendAIMessage()" class="px-4 py-2.5 rounded-xl font-semibold text-white transition flex items-center"
-                        style="background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 4px 14px rgba(99,102,241,0.35)">
-                        <span class="material-symbols-outlined text-sm">send</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Sub-Agents -->
-            <div class="glass-card rounded-2xl p-6">
-                <h4 class="font-bold text-white text-sm mb-4">6 Sub-Agents</h4>
-                <div class="space-y-3" id="agentList"></div>
-            </div>
-        </div>
-
-        <!-- Metrics Grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="metric-card metric-blue rounded-2xl p-5">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Penjualan Hari Ini</p>
-                        <p class="text-2xl font-extrabold text-white">Rp 24.5M</p>
-                        <p class="text-xs mt-1.5 font-semibold text-emerald-400">↑ 12% dari kemarin</p>
-                    </div>
-                    <span class="text-2xl opacity-70">💰</span>
-                </div>
-            </div>
-            <div class="metric-card metric-green rounded-2xl p-5">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Transaksi</p>
-                        <p class="text-2xl font-extrabold text-white">128</p>
-                        <p class="text-xs mt-1.5 font-semibold text-emerald-400">↑ 8 dari kemarin</p>
-                    </div>
-                    <span class="text-2xl opacity-70">📊</span>
-                </div>
-            </div>
-            <div class="metric-card metric-red rounded-2xl p-5">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Stok Alert</p>
-                        <p class="text-2xl font-extrabold text-white">5</p>
-                        <p class="text-xs mt-1.5 font-semibold text-red-400">⚠️ Perlu reorder</p>
-                    </div>
-                    <span class="text-2xl opacity-70">🚨</span>
-                </div>
-            </div>
-            <div class="metric-card metric-amber rounded-2xl p-5">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-medium mb-2" style="color:rgba(255,255,255,0.45)">Outlet Online</p>
-                        <p class="text-2xl font-extrabold text-white">3/4</p>
-                        <p class="text-xs mt-1.5 font-semibold text-amber-400">1 offline</p>
-                    </div>
-                    <span class="text-2xl opacity-70">🏪</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- OPEX + Revenue Target Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-            <!-- OPEX Card -->
-            <div class="glass-card rounded-2xl p-5">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <p class="text-xs font-medium mb-1" style="color:rgba(255,255,255,0.45)">Pengeluaran OPEX Bulan Ini</p>
-                        <p class="text-2xl font-extrabold text-white" id="opexTotal">Rp 0</p>
-                        <p class="text-xs mt-1 font-semibold" id="opexSub" style="color:rgba(255,255,255,0.4)">0 catatan</p>
-                    </div>
-                    <button onclick="window.location.href='expense.html'" class="text-2xl opacity-70 hover:opacity-100 transition" title="Kelola OPEX">💸</button>
-                </div>
-                <div class="space-y-1.5" id="opexBreakdown"></div>
-                <button onclick="window.location.href='expense.html'" class="mt-3 w-full py-2 rounded-xl text-xs font-semibold text-center transition" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6)">+ Catat Pengeluaran</button>
-            </div>
-
-            <!-- Revenue Target Card -->
-            <div class="glass-card rounded-2xl p-5">
-                <div class="flex items-center justify-between mb-3">
-                    <p class="text-xs font-medium" style="color:rgba(255,255,255,0.45)">Target Revenue Bulanan</p>
-                    <button onclick="toggleTargetEdit()" id="targetEditBtn" class="text-xs px-3 py-1 rounded-lg font-semibold" style="background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.4);color:#a5b4fc">Edit</button>
-                </div>
-                <div id="targetDisplay">
-                    <p class="text-2xl font-extrabold text-white mb-1" id="targetAmount">Rp 0</p>
-                    <div class="flex items-center justify-between text-xs mb-1.5">
-                        <span style="color:rgba(255,255,255,.4)">Pencapaian bulan ini</span>
-                        <span class="font-bold" id="targetPct" style="color:#a5b4fc">0%</span>
-                    </div>
-                    <div class="w-full h-2.5 rounded-full" style="background:rgba(255,255,255,.08)">
-                        <div id="targetBar" class="h-full rounded-full transition-all" style="width:0%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div>
-                    </div>
-                    <div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.35)">
-                        <span>Rp 0</span>
-                        <span id="targetGoal">Target: Rp 0</span>
-                    </div>
-                </div>
-                <div id="targetEditForm" class="hidden mt-2">
-                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Target Pendapatan (Rp)</label>
-                    <input type="number" id="targetInput" inputmode="numeric" min="0"
-                        class="w-full px-3 py-2.5 rounded-xl text-sm mb-3" placeholder="cth: 50000000"
-                        style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;">
                     <div class="flex gap-2">
-                        <button onclick="toggleTargetEdit()" class="flex-1 py-2 rounded-xl text-xs font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)">Batal</button>
-                        <button onclick="saveTarget()" class="flex-1 py-2 rounded-xl text-xs font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">Simpan</button>
+                        <input type="text" id="aiInput" placeholder="Tanya apapun tentang bisnis Anda..." class="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm">
+                        <button class="px-4 py-2.5 rounded-xl font-semibold text-white transition flex items-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+                            <span class="material-symbols-outlined text-sm">send</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sub-Agents -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h4 class="font-bold text-white text-sm mb-4">6 Sub-Agents</h4>
+                    <div class="space-y-3" id="agentList"></div>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="metric-card metric-blue rounded-2xl p-5">
+                    <p class="text-xs font-medium mb-2 text-white/50">Penjualan Hari Ini</p>
+                    <p class="text-2xl font-extrabold text-white">Rp 24.5M</p>
+                </div>
+                <div class="metric-card metric-green rounded-2xl p-5">
+                    <p class="text-xs font-medium mb-2 text-white/50">Laba Bersih</p>
+                    <p class="text-2xl font-extrabold text-white">Rp 8.2M</p>
+                </div>
+                <div class="metric-card metric-red rounded-2xl p-5">
+                    <p class="text-xs font-medium mb-2 text-white/50">Stok Kritis</p>
+                    <p class="text-2xl font-extrabold text-white">12 Item</p>
+                </div>
+                <div class="metric-card metric-amber rounded-2xl p-5">
+                    <p class="text-xs font-medium mb-2 text-white/50">Pesanan Aktif</p>
+                    <p class="text-2xl font-extrabold text-white">45</p>
+                </div>
+            </div>
+
+            <!-- Secondary Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+                    <h3 class="font-bold text-white text-sm mb-4">📋 HO Activity Log</h3>
+                    <div id="activityLog" class="space-y-3 max-h-80 overflow-y-auto"></div>
+                </div>
+                <div class="space-y-5">
+                    <!-- OPEX Card -->
+                    <div class="glass-card rounded-2xl p-5">
+                        <p class="text-xs font-medium mb-1 text-white/50">Pengeluaran OPEX</p>
+                        <p class="text-2xl font-extrabold text-white" id="opexTotal">Rp 0</p>
+                        <button onclick="window.location.href='expense.html'" class="mt-3 w-full py-2 rounded-xl text-xs font-semibold bg-white/5 border border-white/10 text-white/60">+ Catat Pengeluaran</button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Activity Log + Quick Actions -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <!-- Activity Log -->
-            <div class="lg:col-span-2 glass-card rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-white text-sm">📋 HO Activity Log</h3>
-                    <button id="refreshBtn" onclick="refreshActivityLog()" title="Refresh"
-                        style="color:rgba(255,255,255,0.4)" class="hover:text-white transition">
-                        <span class="material-symbols-outlined text-lg">refresh</span>
-                    </button>
-                </div>
-                <div id="activityLog" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="glass-card rounded-2xl p-6">
-                <h3 class="font-bold text-white text-sm mb-4">⚡ Quick Actions</h3>
-                <div class="space-y-1.5">
-                    <button onclick="window.location.href='pos.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-blue-400 text-base">point_of_sale</span>
-                        Buka POS Kasir
-                    </button>
-                    <button onclick="window.location.href='kitchen.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-orange-400 text-base">soup_kitchen</span>
-                        Kitchen Display
-                    </button>
-                    <button onclick="window.location.href='inventory.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-green-400 text-base">inventory_2</span>
-                        Cek Inventory
-                    </button>
-                    <button onclick="window.location.href='keuangan.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-emerald-400 text-base">account_balance</span>
-                        Laporan Keuangan
-                    </button>
-                    <button onclick="window.location.href='customer.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-purple-400 text-base">group</span>
-                        Customer
-                    </button>
-                    <button onclick="window.location.href='invoice.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-cyan-400 text-base">receipt_long</span>
-                        Invoice
-                    </button>
-                    <button onclick="window.location.href='hr.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-pink-400 text-base">badge</span>
-                        Kelola Karyawan
-                    </button>
-                    <button onclick="window.location.href='product.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-orange-400 text-base">restaurant_menu</span>
-                        Master Menu
-                    </button>
-                    <button onclick="window.location.href='recipe.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-yellow-400 text-base">menu_book</span>
-                        Master Resep
-                    </button>
-                    <button onclick="window.location.href='analytics.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-teal-400 text-base">bar_chart</span>
-                        Analytics
-                    </button>
-                    <button onclick="window.location.href='expense.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-red-400 text-base">payments</span>
-                        Pengeluaran OPEX
-                    </button>
-                    <button onclick="window.location.href='purchase.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-indigo-400 text-base">shopping_cart</span>
-                        Pembelian Barang
-                    </button>
-                    <button onclick="window.location.href='stockopname.html'" class="qa-btn qa-btn-active">
-                        <span class="material-symbols-outlined text-yellow-400 text-base">fact_check</span>
-                        Stock Opname
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI Chat Modal -->
-    <div id="aiChatModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px)">
-        <div class="glass-card rounded-2xl w-full sm:max-w-2xl flex flex-col" style="height:70vh;max-height:500px">
-            <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color:rgba(255,255,255,0.08)">
-                <div class="flex items-center gap-2">
-                    <span class="dot active"></span>
-                    <h2 class="font-bold text-white">Tanya Lunomi</h2>
-                </div>
-                <button onclick="closeChatAI()" style="color:rgba(255,255,255,0.45)" class="hover:text-white transition">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            <div id="modalChatArea" class="flex-1 overflow-y-auto p-5 space-y-3">
-                <div class="flex gap-2">
-                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div>
-                    <div class="rounded-xl px-3 py-2 text-sm max-w-sm" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">Halo! Saya CEO Orchestrator Lunomi. Apa yang bisa saya bantu?</div>
-                </div>
-            </div>
-            <div class="px-5 py-4 border-t flex gap-2" style="border-color:rgba(255,255,255,0.08)">
-                <input type="text" id="modalAiInput" placeholder="Ketik pertanyaan..."
-                    class="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm" onkeypress="if(event.key==='Enter')sendModalAI()">
-                <button onclick="sendModalAI()" class="px-4 py-2.5 rounded-xl text-white flex items-center"
-                    style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-                    <span class="material-symbols-outlined text-sm">send</span>
-                </button>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <script>
-        const ACTIVITIES = [
-            {color:'#22c55e', title:'FIN AI - Laporan Tutup Kas',       desc:'Tutup kas outlet Jl. Sudirman: Rp 12.3M ✓',                           time:'10 menit lalu'},
-            {color:'#3b82f6', title:'OPS AI - Stok Bahan Baku Alert',   desc:'Daging ayam kurang 5kg, stok di bawah minimum',                        time:'25 menit lalu'},
-            {color:'#f59e0b', title:'HR AI - Absensi Alert',            desc:'Staff Roni belum clock-in, shift dimulai 30 menit lalu',               time:'15 menit lalu'},
-            {color:'#22c55e', title:'MKT AI - Promo Campaign Published', desc:'Promo "Diskon 30% untuk Menu Pilihan" live di semua outlet',           time:'45 menit lalu'},
-            {color:'#a78bfa', title:'CEO Orchestrator - Daily Brief',   desc:'Penjualan ↑ 12%, Inventory OK, 1 outlet offline',                      time:'2 jam lalu'},
-        ];
-
-        const AGENTS = [
-            {code:'FIN AI', label:'Finance',  status:'active'},
-            {code:'HR AI',  label:'Payroll',  status:'active'},
-            {code:'OPS AI', label:'Running…', status:'thinking'},
-            {code:'MKT AI', label:'Campaign', status:'active'},
-            {code:'IT AI',  label:'Standby',  status:'idle'},
-            {code:'DES AI', label:'Standby',  status:'idle'},
-        ];
-
-        const AI_REPLIES = [
-            'Berdasarkan data hari ini, penjualan sedang di atas rata-rata. Outlet Sudirman perlu perhatian karena stok menipis.',
-            'OPS AI sedang memproses laporan stok. Estimasi selesai 5 menit lagi.',
-            'HR AI mendeteksi 1 keterlambatan shift. Notifikasi sudah dikirim ke supervisor.',
-            'MKT AI melaporkan promo berjalan baik — konversi meningkat 18% dari kemarin.',
-            'Semua sistem berjalan normal. Ada hal lain yang perlu dicek?'
-        ];
-        let aiIdx = 0, toastTimer = null;
-
-        function showToast(msg, type='info') {
-            clearTimeout(toastTimer);
-            const colors = {info:'rgba(99,102,241,0.9)',success:'rgba(34,197,94,0.9)',warning:'rgba(245,158,11,0.9)',error:'rgba(239,68,68,0.9)'};
-            const icons  = {info:'ℹ️',success:'✓',warning:'⚠️',error:'✕'};
-            const inner  = document.getElementById('toastInner');
-            inner.style.background = colors[type];
-            inner.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
-            const toast = document.getElementById('toast');
-            toast.classList.remove('hidden'); toast.style.opacity = '1';
-            toastTimer = setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>toast.classList.add('hidden'),300); }, 3000);
-        }
-
-        function showComingSoon(name) { showToast(`${name} sedang dalam pengembangan`, 'info'); }
-
-        function renderAgents() {
-            document.getElementById('agentList').innerHTML = AGENTS.map(a => {
-                const badgeBg = a.status==='active' ? 'rgba(34,197,94,0.15)' : a.status==='thinking' ? 'rgba(245,158,11,0.15)' : 'rgba(55,65,81,0.4)';
-                const badgeColor = a.status==='active' ? '#4ade80' : a.status==='thinking' ? '#fbbf24' : 'rgba(255,255,255,0.3)';
-                return `<div class="flex items-center justify-between text-sm">
-                    <div class="flex items-center gap-2">
-                        <span class="dot ${a.status}"></span>
-                        <span class="font-medium text-white">${a.code}</span>
-                    </div>
-                    <span class="agent-badge" style="background:${badgeBg};color:${badgeColor}">${a.label}</span>
-                </div>`;
-            }).join('');
-        }
-
-        function renderActivityLog() {
-            document.getElementById('activityLog').innerHTML = ACTIVITIES.map((a,i) =>
-                `<div class="flex gap-3 ${i < ACTIVITIES.length-1 ? 'pb-3 border-b' : ''}" style="border-color:rgba(255,255,255,0.06)">
-                    <div class="act-dot" style="background:${a.color};margin-top:6px"></div>
-                    <div class="flex-1">
-                        <p class="text-sm font-semibold text-white">${a.title}</p>
-                        <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.5)">${a.desc}</p>
-                        <p class="text-xs mt-1" style="color:rgba(255,255,255,0.3)">${a.time}</p>
-                    </div>
-                </div>`
-            ).join('');
-        }
-
-        function refreshActivityLog() {
-            const icon = document.getElementById('refreshBtn').querySelector('span');
-            icon.classList.add('spin');
-            showToast('Activity log diperbarui', 'success');
-            setTimeout(()=>icon.classList.remove('spin'), 600);
-        }
-
-        function appendChat(area, role, text) {
-            const isBot = role==='bot';
-            const div = document.createElement('div');
-            div.className = 'flex gap-2 chat-enter' + (isBot ? '' : ' justify-end');
-            div.innerHTML = isBot
-                ? `<div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div>
-                   <div class="rounded-xl px-3 py-2 text-sm max-w-xs" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">${text}</div>`
-                : `<div class="rounded-xl px-3 py-2 text-sm max-w-xs text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">${text}</div>`;
-            area.appendChild(div);
-            area.scrollTop = area.scrollHeight;
-        }
-
-        function sendAIMessage() {
-            const inp = document.getElementById('aiInput');
-            const msg = inp.value.trim(); if (!msg) return;
-            appendChat(document.getElementById('chatArea'), 'user', msg); inp.value = '';
-            setTimeout(()=>{ appendChat(document.getElementById('chatArea'), 'bot', AI_REPLIES[aiIdx++ % AI_REPLIES.length]); }, 700);
-        }
-
-        function sendModalAI() {
-            const inp = document.getElementById('modalAiInput');
-            const msg = inp.value.trim(); if (!msg) return;
-            appendChat(document.getElementById('modalChatArea'), 'user', msg); inp.value = '';
-            setTimeout(()=>{ appendChat(document.getElementById('modalChatArea'), 'bot', AI_REPLIES[aiIdx++ % AI_REPLIES.length]); }, 700);
-        }
-
-        function openChatAI()  { document.getElementById('aiChatModal').classList.remove('hidden'); document.getElementById('modalAiInput').focus(); }
-        function closeChatAI() { document.getElementById('aiChatModal').classList.add('hidden'); }
-
-        function updateClock() {
-            const n = new Date();
-            const days = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-            const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
-            document.getElementById('clockDisplay').textContent =
-                `${days[n.getDay()]} ${n.getDate()} ${months[n.getMonth()]} · ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-        }
-
-        function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
-
-        function loadOpexData() {
-            const exps = JSON.parse(localStorage.getItem('lunomi_expenses') || '[]');
-            const nowMonth = new Date().toISOString().slice(0,7);
-            const month = exps.filter(e => e.date.startsWith(nowMonth));
-            const total = month.reduce((s,e) => s+e.amount, 0);
-            document.getElementById('opexTotal').textContent = rp(total);
-            document.getElementById('opexSub').textContent = month.length + ' catatan bulan ini';
-            // Top 3 categories
-            const cats = {};
-            month.forEach(e => { cats[e.cat] = (cats[e.cat]||0) + e.amount; });
-            const top3 = Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,3);
-            document.getElementById('opexBreakdown').innerHTML = top3.map(([cat,amt]) =>
-                `<div class="flex justify-between text-xs">
-                    <span style="color:rgba(255,255,255,0.45)">${cat}</span>
-                    <span class="font-semibold text-white">${rp(amt)}</span>
-                </div>`
-            ).join('') || '<div class="text-xs" style="color:rgba(255,255,255,0.3)">Belum ada pengeluaran</div>';
-        }
-
-        function loadRevenueTarget() {
-            const tgt = JSON.parse(localStorage.getItem('lunomi_revenue_target') || '{"amount":0}');
-            const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
-            const nowMonth = new Date().toISOString().slice(0,7);
-            const achieved = trxs.filter(t => t.date && t.date.startsWith(nowMonth)).reduce((s,t) => s+t.total, 0);
-            const goal = tgt.amount || 0;
-            const pct = goal > 0 ? Math.min(100, Math.round(achieved/goal*100)) : 0;
-            document.getElementById('targetAmount').textContent = rp(goal);
-            document.getElementById('targetPct').textContent = pct + '%';
-            document.getElementById('targetBar').style.width = pct + '%';
-            document.getElementById('targetBar').style.background = pct >= 100
-                ? 'linear-gradient(90deg,#22c55e,#4ade80)'
-                : pct >= 70 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)'
-                : 'linear-gradient(90deg,#6366f1,#818cf8)';
-            document.getElementById('targetGoal').textContent = 'Target: ' + rp(goal);
-            if(goal > 0) {
-                const el = document.querySelector('#targetDisplay .flex.justify-between.mt-1\\.5 span:first-child');
-                if(el) el.textContent = rp(achieved);
-            }
-        }
-
-        function toggleTargetEdit() {
-            const form = document.getElementById('targetEditForm');
-            const display = document.getElementById('targetDisplay');
-            const btn = document.getElementById('targetEditBtn');
-            const isHidden = form.classList.contains('hidden');
-            if(isHidden) {
-                const tgt = JSON.parse(localStorage.getItem('lunomi_revenue_target') || '{"amount":0}');
-                document.getElementById('targetInput').value = tgt.amount || '';
-                form.classList.remove('hidden');
-                display.classList.add('hidden');
-                btn.textContent = 'Batal';
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            sidebar.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '80px';
+                toggleIcon.textContent = 'menu';
             } else {
-                form.classList.add('hidden');
-                display.classList.remove('hidden');
-                btn.textContent = 'Edit';
+                mainContent.style.marginLeft = '260px';
+                toggleIcon.textContent = 'menu_open';
             }
         }
 
-        function saveTarget() {
-            const v = parseFloat(document.getElementById('targetInput').value) || 0;
-            if(v <= 0) { showToast('Masukkan target yang valid', 'warning'); return; }
-            localStorage.setItem('lunomi_revenue_target', JSON.stringify({amount:v, period:'monthly'}));
-            toggleTargetEdit();
-            loadRevenueTarget();
-            showToast('Target revenue disimpan!', 'success');
+        function toggleMobileSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
         }
 
-        function logout() {
-            if (!confirm('Yakin ingin logout?')) return;
-            localStorage.removeItem('lunomi_session');
-            localStorage.removeItem('lunomi_outlet');
-            window.location.href = 'index.html';
-        }
-
+        // Initialize agents and logs
         document.addEventListener('DOMContentLoaded', () => {
-            try {
-                const s = localStorage.getItem('lunomi_session');
-                if (!s) { window.location.href = 'index.html'; return; }
-                const sess = JSON.parse(s);
-                document.getElementById('userName').textContent = sess.user.name;
-                const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || 'null');
-                const outletEl = document.getElementById('outletBadge');
-                if (outlet && outletEl) outletEl.textContent = '🏪 ' + outlet.name;
-                else if (outletEl) outletEl.textContent = 'POS Dashboard';
-            } catch(e) { window.location.href = 'index.html'; return; }
-            renderAgents();
-            renderActivityLog();
-            updateClock();
-            setInterval(updateClock, 60000);
-            loadOpexData();
-            loadRevenueTarget();
+            initializeLunomi();
+            
+            const agents = [
+                { name: 'FIN AI', status: 'active', task: 'Audit Laporan' },
+                { name: 'OPS AI', status: 'active', task: 'Monitoring Stok' },
+                { name: 'HR AI', status: 'active', task: 'Cek Absensi' },
+                { name: 'MKT AI', status: 'active', task: 'Analisa Promo' },
+                { name: 'SUP AI', status: 'active', task: 'Cek Supplier' },
+                { name: 'SEC AI', status: 'active', task: 'Audit CCTV' }
+            ];
+
+            const agentList = document.getElementById('agentList');
+            agents.forEach(a => {
+                agentList.innerHTML += `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
+                        <div class="flex items-center gap-2">
+                            <span class="dot active"></span>
+                            <span class="text-xs font-bold text-white">${a.name}</span>
+                        </div>
+                        <span class="text-[10px] text-white/40">${a.task}</span>
+                    </div>
+                `;
+            });
+
+            const logs = [
+                { time: '2m ago', msg: 'FIN AI: Laporan harian outlet A selesai' },
+                { time: '15m ago', msg: 'OPS AI: Stok beras kritis di outlet B' },
+                { time: '1h ago', msg: 'HR AI: 2 karyawan terlambat di outlet C' }
+            ];
+
+            const activityLog = document.getElementById('activityLog');
+            logs.forEach(l => {
+                activityLog.innerHTML += `
+                    <div class="flex gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                        <span class="text-[10px] text-white/30 whitespace-nowrap">${l.time}</span>
+                        <span class="text-xs text-white/70">${l.msg}</span>
+                    </div>
+                `;
+            });
         });
     </script>
 </body>
