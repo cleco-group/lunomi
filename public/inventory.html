@@ -43,17 +43,13 @@
         <button onclick="openAddModal()" class="btn-primary px-4 py-2 rounded-xl text-xs flex items-center gap-2">+ Tambah Item</button>
     </div>
 </nav>
-
 <div class="max-w-6xl mx-auto px-4 py-6">
-    <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Item</div><div class="text-2xl font-extrabold text-white" id="statTotal">8</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(34,197,94,.7)">Stok OK</div><div class="text-2xl font-extrabold text-green-400" id="statOk">5</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(245,158,11,.7)">Warning</div><div class="text-2xl font-extrabold text-amber-400" id="statWarn">2</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(239,68,68,.7)">Kritis</div><div class="text-2xl font-extrabold text-red-400" id="statAlert">1</div></div>
     </div>
-
-    <!-- Filter + Search -->
     <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
         <input id="searchInput" type="text" placeholder="🔍  Cari nama item..." class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[180px]" oninput="renderTable()">
         <select id="filterStatus" class="input-glass px-3 py-2 rounded-xl text-sm" onchange="renderTable()">
@@ -69,8 +65,6 @@
             <option value="Bumbu">Bumbu</option>
         </select>
     </div>
-
-    <!-- Table -->
     <div class="glass-card rounded-2xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -90,8 +84,6 @@
         <div id="emptyState" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Tidak ada item ditemukan.</div>
     </div>
 </div>
-
-<!-- Add/Edit Modal -->
 <div id="itemModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl">
         <div class="flex items-center justify-between mb-5">
@@ -121,9 +113,7 @@
         </div>
     </div>
 </div>
-
 <div id="toast" class="toast toast-success"></div>
-
 <script>
     let items = [
         {id:1, name:'Nasi (Beras)',    cat:'Bahan Makanan', stock:45, max:60,  unit:'kg'},
@@ -136,14 +126,12 @@
         {id:8, name:'Kecap Manis',     cat:'Bumbu',         stock:7,  max:20,  unit:'botol'},
     ];
     let editingId = null;
-
     function getStatus(s, m){
         const r = s/m;
         if(r > 0.5) return 'ok';
         if(r > 0.2) return 'warning';
         return 'alert';
     }
-
     function renderTable(){
         const q = document.getElementById('searchInput').value.toLowerCase();
         const sf = document.getElementById('filterStatus').value;
@@ -185,14 +173,12 @@
         }).join('');
         updateStats();
     }
-
     function updateStats(){
         document.getElementById('statTotal').textContent = items.length;
         document.getElementById('statOk').textContent    = items.filter(i=>getStatus(i.stock,i.max)==='ok').length;
         document.getElementById('statWarn').textContent  = items.filter(i=>getStatus(i.stock,i.max)==='warning').length;
         document.getElementById('statAlert').textContent = items.filter(i=>getStatus(i.stock,i.max)==='alert').length;
     }
-
     function openAddModal(){
         editingId=null;
         document.getElementById('modalTitle').textContent='Tambah Item Baru';
@@ -214,7 +200,6 @@
         document.getElementById('itemModal').classList.remove('hidden');
     }
     function closeModal(){ document.getElementById('itemModal').classList.add('hidden'); }
-
     function saveItem(){
         const name  = document.getElementById('mName').value.trim();
         const cat   = document.getElementById('mCat').value;
@@ -241,13 +226,11 @@
         items = items.filter(x=>x.id!==id);
         renderTable(); showToast('Item dihapus');
     }
-
     function showToast(msg){
         const t = document.getElementById('toast');
         t.textContent=msg; t.classList.add('show');
         setTimeout(()=>t.classList.remove('show'),2500);
     }
-
     document.addEventListener('DOMContentLoaded',()=>{
         try{
             const s = localStorage.getItem('lunomi_session');

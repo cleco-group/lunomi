@@ -16,7 +16,6 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
     <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -33,8 +32,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Stats Bar -->
     <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
         <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
@@ -55,8 +52,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Filters -->
     <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
         <div class="max-w-7xl mx-auto flex gap-3 flex-wrap">
             <input type="text" id="searchOutlet" placeholder="Cari outlet..." class="flex-1 min-w-48 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onkeyup="filterOutlets()">
@@ -68,13 +63,9 @@
             </select>
         </div>
     </div>
-
-    <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="outletList"></div>
     </div>
-
-    <!-- Modal Tambah Outlet -->
     <div id="addOutletModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 class="text-lg font-bold mb-4">Tambah Outlet Baru</h2>
@@ -106,8 +97,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal Detail Outlet -->
     <div id="detailOutletModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-screen overflow-auto">
             <div class="flex justify-between items-center mb-4">
@@ -117,7 +106,6 @@
             <div id="outletDetails" class="space-y-4"></div>
         </div>
     </div>
-
     <script>
         // Sample data
         const OUT = [
@@ -130,19 +118,15 @@
             {id:7,n:'Outlet Gatot Subroto',a:'Jl. Gatot Subroto No. 90, Jakarta Selatan',c:'Jakarta',p:'021-4444-4444',m:'Yanto',st:'online',rev:39600000,emp:10,ord:110,rat:4.4},
             {id:8,n:'Outlet Cikini',a:'Jl. Cikini Raya No. 23, Jakarta Pusat',c:'Jakarta',p:'021-2222-2222',m:'Lisa',st:'online',rev:41700000,emp:11,ord:118,rat:4.6}
         ];
-
         let outlets = JSON.parse(JSON.stringify(OUT));
-
         function render() {
             const list = document.getElementById('outletList');
             const search = document.getElementById('searchOutlet').value.toLowerCase();
             const status = document.getElementById('statusFilter').value;
-
             const filtered = outlets.filter(o => 
                 (o.n.toLowerCase().includes(search) || o.a.toLowerCase().includes(search)) &&
                 (!status || o.st === status)
             );
-
             list.innerHTML = filtered.map(o =>
                 '<div class="outlet-card bg-white rounded-lg shadow p-6 border-l-4 border-' + (o.st === 'online' ? 'green' : o.st === 'offline' ? 'red' : 'yellow') + '-500">' +
                 '<div class="flex justify-between items-start mb-4">' +
@@ -160,29 +144,23 @@
                 '<button onclick="editOutlet(' + o.id + ')" class="flex-1 text-gray-600 border border-gray-300 px-3 py-2 rounded text-xs font-semibold hover:bg-gray-50">Edit</button>' +
                 '</div></div>'
             ).join('');
-
             updateStats();
         }
-
         function updateStats() {
             const online = outlets.filter(o => o.st === 'online').length;
             const offline = outlets.filter(o => o.st === 'offline').length;
             const totalRev = outlets.reduce((s, o) => s + o.rev, 0);
-
             document.getElementById('totalOutlet').textContent = outlets.length;
             document.getElementById('onlineOutlet').textContent = online;
             document.getElementById('offlineOutlet').textContent = offline;
             document.getElementById('totalRevenue').textContent = 'Rp ' + (totalRev/1000000).toFixed(1) + 'M';
         }
-
         function filterOutlets() {
             render();
         }
-
         function openAddOutlet() {
             document.getElementById('addOutletModal').style.display = 'flex';
         }
-
         function closeAddOutlet() {
             document.getElementById('addOutletModal').style.display = 'none';
             document.getElementById('outletName').value = '';
@@ -191,26 +169,22 @@
             document.getElementById('outletPhone').value = '';
             document.getElementById('outletManager').value = '';
         }
-
         function saveOutlet() {
             const n = document.getElementById('outletName').value;
             const a = document.getElementById('outletAddress').value;
             const c = document.getElementById('outletCity').value;
             const p = document.getElementById('outletPhone').value;
             const m = document.getElementById('outletManager').value;
-
             if (!n || !a || !c) {
                 alert('Isi semua field yang wajib');
                 return;
             }
-
             const id = Math.max(...outlets.map(o => o.id), 0) + 1;
             outlets.push({id,n,a,c,p,m,st:'online',rev:0,emp:0,ord:0,rat:0});
             render();
             closeAddOutlet();
             alert('✓ Outlet ditambahkan');
         }
-
         function viewDetail(id) {
             const o = outlets.find(x => x.id === id);
             if (o) {
@@ -242,25 +216,20 @@
                 document.getElementById('detailOutletModal').style.display = 'flex';
             }
         }
-
         function closeDetailOutlet() {
             document.getElementById('detailOutletModal').style.display = 'none';
         }
-
         function editOutlet(id) {
             alert('Edit outlet ' + id + ' - Coming soon!');
         }
-
         function logout() {
             localStorage.removeItem('lunomi_session');
             window.location.href = 'index.html';
         }
-
         function checkSession() {
             const s = localStorage.getItem('lunomi_session');
             if (!s) { window.location.href = 'index.html'; return; }
         }
-
         document.addEventListener('DOMContentLoaded', () => {
             checkSession();
             render();

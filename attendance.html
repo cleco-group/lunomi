@@ -24,29 +24,23 @@
             </div>
             <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Attendance Action -->
             <div class="space-y-6">
                 <div class="glass-card p-8 rounded-3xl text-center">
                     <div class="text-4xl font-black mb-2" id="liveClock">00:00:00</div>
                     <p class="text-xs text-white/40 font-bold uppercase tracking-widest mb-6" id="liveDate">Senin, 4 Mei 2026</p>
-                    
                     <div class="camera-preview mb-6 border-2 border-white/10">
                         <span class="material-symbols-outlined text-white/20 text-6xl">person</span>
                         <div class="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-bold flex items-center gap-1">
                             <span class="material-symbols-outlined text-xs">location_on</span> Lokasi Sesuai
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <button class="py-4 bg-emerald-600 hover:bg-emerald-700 rounded-2xl font-bold transition shadow-lg shadow-emerald-500/20">Clock In</button>
                         <button class="py-4 bg-rose-600 hover:bg-rose-700 rounded-2xl font-bold transition shadow-lg shadow-rose-500/20">Clock Out</button>
                     </div>
                 </div>
             </div>
-
-            <!-- Recent Activity -->
             <div class="space-y-6">
                 <h3 class="text-lg font-bold">Aktivitas Hari Ini</h3>
                 <div class="space-y-3">
@@ -71,12 +65,10 @@
                         <span class="material-symbols-outlined text-white/20">verified</span>
                     </div>
                 </div>
-                
                 <button class="w-full py-3 glass-card rounded-xl text-xs font-bold text-white/60 hover:text-white transition">Lihat Riwayat Lengkap</button>
             </div>
         </div>
     </div>
-
     <script>
         function updateClock() {
             const now = new Date();

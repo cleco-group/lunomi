@@ -39,7 +39,6 @@
         </div>
     </div>
 </nav>
-
 <div class="max-w-6xl mx-auto px-4 py-6">
     <div class="flex flex-wrap gap-3 items-center mb-5">
         <input id="searchInput" type="text" placeholder="🔍  Cari menu untuk resep..." class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[180px]" oninput="renderGrid()">
@@ -47,8 +46,6 @@
     <div id="recipeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     <div id="emptyState" class="hidden py-16 text-center text-sm" style="color:rgba(255,255,255,.3)">Tidak ada menu ditemukan.</div>
 </div>
-
-<!-- Recipe Detail Modal -->
 <div id="recipeModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="glass-card rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-5">
@@ -58,27 +55,21 @@
             </div>
             <button onclick="closeModal()" style="color:rgba(255,255,255,.4)" class="hover:text-white text-xl">×</button>
         </div>
-        
         <div class="space-y-4">
             <div class="flex items-center justify-between">
                 <h3 class="text-xs font-bold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Bahan Baku & Gramasi</h3>
                 <button onclick="addIngredientRow()" class="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded-lg border border-indigo-500/30 hover:bg-indigo-500/40 transition">+ Tambah Bahan</button>
             </div>
-            
             <div id="ingredientList" class="space-y-2">
-                <!-- Rows added here -->
             </div>
         </div>
-
         <div class="flex gap-3 mt-8">
             <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
             <button onclick="saveRecipe()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan Resep</button>
         </div>
     </div>
 </div>
-
 <div id="toast" class="toast toast-success"></div>
-
 <script>
     const MENU_ITEMS = [
         {id:1,  n:'Nasi Goreng',       e:'🍳', cat:'Makanan'},
@@ -94,7 +85,6 @@
         {id:11, n:'Kue Lapis',         e:'🍰', cat:'Dessert'},
         {id:12, n:'Bika Ambon',        e:'🍮', cat:'Dessert'},
     ];
-
     const RAW_ITEMS = [
         {id:1, name:'Nasi (Beras)',     unit:'kg'},
         {id:2, name:'Ayam Fillet',      unit:'kg'},
@@ -110,16 +100,13 @@
         {id:12, name:'Bawang Merah',    unit:'gram'},
         {id:13, name:'Bawang Putih',    unit:'gram'},
     ];
-
     let recipes = RecipeManager.getAllRecipes();
     let activeMenuId = null;
-
     function renderGrid() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const grid = document.getElementById('recipeGrid');
         let html = '';
         let count = 0;
-
         MENU_ITEMS.forEach(m => {
             if (m.n.toLowerCase().includes(q)) {
                 const hasRecipe = recipes[m.id] && recipes[m.id].length > 0;
@@ -140,40 +127,32 @@
                 count++;
             }
         });
-
         grid.innerHTML = html;
         document.getElementById('emptyState').classList.toggle('hidden', count > 0);
     }
-
     function openRecipe(id) {
         activeMenuId = id;
         const menu = MENU_ITEMS.find(m => m.id === id);
         document.getElementById('mEmoji').textContent = menu.e;
         document.getElementById('mTitle').textContent = 'Resep: ' + menu.n;
-        
         const list = document.getElementById('ingredientList');
         list.innerHTML = '';
-        
         const existing = recipes[id] || [];
         if (existing.length === 0) {
             addIngredientRow();
         } else {
             existing.forEach(ing => addIngredientRow(ing.rawId, ing.qty));
         }
-        
         document.getElementById('recipeModal').classList.remove('hidden');
     }
-
     function addIngredientRow(rawId = '', qty = '') {
         const list = document.getElementById('ingredientList');
         const div = document.createElement('div');
         div.className = 'flex gap-2 items-center animate-in fade-in duration-200';
-        
         let options = '<option value="">Pilih Bahan...</option>';
         RAW_ITEMS.forEach(r => {
             options += `<option value="${r.id}" ${r.id == rawId ? 'selected' : ''}>${r.name} (${r.unit})</option>`;
         });
-
         div.innerHTML = `
             <select class="ing-id input-glass flex-1 px-3 py-2 rounded-xl text-xs">
                 ${options}
@@ -183,11 +162,9 @@
         `;
         list.appendChild(div);
     }
-
     function saveRecipe() {
         const rows = document.querySelectorAll('#ingredientList > div');
         const data = [];
-        
         rows.forEach(row => {
             const rawId = row.querySelector('.ing-id').value;
             const qty = row.querySelector('.ing-qty').value;
@@ -195,26 +172,21 @@
                 data.push({ rawId: parseInt(rawId), qty: parseFloat(qty) });
             }
         });
-
         RecipeManager.saveRecipe(activeMenuId, data);
         recipes = RecipeManager.getAllRecipes();
-        
         showToast('Resep berhasil disimpan!');
         closeModal();
         renderGrid();
     }
-
     function closeModal() {
         document.getElementById('recipeModal').classList.add('hidden');
     }
-
     function showToast(msg) {
         const t = document.getElementById('toast');
         t.textContent = msg;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);
     }
-
     document.addEventListener('DOMContentLoaded', () => {
         const o = JSON.parse(localStorage.getItem('lunomi_outlet') || 'null');
         if(o) document.getElementById('outletLabel').textContent = o.name;

@@ -41,34 +41,24 @@
         <div class="text-xs" id="opnameDate" style="color:rgba(255,255,255,.4)"></div>
     </div>
 </nav>
-
 <div class="max-w-4xl mx-auto px-4 py-6">
-    <!-- Tabs -->
     <div class="flex gap-2 mb-6">
         <button class="tab-btn active" id="tab-menu" onclick="switchTab('menu',this)">🍜 Stok Menu</button>
         <button class="tab-btn" id="tab-bahan" onclick="switchTab('bahan',this)">📦 Bahan Baku</button>
     </div>
-
-    <!-- Info bar -->
     <div class="glass-card rounded-2xl px-5 py-4 mb-5 flex flex-wrap items-center gap-4 justify-between">
         <div class="text-sm" style="color:rgba(255,255,255,.6)">Masukkan jumlah fisik yang dihitung untuk menyesuaikan stok sistem.</div>
         <button onclick="saveOpname()" class="btn-primary px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
             💾 Simpan Penyesuaian
         </button>
     </div>
-
-    <!-- Table header -->
     <div class="opname-row px-2 text-xs font-semibold" style="color:rgba(255,255,255,.35);border-bottom:1px solid rgba(255,255,255,.12)">
         <span>Nama Item</span>
         <span class="text-center">Sistem</span>
         <span class="text-center">Fisik</span>
         <span class="text-center">Selisih</span>
     </div>
-
-    <!-- Rows -->
     <div id="opnameRows" class="px-2"></div>
-
-    <!-- Summary -->
     <div class="glass-card rounded-2xl p-5 mt-5 grid grid-cols-3 gap-4 text-center">
         <div>
             <div class="text-2xl font-extrabold text-green-400" id="sumPlus">0</div>
@@ -84,9 +74,7 @@
         </div>
     </div>
 </div>
-
 <div id="toast" class="hidden fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2" style="opacity:0;transition:opacity .3s"></div>
-
 <script>
     const MENU_ITEMS = [
         {id:1,  n:'Nasi Goreng', e:'🍜', unit:'porsi'},
@@ -112,11 +100,9 @@
         {id:7, name:'Minyak Goreng',    unit:'liter'},
         {id:8, name:'Kecap Manis',      unit:'botol'},
     ];
-
     let currentTab = 'menu';
     let physicalCounts = {};
     let toastTimer = null;
-
     function showToast(msg, type='success'){
         clearTimeout(toastTimer);
         const C={success:'rgba(34,197,94,.9)',error:'rgba(239,68,68,.9)',info:'rgba(99,102,241,.9)'};
@@ -126,7 +112,6 @@
         t.classList.remove('hidden');t.style.opacity='1';
         toastTimer=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.classList.add('hidden'),300);},3000);
     }
-
     function getMenuStock(){
         const s=localStorage.getItem('lunomi_menu_stock');
         if(s) return JSON.parse(s);
@@ -141,7 +126,6 @@
         RAW_ITEMS.forEach(i=>{d[i.id]={qty:0,unit:i.unit};});
         return d;
     }
-
     function switchTab(tab, btn){
         currentTab=tab;
         document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -149,7 +133,6 @@
         physicalCounts={};
         renderRows();
     }
-
     function renderRows(){
         const isMenu=currentTab==='menu';
         const items=isMenu?MENU_ITEMS:RAW_ITEMS;
@@ -181,7 +164,6 @@
         document.getElementById('opnameRows').innerHTML=html;
         renderSummary();
     }
-
     function renderSummary(){
         const isMenu=currentTab==='menu';
         const items=isMenu?MENU_ITEMS:RAW_ITEMS;
@@ -199,12 +181,10 @@
         document.getElementById('sumMatch').textContent=match;
         document.getElementById('sumMinus').textContent=minus;
     }
-
     function saveOpname(){
         const isMenu=currentTab==='menu';
         const keys=Object.keys(physicalCounts);
         if(!keys.length){showToast('Belum ada data fisik dimasukkan.','info');return;}
-
         if(isMenu){
             const stk=getMenuStock();
             keys.forEach(id=>{
@@ -220,17 +200,14 @@
             });
             localStorage.setItem('lunomi_raw_stock',JSON.stringify(stk));
         }
-
         const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
         const logs=JSON.parse(localStorage.getItem('lunomi_opname_logs')||'[]');
         logs.unshift({date:new Date().toISOString(),tab:currentTab,adjustments:keys.length,outlet_id:outlet?outlet.id:''});
         localStorage.setItem('lunomi_opname_logs',JSON.stringify(logs));
-
         physicalCounts={};
         renderRows();
         showToast(`Stok ${isMenu?'menu':'bahan baku'} berhasil disesuaikan (${keys.length} item)!`,'success');
     }
-
     document.addEventListener('DOMContentLoaded',()=>{
         try{
             const s=localStorage.getItem('lunomi_session');

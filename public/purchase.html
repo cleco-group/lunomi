@@ -42,9 +42,7 @@
         <button onclick="openPOModal()" class="btn-primary px-4 py-2 rounded-xl text-xs flex items-center gap-1.5">+ Buat PO</button>
     </div>
 </nav>
-
 <div class="max-w-4xl mx-auto px-4 py-6">
-    <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
         <div class="glass-card rounded-2xl p-4">
             <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Bulan Ini</div>
@@ -59,8 +57,6 @@
             <div class="text-xl font-extrabold text-white" id="statSupplier">0</div>
         </div>
     </div>
-
-    <!-- Purchase History -->
     <div class="glass-card rounded-2xl overflow-hidden">
         <div class="px-5 py-4 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,.08)">
             <h3 class="font-bold text-sm text-white">📋 Riwayat Pembelian</h3>
@@ -71,8 +67,6 @@
         <div id="historyEmpty" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Belum ada riwayat pembelian.</div>
     </div>
 </div>
-
-<!-- PO Modal -->
 <div id="poModal" class="modal-overlay hidden fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4">
     <div class="modal-box w-full max-w-lg shadow-2xl max-h-[90vh] flex flex-col">
         <div class="flex items-center justify-between px-6 pt-5 pb-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
@@ -116,8 +110,6 @@
         </div>
     </div>
 </div>
-
-<!-- Detail Modal -->
 <div id="detailModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="modal-box w-full max-w-md shadow-2xl">
         <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
@@ -127,9 +119,7 @@
         <div id="detailBody" class="px-6 py-5 space-y-3 max-h-96 overflow-y-auto"></div>
     </div>
 </div>
-
 <div id="toast" class="hidden fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all" style="opacity:0"></div>
-
 <script>
     const RAW_ITEMS = [
         {id:1, name:'Nasi (Beras)',     unit:'kg'},
@@ -141,7 +131,6 @@
         {id:7, name:'Minyak Goreng',    unit:'liter'},
         {id:8, name:'Kecap Manis',      unit:'botol'},
     ];
-
     function getPurchases(){return JSON.parse(localStorage.getItem('lunomi_purchases')||'[]');}
     function savePurchases(p){localStorage.setItem('lunomi_purchases',JSON.stringify(p));}
     function getRawStock(){
@@ -153,10 +142,8 @@
     }
     function saveRawStock(s){localStorage.setItem('lunomi_raw_stock',JSON.stringify(s));}
     function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
-
     let poLines=[];
     let toastTimer=null;
-
     function showToast(msg,type='success'){
         clearTimeout(toastTimer);
         const C={success:'rgba(34,197,94,.9)',error:'rgba(239,68,68,.9)',info:'rgba(99,102,241,.9)'};
@@ -166,7 +153,6 @@
         t.classList.remove('hidden');t.style.opacity='1';
         toastTimer=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.classList.add('hidden'),300);},3000);
     }
-
     function openPOModal(){
         poLines=[];
         document.getElementById('poSupplier').value='';
@@ -178,7 +164,6 @@
         document.getElementById('poModal').classList.remove('hidden');
     }
     function closePOModal(){document.getElementById('poModal').classList.add('hidden');}
-
     function addPOLine(){
         poLines.push({itemId:RAW_ITEMS[0].id,qty:1,price:0});
         renderPOLines();
@@ -187,7 +172,6 @@
         poLines.splice(i,1);
         renderPOLines();
     }
-
     function renderPOLines(){
         const opts=RAW_ITEMS.map(i=>`<option value="${i.id}">${i.name} (${i.unit})</option>`).join('');
         document.getElementById('poLines').innerHTML=poLines.map((l,i)=>`
@@ -205,12 +189,10 @@
             </div>`).join('');
         calcPOTotal();
     }
-
     function calcPOTotal(){
         const total=poLines.reduce((s,l)=>s+(l.qty*l.price),0);
         document.getElementById('poTotal').textContent=rp(total);
     }
-
     function savePO(){
         const supplier=document.getElementById('poSupplier').value.trim();
         const date=document.getElementById('poDate').value;
@@ -219,7 +201,6 @@
         if(!supplier){err.textContent='Nama supplier harus diisi.';err.classList.remove('hidden');return;}
         if(!date){err.textContent='Tanggal harus diisi.';err.classList.remove('hidden');return;}
         if(!poLines.length||poLines.every(l=>l.qty<=0)){err.textContent='Tambahkan minimal 1 item.';err.classList.remove('hidden');return;}
-
         const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
         const total=poLines.reduce((s,l)=>s+(l.qty*l.price),0);
         const items=poLines.filter(l=>l.qty>0).map(l=>{
@@ -231,24 +212,20 @@
             date,supplier,note,total,items,
             outlet_id:outlet?outlet.id:''
         };
-
         const stk=getRawStock();
         items.forEach(i=>{
             if(!stk[i.id]) stk[i.id]={qty:0,unit:i.unit};
             stk[i.id].qty=+(stk[i.id].qty+i.qty).toFixed(2);
         });
         saveRawStock(stk);
-
         const purchases=getPurchases();
         purchases.unshift(po);
         savePurchases(purchases);
-
         closePOModal();
         renderHistory();
         updateStats();
         showToast('PO berhasil disimpan & stok diperbarui!','success');
     }
-
     function renderHistory(){
         const q=(document.getElementById('searchPO').value||'').toLowerCase();
         const pos=getPurchases().filter(p=>!q||p.supplier.toLowerCase().includes(q)||p.id.toLowerCase().includes(q));
@@ -268,7 +245,6 @@
                 </div>
             </div>`).join('');
     }
-
     function showDetail(id){
         const p=getPurchases().find(x=>x.id===id);
         if(!p) return;
@@ -291,7 +267,6 @@
         document.getElementById('detailModal').classList.remove('hidden');
     }
     function closeDetailModal(){document.getElementById('detailModal').classList.add('hidden');}
-
     function updateStats(){
         const pos=getPurchases();
         const now=new Date();
@@ -301,7 +276,6 @@
         document.getElementById('statCount').textContent=pos.length;
         document.getElementById('statSupplier').textContent=suppliers;
     }
-
     document.addEventListener('DOMContentLoaded',()=>{
         try{
             const s=localStorage.getItem('lunomi_session');

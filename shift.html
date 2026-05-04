@@ -24,7 +24,6 @@
             </div>
             <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="glass-card p-6 rounded-2xl">
                 <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Penjualan (Sistem)</p>
@@ -39,7 +38,6 @@
                 <h3 class="text-xl font-extrabold">Rp 500,000</h3>
             </div>
         </div>
-
         <div class="glass-card rounded-3xl p-8">
             <h3 class="text-lg font-bold mb-6">Input Uang Fisik</h3>
             <div class="space-y-6">
@@ -58,45 +56,36 @@
                         </div>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-white/40 mb-2 uppercase">Catatan / Alasan Selisih</label>
                     <textarea class="glass-input w-full px-4 py-3 rounded-2xl text-sm h-24" placeholder="Contoh: Salah kembalian pelanggan..."></textarea>
                 </div>
-
                 <div class="pt-6 border-t border-white/5">
                     <button onclick="processCloseShift()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-2xl font-bold transition shadow-lg shadow-indigo-500/20">Proses Tutup Shift</button>
                 </div>
             </div>
         </div>
     </div>
-
     <script>
         let expectedTotal = 500000; // Modal awal
-
         function loadData() {
             const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
             let totalSales = 0;
             let cashSales = 0;
-
             trxs.forEach(t => {
                 totalSales += t.total;
                 if (t.method === 'cash') cashSales += t.total;
             });
-
             document.getElementById('sysSales').textContent = 'Rp ' + totalSales.toLocaleString('id-ID');
             document.getElementById('sysCash').textContent = 'Rp ' + cashSales.toLocaleString('id-ID');
             expectedTotal += cashSales;
             calcDiff();
         }
-
         function calcDiff() {
             const actual = parseFloat(document.getElementById('actualCash').value) || 0;
             const diff = actual - expectedTotal;
             const box = document.getElementById('varianceBox');
-            
             box.textContent = (diff >= 0 ? '+ Rp ' : '- Rp ') + Math.abs(diff).toLocaleString('id-ID');
-            
             if (diff === 0) {
                 box.className = "w-full px-4 py-4 rounded-2xl text-xl font-black bg-emerald-500/10 text-emerald-400 flex items-center";
             } else if (diff < 0) {
@@ -105,14 +94,12 @@
                 box.className = "w-full px-4 py-4 rounded-2xl text-xl font-black bg-amber-500/10 text-amber-400 flex items-center";
             }
         }
-
         function processCloseShift() {
             if (confirm('Yakin ingin menutup shift? Data transaksi akan diarsipkan.')) {
                 alert('Shift berhasil ditutup. Laporan telah dikirim ke email owner.');
                 window.location.href = 'dashboard.html';
             }
         }
-
         document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>

@@ -9,14 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
-
         /* Dark Modern — Financial Dashboard palette from UI/UX Pro Max skill
            BG:#020617  Surface:#0F172A  Elevated:#1E293B  Accent:#3B82F6  CTA:#F97316 */
         body { background:#020617; color:white; }
-
         /* Header */
         .top-bar { background:#0a0f1e; border-bottom:1px solid rgba(255,255,255,0.06); }
-
         /* Product area */
         #productArea { background:#020617; }
         .cat-btn {
@@ -31,7 +28,6 @@
             background:rgba(59,130,246,0.2); border-color:rgba(59,130,246,0.6);
             color:#93c5fd; box-shadow:0 0 12px rgba(59,130,246,0.2);
         }
-
         /* Product cards */
         .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:0.75rem; }
         .product-item {
@@ -44,7 +40,6 @@
             transform:translateY(-2px); box-shadow:0 6px 20px rgba(59,130,246,0.15);
         }
         .product-item:active { transform:scale(0.96); }
-
         /* Cart sidebar */
         #cartSidebar { background:#0a0f1e; border-left:1px solid rgba(255,255,255,0.06); }
         @media(max-width:640px){
@@ -61,10 +56,8 @@
             align-items:center; justify-content:center; transition:background 0.1s;
         }
         .qty-btn:hover { background:rgba(59,130,246,0.2); border-color:rgba(59,130,246,0.4); }
-
         /* Summary area */
         #cartSummary { background:#0f172a; border-top:1px solid rgba(255,255,255,0.06); }
-
         /* Buttons */
         .btn-pay {
             background:linear-gradient(135deg,#3b82f6,#2563eb);
@@ -90,7 +83,6 @@
             color:#a78bfa; font-weight:600; border-radius:0.75rem; cursor:pointer; transition:all 0.15s;
         }
         .btn-purple:hover { background:rgba(139,92,246,0.2); }
-
         /* Modal overlay */
         .modal-overlay {
             background:rgba(0,0,0,0.7);
@@ -122,23 +114,17 @@
             background:rgba(249,115,22,0.15); border-color:rgba(249,115,22,0.6);
             color:#fb923c; box-shadow:0 0 10px rgba(249,115,22,0.2);
         }
-
         /* History item */
         .hist-item { background:#1e293b; border:1px solid rgba(255,255,255,0.07); border-radius:0.875rem; padding:1rem; }
-
         /* Toast */
         #toast { transition:opacity 0.3s; pointer-events:none; }
     @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
-
-    <!-- Toast -->
     <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] hidden">
         <div id="toastInner" class="px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold text-white flex items-center gap-2"></div>
     </div>
-
-    <!-- Header -->
     <div class="top-bar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-15 py-3">
@@ -162,9 +148,7 @@
             </div>
         </div>
     </div>
-
     <div class="flex pos-layout" style="height:calc(100vh - 61px)">
-        <!-- Products -->
         <div id="productArea" class="flex-1 p-4 overflow-y-auto min-w-0">
             <div class="flex gap-2 mb-4 pb-3 overflow-x-auto" style="border-bottom:1px solid rgba(255,255,255,0.06)">
                 <button class="cat-btn active" onclick="filterCat('all',this)">Semua</button>
@@ -175,8 +159,6 @@
             </div>
             <div id="productGrid" class="product-grid"></div>
         </div>
-
-        <!-- Cart -->
         <div id="cartSidebar" class="flex flex-col" style="width:22rem">
             <div class="px-5 py-4" style="border-bottom:1px solid rgba(255,255,255,0.06)">
                 <h2 class="font-bold text-white">Pesanan Aktif</h2>
@@ -185,7 +167,6 @@
             <div id="cartList" class="flex-1 overflow-y-auto px-5 py-3">
                 <p class="text-center text-sm py-10" style="color:rgba(255,255,255,0.25)">Belum ada item</p>
             </div>
-            <!-- Summary -->
             <div id="cartSummary" class="px-5 py-4 space-y-1.5">
                 <div class="flex justify-between text-sm" style="color:rgba(255,255,255,0.5)">
                     <span>Subtotal</span><span id="sub" class="text-white font-medium">Rp 0</span>
@@ -201,7 +182,6 @@
                     <span id="tot" class="font-extrabold text-lg" style="color:#60a5fa">Rp 0</span>
                 </div>
             </div>
-            <!-- Buttons -->
             <div class="px-5 pb-5 pt-3 space-y-2" style="border-top:1px solid rgba(255,255,255,0.06)">
                 <div class="grid grid-cols-2 gap-2">
                     <button onclick="openDiskon()" class="btn-orange py-2.5 text-sm">🏷️ Diskon</button>
@@ -212,8 +192,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal Diskon -->
     <div id="diskonModal" style="display:none" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 p-4">
         <div class="modal-box p-6 w-full max-w-sm shadow-2xl">
             <h2 class="font-bold text-lg mb-4">🏷️ Tambah Diskon</h2>
@@ -238,8 +216,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal Pembayaran -->
     <div id="paymentModal" style="display:none" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 p-4">
         <div class="modal-box p-6 w-full max-w-sm shadow-2xl">
             <h2 class="font-bold text-lg mb-1">💳 Pembayaran</h2>
@@ -272,8 +248,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal History -->
     <div id="historyModal" style="display:none" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 p-4">
         <div class="modal-box w-full max-w-2xl shadow-2xl max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,0.08)">
@@ -291,7 +265,6 @@
             <div id="historyList" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
         </div>
     </div>
-
     <script>
         const PROD = [
             {id:1, n:'Nasi Goreng', c:'makanan',  p:22000, e:'🍜'},
@@ -317,12 +290,9 @@
             {id:'TRX-007',t:'11:45',tot:200000,st:'paid',   itm:8,m:'bank'},
             {id:'TRX-008',t:'12:00',tot:110000,st:'pending',itm:4,m:null}
         ];
-
         let cart=[],cat='all',disco=0,currentTotal=0;
-
         function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
         function genTrxId(){const d=new Date(),p=n=>String(n).padStart(2,'0');return`TRX-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${String(Math.floor(Math.random()*9000)+1000)}`;}
-
         function getMenuStock(){
             const stored=localStorage.getItem('lunomi_menu_stock');
             if(stored) return JSON.parse(stored);
@@ -332,7 +302,6 @@
             return d;
         }
         function saveMenuStock(s){localStorage.setItem('lunomi_menu_stock',JSON.stringify(s));}
-
         let toastTimer=null;
         function showToast(msg,type='success'){
             clearTimeout(toastTimer);
@@ -344,7 +313,6 @@
             t.classList.remove('hidden');t.style.opacity='1';
             toastTimer=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.classList.add('hidden'),300);},3000);
         }
-
         function render(){
             const f=cat==='all'?PROD:PROD.filter(p=>p.c===cat);
             const stk=getMenuStock();
@@ -361,7 +329,6 @@
                 </div>`;
             }).join('');
         }
-
         // Barcode Scanner Support
         let barcodeBuffer = '';
         let lastKeyTime = Date.now();
@@ -369,7 +336,6 @@
             const now = Date.now();
             if (now - lastKeyTime > 100) barcodeBuffer = ''; // Reset if slow typing
             lastKeyTime = now;
-
             if (e.key === 'Enter') {
                 if (barcodeBuffer.length > 0) {
                     const product = PROD.find(i => i.sku === barcodeBuffer);
@@ -383,14 +349,12 @@
                 barcodeBuffer += e.key;
             }
         });
-
         function filterCat(c,btn){
             cat=c;
             document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
             btn.classList.add('active');
             render();
         }
-
         function add(id){
             const stk=getMenuStock();
             const s=stk[id]||{qty:0};
@@ -403,7 +367,6 @@
         }
         function remove(id){cart=cart.filter(x=>x.id!==id);update();}
         function qty(id,q){if(q<1){remove(id);return;}const i=cart.find(x=>x.id===id);if(i){i.q=q;update();}}
-
         function update(){
             const cl=document.getElementById('cartList');
             if(cart.length===0){
@@ -428,7 +391,6 @@
             }
             calc();
         }
-
         function calc(){
             const sub=cart.reduce((s,i)=>s+(i.p*i.q),0);
             const ppn=Math.round(sub*0.1);
@@ -438,14 +400,11 @@
             document.getElementById('ppn').textContent=rp(ppn);
             document.getElementById('tot').textContent=rp(currentTotal);
         }
-
         function clearCart(){if(!cart.length)return;if(!confirm('Hapus semua item?'))return;cart=[];disco=0;update();document.getElementById('trxId').textContent=genTrxId();}
-
         function openDiskon(){document.getElementById('diskonValue').value='';document.getElementById('diskonError').classList.add('hidden');document.querySelector('input[name="diskonType"][value="percent"]').checked=true;updateDiskonHint();document.getElementById('diskonModal').style.display='flex';document.getElementById('diskonValue').focus();}
         function closeDiskon(){document.getElementById('diskonModal').style.display='none';}
         function clearDiskonError(){document.getElementById('diskonError').classList.add('hidden');}
         function updateDiskonHint(){const t=document.querySelector('input[name="diskonType"]:checked').value;document.getElementById('diskonHint').textContent=t==='percent'?'Masukkan persen (0–100)':'Masukkan jumlah dalam Rupiah';}
-
         function applyDiskon(){
             const type=document.querySelector('input[name="diskonType"]:checked').value;
             const v=parseFloat(document.getElementById('diskonValue').value)||0;
@@ -460,7 +419,6 @@
             calc();closeDiskon();
             showToast(`Diskon ${type==='percent'?v+'%':rp(disco)} diterapkan`,'success');
         }
-
         function openPayment(){
             if(!cart.length)return;
             document.getElementById('payTotal').textContent=rp(currentTotal);
@@ -473,14 +431,12 @@
             document.getElementById('paymentModal').style.display='flex';
         }
         function closePayment(){document.getElementById('paymentModal').style.display='none';}
-
         function updatePayMethod(){
             const m=document.querySelector('input[name="payMethod"]:checked').value;
             const cs=document.getElementById('cashSection'),cb=document.getElementById('confirmPayBtn');
             if(m==='cash'){cs.style.display='block';cb.disabled=true;document.getElementById('cashReceived').value='';document.getElementById('changeRow').classList.add('hidden');document.getElementById('insufficientRow').classList.add('hidden');}
             else{cs.style.display='none';cb.disabled=false;}
         }
-
         function calcChange(){
             const recv=parseFloat(document.getElementById('cashReceived').value)||0;
             const ch=recv-currentTotal;
@@ -489,12 +445,10 @@
             if(ch<0){cr.classList.add('hidden');ir.classList.remove('hidden');cb.disabled=true;}
             else{ir.classList.add('hidden');cr.classList.remove('hidden');document.getElementById('changeAmt').textContent=rp(ch);cb.disabled=false;}
         }
-
         function processPayment(){
             const m=document.querySelector('input[name="payMethod"]:checked').value;
             const mMap={cash:'💵 Tunai',card:'💳 Kartu',ewallet:'📱 E-Wallet',bank:'🏦 Transfer'};
             const trxId=document.getElementById('payTrxId').textContent;
-            
             // Deduct menu stock AND raw material stock via RecipeManager
             const stk=getMenuStock();
             cart.forEach(i=>{
@@ -505,22 +459,18 @@
                 }
             });
             saveMenuStock(stk);
-            
             // Save transaction to localStorage
             const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
             const trxs=JSON.parse(localStorage.getItem('lunomi_transactions')||'[]');
             trxs.unshift({id:trxId,date:new Date().toISOString(),time:new Date().toTimeString().slice(0,5),total:currentTotal,method:m,items:cart.map(i=>({id:i.id,name:i.n,qty:i.q,price:i.p})),outlet_id:outlet?outlet.id:''});
             localStorage.setItem('lunomi_transactions',JSON.stringify(trxs));
             closePayment();
-            
             // Show Success Dialog instead of just toast
             showSuccessDialog(trxId, currentTotal, mMap[m]);
-            
             HIST.unshift({id:trxId,t:new Date().toTimeString().slice(0,5),tot:currentTotal,st:'paid',itm:cart.reduce((s,i)=>s+i.q,0),m});
             cart=[];disco=0;update();document.getElementById('trxId').textContent=genTrxId();
             render();
         }
-
         function showSuccessDialog(id, total, method) {
             const modal = document.createElement('div');
             modal.id = 'successModal';
@@ -532,12 +482,10 @@
                     </div>
                     <h3 class="text-2xl font-extrabold text-white mb-2">Pembayaran Berhasil!</h3>
                     <p class="text-white/50 text-sm mb-6">Transaksi <span class="text-white font-mono">${id}</span> telah selesai via ${method}</p>
-                    
                     <div class="bg-white/5 rounded-2xl p-4 mb-8">
                         <p class="text-xs text-white/40 uppercase font-bold mb-1">Total Dibayar</p>
                         <p class="text-2xl font-black text-white">${rp(total)}</p>
                     </div>
-
                     <div class="grid grid-cols-1 gap-3">
                         <button onclick="printReceiptFromId('${id}'); document.getElementById('successModal').remove();" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition flex items-center justify-center gap-2">
                             <span class="material-symbols-outlined">print</span> Cetak Struk
@@ -550,12 +498,10 @@
             `;
             document.body.appendChild(modal);
         }
-
         function printReceiptFromId(id) {
             const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
             const t = trxs.find(x => x.id === id);
             if(!t) return;
-            
             const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
             const win = window.open('', '', 'width=400,height=600');
             win.document.write(`
@@ -595,7 +541,6 @@
             win.print();
             win.close();
         }
-
         function openHistory(){renderHistory();document.getElementById('historyModal').style.display='flex';}
         function closeHistory(){document.getElementById('historyModal').style.display='none';}
         function renderHistory(){
@@ -613,9 +558,7 @@
                             ${x.st==='paid'?'✓ Dibayar':'⏱ Pending'}</span>
                     </div></div>`).join('');
         }
-
         function logout(){if(!confirm('Yakin ingin logout?'))return;localStorage.removeItem('lunomi_session');localStorage.removeItem('lunomi_outlet');window.location.href='index.html';}
-
         document.addEventListener('DOMContentLoaded',()=>{
             try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}document.getElementById('kasirName').textContent=JSON.parse(s).user.name;}
             catch(e){window.location.href='index.html';return;}

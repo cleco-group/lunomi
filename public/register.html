@@ -41,7 +41,6 @@
             <h1 class="text-2xl font-extrabold text-white">Daftar Outlet Baru</h1>
             <p class="text-sm mt-1" style="color:rgba(255,255,255,.45)">Bergabung dengan ekosistem Lunomi POS</p>
         </div>
-
         <div class="flex items-center justify-center gap-0 mb-6">
             <div class="flex flex-col items-center gap-1">
                 <div id="dot1" class="step-dot step-active">1</div>
@@ -58,7 +57,6 @@
                 <span class="text-xs" style="color:rgba(255,255,255,.45)">Review</span>
             </div>
         </div>
-
         <div id="step1" class="glass rounded-3xl p-7 shadow-2xl">
             <h2 class="font-bold text-white mb-1">Pilih Outlet</h2>
             <p class="text-xs mb-5" style="color:rgba(255,255,255,.4)">Pilih outlet tempat kamu akan menjadi admin</p>
@@ -83,7 +81,6 @@
             <button onclick="goStep2()" class="btn-primary w-full py-3 rounded-xl text-sm mt-5">Lanjut →</button>
             <p class="text-center mt-3 text-xs" style="color:rgba(255,255,255,.35)">Sudah punya akun? <a href="index.html" class="text-indigo-400 hover:underline">Masuk</a></p>
         </div>
-
         <div id="step2" class="glass rounded-3xl p-7 shadow-2xl hidden">
             <h2 class="font-bold text-white mb-1">Data Admin</h2>
             <p class="text-xs mb-5" style="color:rgba(255,255,255,.4)">Buat akun admin untuk outlet <span id="selectedOutletName" class="text-indigo-400 font-semibold"></span></p>
@@ -128,7 +125,6 @@
                 <button onclick="goStep3()" class="btn-primary flex-1 py-3 rounded-xl text-sm">Review →</button>
             </div>
         </div>
-
         <div id="step3" class="glass rounded-3xl p-7 shadow-2xl hidden">
             <h2 class="font-bold text-white mb-1">Review & Konfirmasi</h2>
             <p class="text-xs mb-5" style="color:rgba(255,255,255,.4)">Periksa data sebelum mendaftar</p>
@@ -150,7 +146,6 @@
                 <button id="submitBtn" onclick="submitReg()" class="btn-primary flex-1 py-3 rounded-xl text-sm">Daftar Sekarang</button>
             </div>
         </div>
-
         <div id="successModal" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4" style="background:rgba(0,0,0,.7);backdrop-filter:blur(6px)">
             <div class="glass rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
                 <div class="text-5xl mb-4">🎉</div>
@@ -170,7 +165,6 @@
 <script>
     let selectedOutlet = null;
     const formData = {};
-
     function selectOutlet(el){
         document.querySelectorAll('.outlet-card').forEach(c=>{
             c.classList.remove('selected');
@@ -181,7 +175,6 @@
         selectedOutlet = {id: el.dataset.id, name: el.dataset.name};
         document.getElementById('err1').classList.add('hidden');
     }
-
     function setStep(n){
         [1,2,3].forEach(i=>{
             document.getElementById('step'+i).classList.add('hidden');
@@ -196,7 +189,6 @@
         });
         document.getElementById('step'+n).classList.remove('hidden');
     }
-
     function goStep2(){
         if(!selectedOutlet){ document.getElementById('err1').classList.remove('hidden'); return; }
         formData.outlet = selectedOutlet;
@@ -204,7 +196,6 @@
         setStep(2);
     }
     function goStep1(){ setStep(1); }
-
     function checkPw(){
         const pw = document.getElementById('regPw').value;
         let score = 0;
@@ -221,23 +212,19 @@
         document.getElementById('pwHint').textContent = score > 0 ? hints[score-1] : 'Masukkan password';
         document.getElementById('pwHint').style.color = score > 0 ? colors[score-1] : 'rgba(255,255,255,.3)';
     }
-
     function togglePw(id, btnId){
         const el = document.getElementById(id);
         el.type = el.type==='password' ? 'text' : 'password';
         document.getElementById(btnId).textContent = el.type==='password' ? '👁️' : '🙈';
     }
-
     function clearErr2(){ document.getElementById('err2').classList.add('hidden'); }
     function showErr2(msg){ document.getElementById('err2Text').textContent=msg; document.getElementById('err2').classList.remove('hidden'); }
-
     function goStep3(){
         const name  = document.getElementById('regName').value.trim();
         const email = document.getElementById('regEmail').value.trim();
         const phone = document.getElementById('regPhone').value.trim();
         const pw    = document.getElementById('regPw').value;
         const pw2   = document.getElementById('regPw2').value;
-
         if(!name){ showErr2('Nama lengkap harus diisi.'); return; }
         if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showErr2('Format email tidak valid.'); return; }
         if(!phone || !/^08\d{8,11}$/.test(phone)){ showErr2('Format HP tidak valid. Contoh: 0812xxxxxxxx'); return; }
@@ -245,7 +232,6 @@
         if(!/[A-Z]/.test(pw)){ showErr2('Password harus mengandung huruf kapital.'); return; }
         if(!/[0-9]/.test(pw)){ showErr2('Password harus mengandung angka.'); return; }
         if(pw !== pw2){ showErr2('Konfirmasi password tidak cocok.'); return; }
-
         formData.name=name; formData.email=email; formData.phone=phone; formData.pw=pw;
         document.getElementById('rev_outlet').textContent = formData.outlet.name;
         document.getElementById('rev_name').textContent  = name;
@@ -254,7 +240,6 @@
         setStep(3);
     }
     function goStep2back(){ setStep(2); }
-
     function submitReg(){
         const btn = document.getElementById('submitBtn');
         btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Mendaftar...';

@@ -54,8 +54,6 @@
     <div id="prodGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     <div id="emptyState" class="hidden py-16 text-center text-sm" style="color:rgba(255,255,255,.3)">Tidak ada menu ditemukan.</div>
 </div>
-
-<!-- Add/Edit Modal -->
 <div id="prodModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl">
         <div class="flex items-center justify-between mb-5">
@@ -101,9 +99,7 @@
     ];
     const CATS = ['Semua','Makanan','Minuman','Snack','Dessert'];
     let activeCat = 'Semua', editingId = null, isAvail = true;
-
     function rp(n){return'Rp '+n.toLocaleString('id-ID');}
-
     function initFilters(){
         document.getElementById('catFilters').innerHTML = CATS.map(c=>`
             <button class="cat-btn${c==='Semua'?' active':''}" onclick="setCat('${c}',this)">${c}</button>`).join('');
@@ -132,9 +128,7 @@
                 </div>
             </div>`).join('');
     }
-
     function toggleAvail(){ isAvail=!isAvail; const el=document.getElementById('availToggle'); el.className=`toggle ${isAvail?'on':'off'}`; }
-
     function openAddModal(){
         editingId=null; isAvail=true;
         document.getElementById('modalTitle').textContent='Tambah Menu Baru';
@@ -168,7 +162,6 @@
         closeModal(); renderGrid();
     }
     function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-
     document.addEventListener('DOMContentLoaded',()=>{
         try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
         const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');

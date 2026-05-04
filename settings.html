@@ -24,9 +24,7 @@
             </div>
             <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
         </div>
-
         <div class="space-y-6">
-            <!-- Outlet Info -->
             <div class="glass-card rounded-2xl p-6">
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-indigo-400">store</span> Informasi Outlet
@@ -46,8 +44,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Tax & Service -->
             <div class="glass-card rounded-2xl p-6">
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-emerald-400">receipt</span> Pajak & Biaya Layanan
@@ -63,7 +59,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="flex justify-end">
                 <button onclick="saveSettings()" class="px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-500/20">
                     Simpan Perubahan
@@ -71,37 +66,30 @@
             </div>
         </div>
     </div>
-
     <script>
         function loadSettings() {
             const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
             const config = JSON.parse(localStorage.getItem('lunomi_config') || '{"tax": 10, "service": 0}');
-
             document.getElementById('setStoreName').value = outlet.name || '';
             document.getElementById('setStorePhone').value = outlet.phone || '';
             document.getElementById('setStoreAddr').value = outlet.address || '';
             document.getElementById('setTax').value = config.tax;
             document.getElementById('setService').value = config.service;
         }
-
         function saveSettings() {
             const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
             outlet.name = document.getElementById('setStoreName').value;
             outlet.phone = document.getElementById('setStorePhone').value;
             outlet.address = document.getElementById('setStoreAddr').value;
-
             const config = {
                 tax: parseFloat(document.getElementById('setTax').value) || 0,
                 service: parseFloat(document.getElementById('setService').value) || 0
             };
-
             localStorage.setItem('lunomi_outlet', JSON.stringify(outlet));
             localStorage.setItem('lunomi_config', JSON.stringify(config));
-
             alert('Pengaturan berhasil disimpan!');
             window.location.reload();
         }
-
         document.addEventListener('DOMContentLoaded', loadSettings);
     </script>
 </body>

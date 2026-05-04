@@ -45,14 +45,12 @@
     </div>
 </nav>
 <div class="max-w-6xl mx-auto px-4 py-6 no-print">
-    <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Invoice</div><div class="text-2xl font-extrabold text-white" id="statTotal">5</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(34,197,94,.7)">Lunas</div><div class="text-2xl font-extrabold text-green-400" id="statPaid">3</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(245,158,11,.7)">Menunggu</div><div class="text-2xl font-extrabold text-amber-400" id="statPending">1</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(59,130,246,.7)">Terkirim</div><div class="text-2xl font-extrabold text-blue-400" id="statSent">1</div></div>
     </div>
-    <!-- Table -->
     <div class="glass-card rounded-2xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -69,8 +67,6 @@
         </div>
     </div>
 </div>
-
-<!-- Create Invoice Modal -->
 <div id="createModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="glass-card rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-screen overflow-y-auto">
         <div class="flex items-center justify-between mb-5">
@@ -106,8 +102,6 @@
         </div>
     </div>
 </div>
-
-<!-- Preview Modal -->
 <div id="previewModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="glass-card rounded-3xl p-6 w-full max-w-lg shadow-2xl">
         <div class="flex items-center justify-between mb-4">
@@ -122,7 +116,6 @@
         </div>
     </div>
 </div>
-
 <div id="toast" class="toast toast-success"></div>
 <script>
     let invoices = [
@@ -133,13 +126,11 @@
         {id:'INV-202604-016', cust:'Ahmad Fauzi',       date:'2026-04-20', sub:55000,  ppn:5500,  total:60500,  status:'pending'},
     ];
     let invItemsList = [];
-
     function genInvNo(){
         const d=new Date(); const m=String(d.getMonth()+1).padStart(2,'0');
         return `INV-${d.getFullYear()}${m}-${String(invoices.length+1).padStart(3,'0')}`;
     }
     function rp(n){return'Rp '+n.toLocaleString('id-ID');}
-
     function renderTable(){
         document.getElementById('invoiceBody').innerHTML = invoices.map(inv=>`
             <tr class="row-item">
@@ -161,7 +152,6 @@
         document.getElementById('statPending').textContent = invoices.filter(i=>i.status==='pending').length;
         document.getElementById('statSent').textContent    = invoices.filter(i=>i.status==='sent').length;
     }
-
     function addInvItem(){
         const idx = invItemsList.length;
         invItemsList.push({name:'',qty:1,price:0});
@@ -191,7 +181,6 @@
         document.getElementById('invPpn').textContent=rp(ppn);
         document.getElementById('invTotal').textContent=rp(sub+ppn);
     }
-
     function openCreateModal(){
         invItemsList=[];
         document.getElementById('invItems').innerHTML='';
@@ -204,7 +193,6 @@
         document.getElementById('createModal').classList.remove('hidden');
     }
     function closeCreate(){ document.getElementById('createModal').classList.add('hidden'); }
-
     function saveInvoice(){
         const cust=document.getElementById('invCust').value.trim();
         const err=document.getElementById('invErr');
@@ -220,7 +208,6 @@
         });
         closeCreate(); renderTable(); showToast('Invoice berhasil dibuat');
     }
-
     function previewInv(id){
         const inv=invoices.find(x=>x.id===id);
         document.getElementById('previewContent').innerHTML=`

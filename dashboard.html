@@ -11,7 +11,6 @@
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; font-family:'Material Symbols Outlined'; }
-
         body {
             background: #020617;
             background-image:
@@ -22,7 +21,6 @@
             color: white;
             overflow-x: hidden;
         }
-
         .glass-nav {
             background: rgba(2,6,23,0.7);
             backdrop-filter: blur(20px);
@@ -48,7 +46,6 @@
         }
         .glass-input::placeholder { color: rgba(255,255,255,0.3); }
         .glass-input:focus { outline:none; border-color:rgba(99,102,241,0.6); box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
-
         /* Sidebar Styles */
         #sidebar {
             width: 260px;
@@ -72,7 +69,6 @@
         #sidebar.collapsed .sidebar-item span:first-child {
             margin-right: 0;
         }
-
         .sidebar-item {
             display: flex;
             align-items: center;
@@ -101,12 +97,10 @@
             color: rgba(255,255,255,0.3);
             margin: 1.5rem 0 0.5rem 1rem;
         }
-
         /* Main Content Adjustment */
         #mainContent {
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         /* Sidebar Overlay */
         #sidebarOverlay {
             display: none;
@@ -116,7 +110,6 @@
             backdrop-filter: blur(4px);
             z-index: 90;
         }
-
         /* Metric cards */
         .metric-card {
             background: rgba(255,255,255,0.04);
@@ -129,11 +122,9 @@
         .metric-green  { border-left: 3px solid #22c55e; }
         .metric-red    { border-left: 3px solid #ef4444; }
         .metric-amber  { border-left: 3px solid #f59e0b; }
-
         .dot { display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px; }
         .dot.active   { background:#22c55e; animation:pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
         @media(max-width:768px){
             #sidebar { position: fixed; left: -260px; width: 260px !important; }
             #sidebar.mobile-open { left: 0; }
@@ -143,15 +134,12 @@
             #sidebar.collapsed .sidebar-text, #sidebar.collapsed .sidebar-category { display: block; }
             #sidebar.collapsed .sidebar-item { justify-content: flex-start; padding: 0.75rem 1rem; }
             #sidebar.collapsed .sidebar-item span:first-child { margin-right: 0.75rem; }
-            
             .metric-grid { grid-template-cols: repeat(1, minmax(0, 1fr)); }
             .stats-grid { grid-template-cols: repeat(1, minmax(0, 1fr)); }
         }
     </style>
 </head>
 <body class="flex">
-
-    <!-- Sidebar -->
     <aside id="sidebar" class="fixed h-screen flex flex-col">
         <div class="p-4 flex items-center justify-between border-b border-white/5">
             <div class="flex items-center gap-3 sidebar-text">
@@ -167,16 +155,12 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-
         <div class="flex-1 overflow-y-auto p-3 custom-scrollbar">
-            <!-- Utama -->
             <div class="sidebar-category">Utama</div>
             <a href="dashboard.html" class="sidebar-item active">
                 <span class="material-symbols-outlined text-indigo-400 mr-3">dashboard</span>
                 <span class="sidebar-text">Dashboard</span>
             </a>
-
-            <!-- Operasional -->
             <div class="sidebar-category">Operasional</div>
             <a href="pos.html" class="sidebar-item">
                 <span class="material-symbols-outlined text-blue-400 mr-3">point_of_sale</span>
@@ -198,8 +182,6 @@
                 <span class="material-symbols-outlined text-slate-400 mr-3">account_balance_wallet</span>
                 <span class="sidebar-text">Rekonsiliasi Shift</span>
             </a>
-
-            <!-- Inventory & Produk -->
             <div class="sidebar-category">Inventory & Produk</div>
             <a href="inventory.html" class="sidebar-item">
                 <span class="material-symbols-outlined text-green-400 mr-3">inventory_2</span>
@@ -225,8 +207,6 @@
                 <span class="material-symbols-outlined text-yellow-400 mr-3">fact_check</span>
                 <span class="sidebar-text">Stock Opname</span>
             </a>
-
-            <!-- Keuangan & Analisa -->
             <div class="sidebar-category">Keuangan & Analisa</div>
             <a href="keuangan.html" class="sidebar-item">
                 <span class="material-symbols-outlined text-emerald-400 mr-3">account_balance</span>
@@ -252,8 +232,6 @@
                 <span class="material-symbols-outlined text-teal-400 mr-3">bar_chart</span>
                 <span class="sidebar-text">Analytics</span>
             </a>
-
-            <!-- SDM & Pelanggan -->
             <div class="sidebar-category">SDM & Pelanggan</div>
             <a href="hr.html" class="sidebar-item">
                 <span class="material-symbols-outlined text-pink-400 mr-3">badge</span>
@@ -279,15 +257,12 @@
                 <span class="material-symbols-outlined text-yellow-500 mr-3">military_tech</span>
                 <span class="sidebar-text">Loyalty & CRM</span>
             </a>
-
-            <!-- Sistem -->
             <div class="sidebar-category">Sistem</div>
             <a href="settings.html" class="sidebar-item">
                 <span class="material-symbols-outlined text-slate-400 mr-3">settings</span>
                 <span class="sidebar-text">Pengaturan</span>
             </a>
         </div>
-
         <div class="p-4 border-t border-white/5">
             <button onclick="logout()" class="sidebar-item w-full text-red-400 hover:bg-red-400/10">
                 <span class="material-symbols-outlined mr-3">logout</span>
@@ -295,13 +270,8 @@
             </button>
         </div>
     </aside>
-
-    <!-- Sidebar Overlay -->
     <div id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-
-    <!-- Main Content -->
     <main id="mainContent" class="flex-1 ml-[260px] min-h-screen w-full">
-        <!-- Navbar -->
         <nav class="glass-nav sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
@@ -324,15 +294,11 @@
                 </div>
             </div>
         </nav>
-
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-            <!-- Header -->
             <div class="mb-6 sm:mb-8">
                 <h2 class="text-xl sm:text-2xl font-extrabold text-white">Ringkasan Bisnis</h2>
                 <p class="text-xs sm:text-sm mt-1" style="color:rgba(255,255,255,0.45)">Selamat datang kembali, <span id="userName" class="text-white font-semibold">Owner</span>!</p>
             </div>
-
-            <!-- CEO Orchestrator -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
                 <div class="lg:col-span-2 glass-card-accent rounded-2xl p-5 sm:p-6">
                     <div class="flex items-start justify-between mb-4">
@@ -360,15 +326,11 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Sub-Agents -->
                 <div class="glass-card rounded-2xl p-5 sm:p-6">
                     <h4 class="font-bold text-white text-sm mb-4">6 Sub-Agents</h4>
                     <div class="space-y-2 sm:space-y-3" id="agentList"></div>
                 </div>
             </div>
-
-            <!-- Metrics Grid -->
             <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div class="metric-card metric-blue rounded-2xl p-4 sm:p-5">
                     <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Penjualan Hari Ini</p>
@@ -387,15 +349,12 @@
                     <p class="text-xl sm:text-2xl font-extrabold text-white">45</p>
                 </div>
             </div>
-
-            <!-- Secondary Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <div class="lg:col-span-2 glass-card rounded-2xl p-5 sm:p-6">
                     <h3 class="font-bold text-white text-sm mb-4">📋 HO Activity Log</h3>
                     <div id="activityLog" class="space-y-2 sm:space-y-3 max-h-80 overflow-y-auto"></div>
                 </div>
                 <div class="space-y-5">
-                    <!-- OPEX Card -->
                     <div class="glass-card rounded-2xl p-5">
                         <p class="text-[10px] sm:text-xs font-medium mb-1 text-white/50">Pengeluaran OPEX</p>
                         <p class="text-xl sm:text-2xl font-extrabold text-white" id="opexTotal">Rp 0</p>
@@ -405,13 +364,11 @@
             </div>
         </div>
     </main>
-
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
             const toggleIcon = document.getElementById('toggleIcon');
-            
             sidebar.classList.toggle('collapsed');
             if (sidebar.classList.contains('collapsed')) {
                 mainContent.style.marginLeft = '80px';
@@ -421,16 +378,13 @@
                 toggleIcon.textContent = 'menu_open';
             }
         }
-
         function toggleMobileSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('mobile-open');
         }
-
         // Initialize agents and logs
         document.addEventListener('DOMContentLoaded', () => {
             initializeLunomi();
-            
             const agents = [
                 { name: 'FIN AI', status: 'active', task: 'Audit Laporan' },
                 { name: 'OPS AI', status: 'active', task: 'Monitoring Stok' },
@@ -439,7 +393,6 @@
                 { name: 'SUP AI', status: 'active', task: 'Cek Supplier' },
                 { name: 'SEC AI', status: 'active', task: 'Audit CCTV' }
             ];
-
             const agentList = document.getElementById('agentList');
             agents.forEach(a => {
                 agentList.innerHTML += `
@@ -452,13 +405,11 @@
                     </div>
                 `;
             });
-
             const logs = [
                 { time: '2m ago', msg: 'FIN AI: Laporan harian outlet A selesai' },
                 { time: '15m ago', msg: 'OPS AI: Stok beras kritis di outlet B' },
                 { time: '1h ago', msg: 'HR AI: 2 karyawan terlambat di outlet C' }
             ];
-
             const activityLog = document.getElementById('activityLog');
             logs.forEach(l => {
                 activityLog.innerHTML += `
