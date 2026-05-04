@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pajak PB1 - Lunomi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Pelaporan Pajak PB1</h1>
+                <p class="text-sm text-white/50">Kepatuhan pajak restoran untuk pelaporan daerah (Bapenda)</p>
+            </div>
+            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-orange-500">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total PPN Terkumpul</p>
+                <h3 id="totalTax" class="text-2xl font-extrabold">Rp 0</h3>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-blue-500">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Service Charge</p>
+                <h3 id="totalService" class="text-2xl font-extrabold">Rp 0</h3>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-emerald-500">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Status Pelaporan</p>
+                <h3 class="text-xl font-extrabold text-emerald-400 flex items-center gap-2">
+                    <span class="material-symbols-outlined">verified</span> Terverifikasi
+                </h3>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                <h4 class="font-bold">Riwayat Setoran Pajak</h4>
+                <button class="px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-xl text-xs font-bold transition">Upload NTPD Baru</button>
+            </div>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                        <th class="px-6 py-4">Periode</th>
+                        <th class="px-6 py-4">No. Transaksi (NTPD)</th>
+                        <th class="px-6 py-4 text-right">Jumlah Setoran</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="px-6 py-4 text-sm font-bold">April 2026</td>
+                        <td class="px-6 py-4 text-sm font-mono text-white/60">NTPD-9928310023</td>
+                        <td class="px-6 py-4 text-right text-sm font-bold">Rp 12,450,000</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-2 py-1 rounded-md bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase">Selesai</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function loadTaxData() {
+            const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
+            let totalTax = 0;
+            let totalService = 0;
+
+            trxs.forEach(t => {
+                // Assuming 10% tax and 5% service from gross
+                const gross = t.total / 1.15; 
+                totalTax += gross * 0.10;
+                totalService += gross * 0.05;
+            });
+
+            document.getElementById('totalTax').textContent = 'Rp ' + Math.round(totalTax).toLocaleString('id-ID');
+            document.getElementById('totalService').textContent = 'Rp ' + Math.round(totalService).toLocaleString('id-ID');
+        }
+        document.addEventListener('DOMContentLoaded', loadTaxData);
+    </script>
+</body>
+</html>

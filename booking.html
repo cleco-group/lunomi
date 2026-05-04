@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Online - Lunomi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Manajemen Booking Online</h1>
+                <p class="text-sm text-white/50">Kelola reservasi jasa dan janji temu pelanggan</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+                <button class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold transition">Lihat Landing Page</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Booking Stats -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="glass-card p-6 rounded-3xl">
+                    <h4 class="text-xs font-bold text-white/40 uppercase mb-4">Status Hari Ini</h4>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Total Booking</span>
+                            <span class="font-black text-lg">24</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-emerald-400">Selesai</span>
+                            <span class="font-black text-lg text-emerald-400">18</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-amber-400">Menunggu</span>
+                            <span class="font-black text-lg text-amber-400">6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-3xl bg-indigo-600/10 border-indigo-500/30">
+                    <h4 class="text-sm font-bold mb-2">Link Booking Anda</h4>
+                    <p class="text-[10px] text-white/50 mb-4">Bagikan link ini ke pelanggan atau pasang di Bio Instagram</p>
+                    <div class="flex gap-2">
+                        <input type="text" readonly value="lunomi.id/b/outlet-pusat" class="bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs flex-1 font-mono">
+                        <button class="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition">
+                            <span class="material-symbols-outlined text-sm">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking List -->
+            <div class="lg:col-span-2">
+                <div class="glass-card rounded-3xl overflow-hidden">
+                    <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                        <h4 class="font-bold">Jadwal Booking Mendatang</h4>
+                        <div class="flex gap-2">
+                            <button class="p-2 glass-card rounded-lg"><span class="material-symbols-outlined text-sm">filter_list</span></button>
+                            <button class="p-2 glass-card rounded-lg"><span class="material-symbols-outlined text-sm">search</span></button>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-white/5">
+                        <!-- Item 1 -->
+                        <div class="p-6 flex items-center justify-between hover:bg-white/5 transition">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex flex-col items-center justify-center">
+                                    <span class="text-[10px] font-bold uppercase">Mei</span>
+                                    <span class="text-lg font-black">04</span>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-sm">Budi Santoso</h5>
+                                    <p class="text-xs text-white/40">Potong Rambut + Wash • 14:00 WIB</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="px-2 py-1 rounded-md bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase">Menunggu</span>
+                                <button class="p-2 hover:bg-white/10 rounded-full transition"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+                            </div>
+                        </div>
+                        <!-- Item 2 -->
+                        <div class="p-6 flex items-center justify-between hover:bg-white/5 transition">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex flex-col items-center justify-center">
+                                    <span class="text-[10px] font-bold uppercase">Mei</span>
+                                    <span class="text-lg font-black">04</span>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-sm">Ani Wijaya</h5>
+                                    <p class="text-xs text-white/40">Facial Treatment • 15:30 WIB</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="px-2 py-1 rounded-md bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase">Menunggu</span>
+                                <button class="p-2 hover:bg-white/10 rounded-full transition"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

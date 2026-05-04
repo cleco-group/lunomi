@@ -352,7 +352,8 @@
                 const s=stk[p.id]||{qty:0,min:5};
                 const oos=s.qty<=0;
                 const low=!oos&&s.qty<=s.min;
-                return`<div class="product-item${oos?' opacity-40 pointer-events-none':''}" onclick="add(${p.id})">
+                return`<div class="product-item${oos?' opacity-40 pointer-events-none':''}" onclick="add(${p.id})" style="position:relative">
+                    ${p.sku ? `<div style="position:absolute;top:5px;right:5px;font-size:8px;font-family:monospace;color:rgba(255,255,255,0.2)">${p.sku}</div>` : ''}
                     <div style="font-size:2rem;margin-bottom:0.4rem">${p.e}</div>
                     <div style="font-weight:700;font-size:0.78rem;color:rgba(255,255,255,0.9);line-height:1.3">${p.n}</div>
                     <div style="font-weight:700;font-size:0.78rem;margin-top:0.4rem;color:#60a5fa">${rp(p.p)}</div>
@@ -360,6 +361,28 @@
                 </div>`;
             }).join('');
         }
+
+        // Barcode Scanner Support
+        let barcodeBuffer = '';
+        let lastKeyTime = Date.now();
+        document.addEventListener('keydown', (e) => {
+            const now = Date.now();
+            if (now - lastKeyTime > 100) barcodeBuffer = ''; // Reset if slow typing
+            lastKeyTime = now;
+
+            if (e.key === 'Enter') {
+                if (barcodeBuffer.length > 0) {
+                    const product = PROD.find(i => i.sku === barcodeBuffer);
+                    if (product) {
+                        add(product.id);
+                        showToast(`Barcode: ${product.n} ditambahkan`, 'success');
+                    }
+                    barcodeBuffer = '';
+                }
+            } else if (e.key.length === 1) {
+                barcodeBuffer += e.key;
+            }
+        });
 
         function filterCat(c,btn){
             cat=c;
