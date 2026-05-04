@@ -117,3 +117,30 @@ function initializeLunomi() {
     }
     return true;
 }
+
+var RecipeManager = {
+    saveRecipe: function(menuId, ingredients) {
+        var recipes = SessionManager.get('recipes') || {};
+        recipes[menuId] = ingredients;
+        SessionManager.set('recipes', recipes);
+    },
+    getRecipe: function(menuId) {
+        var recipes = SessionManager.get('recipes') || {};
+        return recipes[menuId] || [];
+    },
+    getAllRecipes: function() {
+        return SessionManager.get('recipes') || {};
+    },
+    deductStock: function(menuId, qty) {
+        var recipe = this.getRecipe(menuId);
+        if (!recipe.length) return;
+        
+        var stock = SessionManager.get('raw_stock') || {};
+        recipe.forEach(function(ing) {
+            if (stock[ing.rawId]) {
+                stock[ing.rawId].qty -= (ing.qty * qty);
+            }
+        });
+        SessionManager.set('raw_stock', stock);
+    }
+};

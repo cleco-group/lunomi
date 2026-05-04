@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Master Resep</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .recipe-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:1rem;transition:all .2s;cursor:pointer;}
+        .recipe-card:hover{background:rgba(255,255,255,.08);border-color:rgba(99,102,241,.3);}
+        .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(4px);}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>📖</span></div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Master Resep</div>
+                <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex flex-wrap gap-3 items-center mb-5">
+        <input id="searchInput" type="text" placeholder="🔍  Cari menu untuk resep..." class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[180px]" oninput="renderGrid()">
+    </div>
+    <div id="recipeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <div id="emptyState" class="hidden py-16 text-center text-sm" style="color:rgba(255,255,255,.3)">Tidak ada menu ditemukan.</div>
+</div>
+
+<!-- Recipe Detail Modal -->
+<div id="recipeModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-3">
+                <span id="mEmoji" class="text-2xl"></span>
+                <h2 id="mTitle" class="font-bold text-white text-lg">Detail Resep</h2>
+            </div>
+            <button onclick="closeModal()" style="color:rgba(255,255,255,.4)" class="hover:text-white text-xl">×</button>
+        </div>
+        
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Bahan Baku & Gramasi</h3>
+                <button onclick="addIngredientRow()" class="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded-lg border border-indigo-500/30 hover:bg-indigo-500/40 transition">+ Tambah Bahan</button>
+            </div>
+            
+            <div id="ingredientList" class="space-y-2">
+                <!-- Rows added here -->
+            </div>
+        </div>
+
+        <div class="flex gap-3 mt-8">
+            <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="saveRecipe()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan Resep</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast toast-success"></div>
+
+<script>
+    const MENU_ITEMS = [
+        {id:1,  n:'Nasi Goreng',       e:'🍳', cat:'Makanan'},
+        {id:2,  n:'Mie Ayam',          e:'🍜', cat:'Makanan'},
+        {id:3,  n:'Soto Ayam',         e:'🥘', cat:'Makanan'},
+        {id:4,  n:'Ayam Bakar',        e:'🍗', cat:'Makanan'},
+        {id:5,  n:'Es Teh Manis',      e:'🧊', cat:'Minuman'},
+        {id:6,  n:'Es Jeruk',          e:'🍊', cat:'Minuman'},
+        {id:7,  n:'Jus Alpukat',       e:'🥑', cat:'Minuman'},
+        {id:8,  n:'Kentang Goreng',    e:'🍟', cat:'Snack'},
+        {id:9,  n:'Pisang Goreng',     e:'🍌', cat:'Snack'},
+        {id:10, n:'Lumpia',            e:'🥟', cat:'Snack'},
+        {id:11, n:'Kue Lapis',         e:'🍰', cat:'Dessert'},
+        {id:12, n:'Bika Ambon',        e:'🍮', cat:'Dessert'},
+    ];
+
+    const RAW_ITEMS = [
+        {id:1, name:'Nasi (Beras)',     unit:'kg'},
+        {id:2, name:'Ayam Fillet',      unit:'kg'},
+        {id:3, name:'Mie Kuning',       unit:'kg'},
+        {id:4, name:'Soto Ayam Presto', unit:'porsi'},
+        {id:5, name:'Es Batu',          unit:'kg'},
+        {id:6, name:'Teh Celup',        unit:'box'},
+        {id:7, name:'Minyak Goreng',    unit:'liter'},
+        {id:8, name:'Kecap Manis',      unit:'botol'},
+        {id:9, name:'Telur',            unit:'butir'},
+        {id:10, name:'Gula Pasir',      unit:'kg'},
+        {id:11, name:'Garam',           unit:'gram'},
+        {id:12, name:'Bawang Merah',    unit:'gram'},
+        {id:13, name:'Bawang Putih',    unit:'gram'},
+    ];
+
+    let recipes = RecipeManager.getAllRecipes();
+    let activeMenuId = null;
+
+    function renderGrid() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const grid = document.getElementById('recipeGrid');
+        let html = '';
+        let count = 0;
+
+        MENU_ITEMS.forEach(m => {
+            if (m.n.toLowerCase().includes(q)) {
+                const hasRecipe = recipes[m.id] && recipes[m.id].length > 0;
+                html += `
+                    <div class="recipe-card p-4 flex items-center justify-between" onclick="openRecipe(${m.id})">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl">${m.e}</div>
+                            <div>
+                                <div class="font-bold text-white text-sm">${m.n}</div>
+                                <div class="text-[10px] uppercase tracking-wider font-bold" style="color:${hasRecipe ? '#4ade80' : 'rgba(255,255,255,.3)'}">
+                                    ${hasRecipe ? '✓ Resep Terisi' : 'Belum Ada Resep'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-white opacity-30">›</div>
+                    </div>
+                `;
+                count++;
+            }
+        });
+
+        grid.innerHTML = html;
+        document.getElementById('emptyState').classList.toggle('hidden', count > 0);
+    }
+
+    function openRecipe(id) {
+        activeMenuId = id;
+        const menu = MENU_ITEMS.find(m => m.id === id);
+        document.getElementById('mEmoji').textContent = menu.e;
+        document.getElementById('mTitle').textContent = 'Resep: ' + menu.n;
+        
+        const list = document.getElementById('ingredientList');
+        list.innerHTML = '';
+        
+        const existing = recipes[id] || [];
+        if (existing.length === 0) {
+            addIngredientRow();
+        } else {
+            existing.forEach(ing => addIngredientRow(ing.rawId, ing.qty));
+        }
+        
+        document.getElementById('recipeModal').classList.remove('hidden');
+    }
+
+    function addIngredientRow(rawId = '', qty = '') {
+        const list = document.getElementById('ingredientList');
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 items-center animate-in fade-in duration-200';
+        
+        let options = '<option value="">Pilih Bahan...</option>';
+        RAW_ITEMS.forEach(r => {
+            options += `<option value="${r.id}" ${r.id == rawId ? 'selected' : ''}>${r.name} (${r.unit})</option>`;
+        });
+
+        div.innerHTML = `
+            <select class="ing-id input-glass flex-1 px-3 py-2 rounded-xl text-xs">
+                ${options}
+            </select>
+            <input type="number" step="any" class="ing-qty input-glass w-24 px-3 py-2 rounded-xl text-xs" placeholder="Qty" value="${qty}">
+            <button onclick="this.parentElement.remove()" class="text-red-400/50 hover:text-red-400 p-2">×</button>
+        `;
+        list.appendChild(div);
+    }
+
+    function saveRecipe() {
+        const rows = document.querySelectorAll('#ingredientList > div');
+        const data = [];
+        
+        rows.forEach(row => {
+            const rawId = row.querySelector('.ing-id').value;
+            const qty = row.querySelector('.ing-qty').value;
+            if (rawId && qty) {
+                data.push({ rawId: parseInt(rawId), qty: parseFloat(qty) });
+            }
+        });
+
+        RecipeManager.saveRecipe(activeMenuId, data);
+        recipes = RecipeManager.getAllRecipes();
+        
+        showToast('Resep berhasil disimpan!');
+        closeModal();
+        renderGrid();
+    }
+
+    function closeModal() {
+        document.getElementById('recipeModal').classList.add('hidden');
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const o = JSON.parse(localStorage.getItem('lunomi_outlet') || 'null');
+        if(o) document.getElementById('outletLabel').textContent = o.name;
+        renderGrid();
+    });
+</script>
+</body>
+</html>
