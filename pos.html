@@ -471,20 +471,106 @@
             const m=document.querySelector('input[name="payMethod"]:checked').value;
             const mMap={cash:'💵 Tunai',card:'💳 Kartu',ewallet:'📱 E-Wallet',bank:'🏦 Transfer'};
             const trxId=document.getElementById('payTrxId').textContent;
-            // Deduct menu stock
+            
+            // Deduct menu stock AND raw material stock via RecipeManager
             const stk=getMenuStock();
-            cart.forEach(i=>{if(stk[i.id]){stk[i.id].qty=Math.max(0,stk[i.id].qty-i.q);}});
+            cart.forEach(i=>{
+                if(stk[i.id]){stk[i.id].qty=Math.max(0,stk[i.id].qty-i.q);}
+                // NEW: Deduct raw materials based on recipe
+                if(typeof RecipeManager !== 'undefined') {
+                    RecipeManager.deductStock(i.id, i.q);
+                }
+            });
             saveMenuStock(stk);
+            
             // Save transaction to localStorage
             const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
             const trxs=JSON.parse(localStorage.getItem('lunomi_transactions')||'[]');
             trxs.unshift({id:trxId,date:new Date().toISOString(),time:new Date().toTimeString().slice(0,5),total:currentTotal,method:m,items:cart.map(i=>({id:i.id,name:i.n,qty:i.q,price:i.p})),outlet_id:outlet?outlet.id:''});
             localStorage.setItem('lunomi_transactions',JSON.stringify(trxs));
             closePayment();
-            showToast(`Pembayaran ${rp(currentTotal)} via ${mMap[m]} berhasil!`,'success');
+            
+            // Show Success Dialog instead of just toast
+            showSuccessDialog(trxId, currentTotal, mMap[m]);
+            
             HIST.unshift({id:trxId,t:new Date().toTimeString().slice(0,5),tot:currentTotal,st:'paid',itm:cart.reduce((s,i)=>s+i.q,0),m});
             cart=[];disco=0;update();document.getElementById('trxId').textContent=genTrxId();
             render();
+        }
+
+        function showSuccessDialog(id, total, method) {
+            const modal = document.createElement('div');
+            modal.id = 'successModal';
+            modal.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4';
+            modal.innerHTML = `
+                <div class="glass-card w-full max-w-sm rounded-3xl p-8 text-center border border-white/10">
+                    <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="material-symbols-outlined text-4xl">check_circle</span>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-white mb-2">Pembayaran Berhasil!</h3>
+                    <p class="text-white/50 text-sm mb-6">Transaksi <span class="text-white font-mono">${id}</span> telah selesai via ${method}</p>
+                    
+                    <div class="bg-white/5 rounded-2xl p-4 mb-8">
+                        <p class="text-xs text-white/40 uppercase font-bold mb-1">Total Dibayar</p>
+                        <p class="text-2xl font-black text-white">${rp(total)}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <button onclick="printReceiptFromId('${id}'); document.getElementById('successModal').remove();" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined">print</span> Cetak Struk
+                        </button>
+                        <button onclick="document.getElementById('successModal').remove();" class="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold transition">
+                            Transaksi Baru
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function printReceiptFromId(id) {
+            const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
+            const t = trxs.find(x => x.id === id);
+            if(!t) return;
+            
+            const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
+            const win = window.open('', '', 'width=400,height=600');
+            win.document.write(`
+                <html>
+                <head>
+                    <style>
+                        body { font-family: monospace; padding: 20px; font-size: 12px; line-height: 1.4; }
+                        .text-center { text-align: center; }
+                        .hr { border-top: 1px dashed #000; margin: 10px 0; }
+                        .flex { display: flex; justify-content: space-between; }
+                        .bold { font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="text-center">
+                        <div class="bold" style="font-size: 16px;">${outlet.name || 'LUNOMI POS'}</div>
+                        <div>${outlet.address || ''}</div>
+                        <div>Telp: ${outlet.phone || '-'}</div>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="flex"><span>ID: ${t.id}</span><span>${t.time}</span></div>
+                    <div>Tgl: ${new Date(t.date).toLocaleDateString('id-ID')}</div>
+                    <div class="hr"></div>
+                    ${t.items.map(i => `
+                        <div class="flex"><span>${i.name}</span></div>
+                        <div class="flex"><span>  ${i.qty} x ${rp(i.price)}</span><span>${rp(i.qty * i.price)}</span></div>
+                    `).join('')}
+                    <div class="hr"></div>
+                    <div class="flex bold"><span>TOTAL</span><span>${rp(t.total)}</span></div>
+                    <div class="flex"><span>Metode</span><span>${t.method.toUpperCase()}</span></div>
+                    <div class="hr"></div>
+                    <div class="text-center" style="margin-top: 20px;">Terima Kasih Atas Kunjungan Anda</div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            win.print();
+            win.close();
         }
 
         function openHistory(){renderHistory();document.getElementById('historyModal').style.display='flex';}

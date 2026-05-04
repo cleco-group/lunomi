@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Supplier - Lunomi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Manajemen Supplier</h1>
+                <p class="text-sm text-white/50">Kelola daftar pemasok bahan baku Anda</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+                <button onclick="openAddModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold transition"> + Tambah Supplier</button>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/5 text-xs font-bold uppercase tracking-wider text-white/40">
+                        <th class="px-6 py-4">Nama Supplier</th>
+                        <th class="px-6 py-4">Kontak</th>
+                        <th class="px-6 py-4">Kategori</th>
+                        <th class="px-6 py-4">Alamat</th>
+                        <th class="px-6 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="supplierTable" class="divide-y divide-white/5">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="supplierModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="glass-card w-full max-w-md rounded-2xl p-6">
+            <h3 id="modalTitle" class="text-xl font-bold mb-4">Tambah Supplier</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-white/40 mb-1">Nama Perusahaan/Supplier</label>
+                    <input type="text" id="supName" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Contoh: PT Sumber Makmur">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">PIC / Nama Kontak</label>
+                        <input type="text" id="supPic" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Bpk. Budi">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">No. Telepon</label>
+                        <input type="text" id="supPhone" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="0812...">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-white/40 mb-1">Kategori</label>
+                    <select id="supCat" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                        <option value="Bahan Pokok">Bahan Pokok</option>
+                        <option value="Daging & Ikan">Daging & Ikan</option>
+                        <option value="Sayuran">Sayuran</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Kemasan">Kemasan</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-white/40 mb-1">Alamat</label>
+                    <textarea id="supAddr" class="glass-input w-full px-4 py-2 rounded-xl text-sm h-20" placeholder="Alamat lengkap..."></textarea>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeModal()" class="flex-1 py-2 rounded-xl glass-card text-sm font-bold">Batal</button>
+                <button onclick="saveSupplier()" class="flex-1 py-2 rounded-xl bg-indigo-600 text-sm font-bold">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let suppliers = JSON.parse(localStorage.getItem('lunomi_suppliers') || '[]');
+        let editIndex = -1;
+
+        function renderSuppliers() {
+            const table = document.getElementById('supplierTable');
+            if (suppliers.length === 0) {
+                table.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-white/30 text-sm">Belum ada data supplier</td></tr>';
+                return;
+            }
+            table.innerHTML = suppliers.map((s, i) => `
+                <tr class="hover:bg-white/5 transition">
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-sm">${s.name}</div>
+                        <div class="text-xs text-white/40">PIC: ${s.pic}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm">${s.phone}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-400 text-[10px] font-bold uppercase">${s.category}</span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-white/50 max-w-xs truncate">${s.address}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="editSupplier(${i})" class="p-1.5 text-white/40 hover:text-white transition"><span class="material-symbols-outlined text-lg">edit</span></button>
+                        <button onclick="deleteSupplier(${i})" class="p-1.5 text-white/40 hover:text-red-400 transition"><span class="material-symbols-outlined text-lg">delete</span></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddModal() {
+            editIndex = -1;
+            document.getElementById('modalTitle').textContent = 'Tambah Supplier';
+            document.getElementById('supName').value = '';
+            document.getElementById('supPic').value = '';
+            document.getElementById('supPhone').value = '';
+            document.getElementById('supCat').value = 'Bahan Pokok';
+            document.getElementById('supAddr').value = '';
+            document.getElementById('supplierModal').classList.remove('hidden');
+        }
+
+        function editSupplier(index) {
+            editIndex = index;
+            const s = suppliers[index];
+            document.getElementById('modalTitle').textContent = 'Edit Supplier';
+            document.getElementById('supName').value = s.name;
+            document.getElementById('supPic').value = s.pic;
+            document.getElementById('supPhone').value = s.phone;
+            document.getElementById('supCat').value = s.category;
+            document.getElementById('supAddr').value = s.address;
+            document.getElementById('supplierModal').classList.remove('hidden');
+        }
+
+        function saveSupplier() {
+            const data = {
+                name: document.getElementById('supName').value,
+                pic: document.getElementById('supPic').value,
+                phone: document.getElementById('supPhone').value,
+                category: document.getElementById('supCat').value,
+                address: document.getElementById('supAddr').value
+            };
+
+            if (!data.name || !data.phone) {
+                alert('Nama dan No. Telepon wajib diisi!');
+                return;
+            }
+
+            if (editIndex > -1) {
+                suppliers[editIndex] = data;
+            } else {
+                suppliers.push(data);
+            }
+
+            localStorage.setItem('lunomi_suppliers', JSON.stringify(suppliers));
+            closeModal();
+            renderSuppliers();
+        }
+
+        function deleteSupplier(index) {
+            if (confirm('Hapus supplier ini?')) {
+                suppliers.splice(index, 1);
+                localStorage.setItem('lunomi_suppliers', JSON.stringify(suppliers));
+                renderSuppliers();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('supplierModal').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', renderSuppliers);
+    </script>
+</body>
+</html>
