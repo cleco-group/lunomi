@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan - Lunomi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Pengaturan Sistem</h1>
+                <p class="text-sm text-white/50">Konfigurasi outlet, pajak, dan struk</p>
+            </div>
+            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Outlet Info -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-indigo-400">store</span> Informasi Outlet
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Nama Outlet</label>
+                        <input type="text" id="setStoreName" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">No. Telepon</label>
+                        <input type="text" id="setStorePhone" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-white/40 mb-1">Alamat</label>
+                        <textarea id="setStoreAddr" class="glass-input w-full px-4 py-2 rounded-xl text-sm h-20"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tax & Service -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-emerald-400">receipt</span> Pajak & Biaya Layanan
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">PPN (%)</label>
+                        <input type="number" id="setTax" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Service Charge (%)</label>
+                        <input type="number" id="setService" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="saveSettings()" class="px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-500/20">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadSettings() {
+            const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
+            const config = JSON.parse(localStorage.getItem('lunomi_config') || '{"tax": 10, "service": 0}');
+
+            document.getElementById('setStoreName').value = outlet.name || '';
+            document.getElementById('setStorePhone').value = outlet.phone || '';
+            document.getElementById('setStoreAddr').value = outlet.address || '';
+            document.getElementById('setTax').value = config.tax;
+            document.getElementById('setService').value = config.service;
+        }
+
+        function saveSettings() {
+            const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
+            outlet.name = document.getElementById('setStoreName').value;
+            outlet.phone = document.getElementById('setStorePhone').value;
+            outlet.address = document.getElementById('setStoreAddr').value;
+
+            const config = {
+                tax: parseFloat(document.getElementById('setTax').value) || 0,
+                service: parseFloat(document.getElementById('setService').value) || 0
+            };
+
+            localStorage.setItem('lunomi_outlet', JSON.stringify(outlet));
+            localStorage.setItem('lunomi_config', JSON.stringify(config));
+
+            alert('Pengaturan berhasil disimpan!');
+            window.location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
+</body>
+</html>

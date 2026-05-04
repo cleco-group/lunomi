@@ -3,283 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi Inventory - Manajemen Stok</title>
+    <title>Lunomi — Inventory</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .stock-item { transition: all 0.3s; }
-        .stock-item.alert { border-left: 4px solid #ef4444; background: #fef2f2; }
-        .stock-item.warning { border-left: 4px solid #f59e0b; background: #fffbeb; }
-        .stock-item.normal { border-left: 4px solid #10b981; background: #f0fdf4; }
-        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
-        .badge.red { background: #fecaca; color: #991b1b; }
-        .badge.orange { background: #fed7aa; color: #92400e; }
-        .badge.green { background: #bbf7d0; color: #065f46; }
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .status-ok{background:rgba(34,197,94,.15);color:#4ade80;}
+        .status-warn{background:rgba(245,158,11,.15);color:#fbbf24;}
+        .status-alert{background:rgba(239,68,68,.15);color:#f87171;}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.06);transition:background .15s;}
+        .row-item:hover{background:rgba(255,255,255,.03);}
+        .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(4px);}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">📦 Inventory Management</h1>
-                    <p class="text-sm text-gray-500">Lunomi - Manajemen Stok Bahan Baku</p>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="openAddStock()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold">
-                        + Tambah Stok
-                    </button>
-                    <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
-                </div>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>📦</span></div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Inventory</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)" id="outletLabel">Semua Outlet</div>
             </div>
         </div>
+        <button onclick="openAddModal()" class="btn-primary px-4 py-2 rounded-xl text-xs flex items-center gap-2">+ Tambah Item</button>
+    </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Item</div><div class="text-2xl font-extrabold text-white" id="statTotal">8</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(34,197,94,.7)">Stok OK</div><div class="text-2xl font-extrabold text-green-400" id="statOk">5</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(245,158,11,.7)">Warning</div><div class="text-2xl font-extrabold text-amber-400" id="statWarn">2</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(239,68,68,.7)">Kritis</div><div class="text-2xl font-extrabold text-red-400" id="statAlert">1</div></div>
     </div>
 
-    <!-- Stats Bar -->
-    <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
-        <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-                <p class="text-gray-600">Total Item</p>
-                <p class="text-2xl font-bold text-gray-900" id="totalItems">0</p>
+    <!-- Filter + Search -->
+    <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
+        <input id="searchInput" type="text" placeholder="🔍  Cari nama item..." class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[180px]" oninput="renderTable()">
+        <select id="filterStatus" class="input-glass px-3 py-2 rounded-xl text-sm" onchange="renderTable()">
+            <option value="all">Semua Status</option>
+            <option value="ok">OK</option>
+            <option value="warning">Warning</option>
+            <option value="alert">Kritis</option>
+        </select>
+        <select id="filterCat" class="input-glass px-3 py-2 rounded-xl text-sm" onchange="renderTable()">
+            <option value="all">Semua Kategori</option>
+            <option value="Bahan Makanan">Bahan Makanan</option>
+            <option value="Minuman">Minuman</option>
+            <option value="Bumbu">Bumbu</option>
+        </select>
+    </div>
+
+    <!-- Table -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,.1)">
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Nama Item</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Kategori</th>
+                        <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Stok</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Stok Progress</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Status</th>
+                        <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody"></tbody>
+            </table>
+        </div>
+        <div id="emptyState" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Tidak ada item ditemukan.</div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="itemModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl">
+        <div class="flex items-center justify-between mb-5">
+            <h2 id="modalTitle" class="font-bold text-white">Tambah Item Baru</h2>
+            <button onclick="closeModal()" style="color:rgba(255,255,255,.4)" class="hover:text-white transition text-xl">×</button>
+        </div>
+        <div class="space-y-4">
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Nama Item</label>
+                <input id="mName" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="cth: Ayam Fillet"></div>
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Kategori</label>
+                <select id="mCat" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm">
+                    <option>Bahan Makanan</option><option>Minuman</option><option>Bumbu</option>
+                </select></div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Stok Saat Ini</label>
+                    <input id="mStock" type="number" min="0" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="0" inputmode="numeric"></div>
+                <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Stok Maksimal</label>
+                    <input id="mMax" type="number" min="1" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="100" inputmode="numeric"></div>
             </div>
-            <div>
-                <p class="text-gray-600">Stock Alert 🚨</p>
-                <p class="text-2xl font-bold text-red-600" id="alertItems">0</p>
-            </div>
-            <div>
-                <p class="text-gray-600">Warning ⚠️</p>
-                <p class="text-2xl font-bold text-orange-600" id="warningItems">0</p>
-            </div>
-            <div>
-                <p class="text-gray-600">Stock OK ✓</p>
-                <p class="text-2xl font-bold text-green-600" id="okItems">0</p>
-            </div>
+            <div><label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Satuan</label>
+                <input id="mUnit" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="cth: kg, liter, porsi"></div>
+        </div>
+        <div id="mError" class="hidden mt-3 px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;"></div>
+        <div class="flex gap-3 mt-5">
+            <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="saveItem()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan</button>
         </div>
     </div>
+</div>
 
-    <!-- Filters & Search -->
-    <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
-        <div class="max-w-7xl mx-auto flex gap-3 flex-wrap">
-            <input type="text" id="searchInput" placeholder="Cari item..." class="flex-1 min-w-48 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onkeyup="filterInventory()">
-            <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterInventory()">
-                <option value="">Semua Kategori</option>
-                <option value="bahan">Bahan Baku</option>
-                <option value="bumbu">Bumbu</option>
-                <option value="minuman">Minuman</option>
-                <option value="packaging">Packaging</option>
-            </select>
-            <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterInventory()">
-                <option value="">Semua Status</option>
-                <option value="alert">Alert</option>
-                <option value="warning">Warning</option>
-                <option value="ok">OK</option>
-            </select>
-        </div>
-    </div>
+<div id="toast" class="toast toast-success"></div>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div id="inventoryList" class="space-y-4"></div>
-    </div>
+<script>
+    let items = [
+        {id:1, name:'Nasi (Beras)',    cat:'Bahan Makanan', stock:45, max:60,  unit:'kg'},
+        {id:2, name:'Ayam Fillet',     cat:'Bahan Makanan', stock:12, max:30,  unit:'kg'},
+        {id:3, name:'Mie Kuning',      cat:'Bahan Makanan', stock:8,  max:20,  unit:'kg'},
+        {id:4, name:'Soto Ayam Presto',cat:'Bahan Makanan', stock:2,  max:15,  unit:'porsi'},
+        {id:5, name:'Es Batu',         cat:'Minuman',       stock:40, max:50,  unit:'kg'},
+        {id:6, name:'Teh Celup',       cat:'Minuman',       stock:90, max:120, unit:'box'},
+        {id:7, name:'Minyak Goreng',   cat:'Bumbu',         stock:18, max:25,  unit:'liter'},
+        {id:8, name:'Kecap Manis',     cat:'Bumbu',         stock:7,  max:20,  unit:'botol'},
+    ];
+    let editingId = null;
 
-    <!-- Modal Tambah Stok -->
-    <div id="addStockModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 class="text-lg font-bold mb-4">Tambah Stok Item</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Nama Item</label>
-                    <input type="text" id="itemName" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Misal: Daging Ayam">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Kategori</label>
-                    <select id="itemCategory" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="bahan">Bahan Baku</option>
-                        <option value="bumbu">Bumbu</option>
-                        <option value="minuman">Minuman</option>
-                        <option value="packaging">Packaging</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Jumlah</label>
-                    <input type="number" id="itemQty" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" min="0">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Satuan</label>
-                    <select id="itemUnit" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="kg">kg</option>
-                        <option value="liter">Liter</option>
-                        <option value="pcs">Pcs</option>
-                        <option value="box">Box</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Minimum Stock</label>
-                    <input type="number" id="itemMin" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" min="0">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Supplier</label>
-                    <input type="text" id="itemSupplier" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Misal: PT Maju Jaya">
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="closeAddStock()" class="flex-1 border border-gray-300 px-4 py-2 rounded text-sm font-semibold hover:bg-gray-50">Batal</button>
-                    <button onclick="saveStock()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-blue-700">Simpan</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    function getStatus(s, m){
+        const r = s/m;
+        if(r > 0.5) return 'ok';
+        if(r > 0.2) return 'warning';
+        return 'alert';
+    }
 
-    <script>
-        // Sample inventory data
-        const INV = [
-            {id:1,n:'Daging Ayam',c:'bahan',q:25,u:'kg',min:20,s:'PT Maju Jaya',upd:'2026-05-01'},
-            {id:2,n:'Beras Premium',c:'bahan',q:15,u:'kg',min:30,s:'PT Beras Emas',upd:'2026-04-30'},
-            {id:3,n:'Minyak Goreng',c:'bahan',q:8,u:'liter',min:10,s:'PT Samin',upd:'2026-04-29'},
-            {id:4,n:'Garam Halus',c:'bumbu',q:5,u:'kg',min:3,s:'PT Garam',upd:'2026-05-01'},
-            {id:5,n:'Lada Hitam',c:'bumbu',q:2,u:'kg',min:1.5,s:'PT Rempah',upd:'2026-04-28'},
-            {id:6,n:'Air Mineral',c:'minuman',q:50,u:'box',min:40,s:'PT Aqua',upd:'2026-05-01'},
-            {id:7,n:'Kopi Arabika',c:'bumbu',q:3,u:'kg',min:5,s:'PT Kopi',upd:'2026-04-27'},
-            {id:8,n:'Plastik Makan',c:'packaging',q:500,u:'pcs',min:1000,s:'PT Plastik',upd:'2026-04-30'}
-        ];
-
-        let inv = JSON.parse(JSON.stringify(INV));
-
-        function getStatus(q, min) {
-            if (q <= min * 0.5) return 'alert';
-            if (q <= min) return 'warning';
-            return 'ok';
-        }
-
-        function render() {
-            const list = document.getElementById('inventoryList');
-            const items = inv.filter(i => {
-                const search = document.getElementById('searchInput').value.toLowerCase();
-                const cat = document.getElementById('categoryFilter').value;
-                const stat = document.getElementById('statusFilter').value;
-                const itemStat = getStatus(i.q, i.min);
-                
-                return (i.n.toLowerCase().includes(search) || i.s.toLowerCase().includes(search)) &&
-                       (!cat || i.c === cat) &&
-                       (!stat || itemStat === stat);
-            });
-
-            list.innerHTML = items.map(i => {
-                const st = getStatus(i.q, i.min);
-                const pct = Math.round((i.q / i.min) * 100);
-                return '<div class="stock-item ' + st + ' p-6 rounded-lg">' +
-                    '<div class="flex justify-between items-start mb-4">' +
-                    '<div><div class="font-bold text-lg">' + i.n + '</div>' +
-                    '<div class="text-sm text-gray-600">' + i.c.charAt(0).toUpperCase() + i.c.slice(1) + ' | ' + i.s + '</div></div>' +
-                    '<span class="badge ' + (st === 'alert' ? 'red' : st === 'warning' ? 'orange' : 'green') + '">' +
-                    (st === 'alert' ? '🚨 ALERT' : st === 'warning' ? '⚠️ WARNING' : '✓ OK') + '</span></div>' +
-                    '<div class="mb-4"><div class="flex justify-between text-sm mb-2">' +
-                    '<span>' + i.q + ' ' + i.u + ' / Min: ' + i.min + ' ' + i.u + '</span>' +
-                    '<span class="font-semibold">' + pct + '%</span></div>' +
-                    '<div class="w-full bg-gray-300 rounded h-2"><div class="bg-' + (st === 'alert' ? 'red' : st === 'warning' ? 'amber' : 'green') + '-500 h-2 rounded" style="width:' + Math.min(pct, 100) + '%"></div></div></div>' +
-                    '<div class="flex gap-2 text-xs text-gray-500 mb-3">Updated: ' + i.upd + '</div>' +
-                    '<div class="flex gap-2">' +
-                    '<button onclick="addQty(' + i.id + ')" class="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm font-semibold hover:bg-green-700">+ Masuk</button>' +
-                    '<button onclick="minusQty(' + i.id + ')" class="flex-1 bg-orange-600 text-white px-3 py-2 rounded text-sm font-semibold hover:bg-orange-700">- Keluar</button>' +
-                    '<button onclick="deleteItem(' + i.id + ')" class="flex-1 bg-red-600 text-white px-3 py-2 rounded text-sm font-semibold hover:bg-red-700">Hapus</button>' +
-                    '</div></div>';
-            }).join('');
-
-            updateStats();
-        }
-
-        function updateStats() {
-            const alert = inv.filter(i => getStatus(i.q, i.min) === 'alert').length;
-            const warning = inv.filter(i => getStatus(i.q, i.min) === 'warning').length;
-            const ok = inv.filter(i => getStatus(i.q, i.min) === 'ok').length;
-            document.getElementById('totalItems').textContent = inv.length;
-            document.getElementById('alertItems').textContent = alert;
-            document.getElementById('warningItems').textContent = warning;
-            document.getElementById('okItems').textContent = ok;
-        }
-
-        function filterInventory() {
-            render();
-        }
-
-        function openAddStock() {
-            document.getElementById('addStockModal').style.display = 'flex';
-        }
-
-        function closeAddStock() {
-            document.getElementById('addStockModal').style.display = 'none';
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemQty').value = '';
-            document.getElementById('itemMin').value = '';
-            document.getElementById('itemSupplier').value = '';
-        }
-
-        function saveStock() {
-            const n = document.getElementById('itemName').value;
-            const c = document.getElementById('itemCategory').value;
-            const q = parseFloat(document.getElementById('itemQty').value) || 0;
-            const u = document.getElementById('itemUnit').value;
-            const min = parseFloat(document.getElementById('itemMin').value) || 0;
-            const s = document.getElementById('itemSupplier').value;
-
-            if (!n || q < 0 || min < 0) {
-                alert('Isi semua field dengan benar');
-                return;
-            }
-
-            const id = Math.max(...inv.map(i => i.id), 0) + 1;
-            inv.push({id,n,c,q,u,min,s,upd:new Date().toISOString().split('T')[0]});
-            render();
-            closeAddStock();
-            alert('✓ Item ditambahkan');
-        }
-
-        function addQty(id) {
-            const i = inv.find(x => x.id === id);
-            if (i) {
-                const add = prompt('Tambah berapa ' + i.u + '?', '1');
-                if (add && !isNaN(add)) {
-                    i.q += parseFloat(add);
-                    i.upd = new Date().toISOString().split('T')[0];
-                    render();
-                }
-            }
-        }
-
-        function minusQty(id) {
-            const i = inv.find(x => x.id === id);
-            if (i) {
-                const minus = prompt('Kurang berapa ' + i.u + '?', '1');
-                if (minus && !isNaN(minus)) {
-                    i.q = Math.max(0, i.q - parseFloat(minus));
-                    i.upd = new Date().toISOString().split('T')[0];
-                    render();
-                }
-            }
-        }
-
-        function deleteItem(id) {
-            if (confirm('Hapus item ini?')) {
-                inv = inv.filter(x => x.id !== id);
-                render();
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('lunomi_session');
-            window.location.href = 'index.html';
-        }
-
-        function checkSession() {
-            const s = localStorage.getItem('lunomi_session');
-            if (!s) { window.location.href = 'index.html'; return; }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            checkSession();
-            render();
+    function renderTable(){
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const sf = document.getElementById('filterStatus').value;
+        const cf = document.getElementById('filterCat').value;
+        const filtered = items.filter(it=>{
+            const st = getStatus(it.stock, it.max);
+            return (!q || it.name.toLowerCase().includes(q)) &&
+                   (sf==='all' || st===sf) &&
+                   (cf==='all' || it.cat===cf);
         });
-    </script>
+        const tbody = document.getElementById('inventoryBody');
+        const empty = document.getElementById('emptyState');
+        if(!filtered.length){ tbody.innerHTML=''; empty.classList.remove('hidden'); return; }
+        empty.classList.add('hidden');
+        const statusCls = {ok:'status-ok', warning:'status-warn', alert:'status-alert'};
+        const statusLbl = {ok:'✓ OK', warning:'⚠ Warning', alert:'🔴 Kritis'};
+        const barColor  = {ok:'#22c55e', warning:'#f59e0b', alert:'#ef4444'};
+        tbody.innerHTML = filtered.map(it=>{
+            const st = getStatus(it.stock, it.max);
+            const pct = Math.round(it.stock/it.max*100);
+            return `<tr class="row-item">
+                <td class="px-5 py-3.5 font-semibold text-white">${it.name}</td>
+                <td class="px-4 py-3.5 text-sm" style="color:rgba(255,255,255,.5)">${it.cat}</td>
+                <td class="px-4 py-3.5 text-right font-bold text-white">${it.stock} <span class="text-xs font-normal" style="color:rgba(255,255,255,.35)">${it.unit}</span></td>
+                <td class="px-4 py-3.5 min-w-[120px]">
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 rounded-full" style="background:rgba(255,255,255,.1)">
+                            <div class="h-full rounded-full" style="width:${pct}%;background:${barColor[st]};transition:width .3s"></div>
+                        </div>
+                        <span class="text-xs" style="color:rgba(255,255,255,.4)">${pct}%</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3.5"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${statusCls[st]}">${statusLbl[st]}</span></td>
+                <td class="px-4 py-3.5 text-center">
+                    <button onclick="editItem(${it.id})" class="text-xs px-3 py-1.5 rounded-lg mr-1 font-semibold transition hover:bg-white hover:text-gray-900" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)">Edit</button>
+                    <button onclick="deleteItem(${it.id})" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition" style="background:rgba(239,68,68,.1);color:#f87171">Hapus</button>
+                </td>
+            </tr>`;
+        }).join('');
+        updateStats();
+    }
+
+    function updateStats(){
+        document.getElementById('statTotal').textContent = items.length;
+        document.getElementById('statOk').textContent    = items.filter(i=>getStatus(i.stock,i.max)==='ok').length;
+        document.getElementById('statWarn').textContent  = items.filter(i=>getStatus(i.stock,i.max)==='warning').length;
+        document.getElementById('statAlert').textContent = items.filter(i=>getStatus(i.stock,i.max)==='alert').length;
+    }
+
+    function openAddModal(){
+        editingId=null;
+        document.getElementById('modalTitle').textContent='Tambah Item Baru';
+        ['mName','mStock','mMax','mUnit'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('mCat').value='Bahan Makanan';
+        document.getElementById('mError').classList.add('hidden');
+        document.getElementById('itemModal').classList.remove('hidden');
+    }
+    function editItem(id){
+        const it = items.find(x=>x.id===id);
+        editingId=id;
+        document.getElementById('modalTitle').textContent='Edit Item';
+        document.getElementById('mName').value  = it.name;
+        document.getElementById('mCat').value   = it.cat;
+        document.getElementById('mStock').value = it.stock;
+        document.getElementById('mMax').value   = it.max;
+        document.getElementById('mUnit').value  = it.unit;
+        document.getElementById('mError').classList.add('hidden');
+        document.getElementById('itemModal').classList.remove('hidden');
+    }
+    function closeModal(){ document.getElementById('itemModal').classList.add('hidden'); }
+
+    function saveItem(){
+        const name  = document.getElementById('mName').value.trim();
+        const cat   = document.getElementById('mCat').value;
+        const stock = parseInt(document.getElementById('mStock').value)||0;
+        const max   = parseInt(document.getElementById('mMax').value)||0;
+        const unit  = document.getElementById('mUnit').value.trim();
+        const err   = document.getElementById('mError');
+        if(!name){ err.textContent='Nama item harus diisi.'; err.classList.remove('hidden'); return; }
+        if(max < 1){ err.textContent='Stok maksimal harus lebih dari 0.'; err.classList.remove('hidden'); return; }
+        if(stock > max){ err.textContent='Stok saat ini tidak boleh melebihi stok maksimal.'; err.classList.remove('hidden'); return; }
+        if(!unit){ err.textContent='Satuan harus diisi.'; err.classList.remove('hidden'); return; }
+        if(editingId){
+            const it = items.find(x=>x.id===editingId);
+            Object.assign(it,{name,cat,stock,max,unit});
+            showToast('Item berhasil diupdate');
+        } else {
+            items.unshift({id:Date.now(),name,cat,stock,max,unit});
+            showToast('Item berhasil ditambahkan');
+        }
+        closeModal(); renderTable();
+    }
+    function deleteItem(id){
+        if(!confirm('Hapus item ini?')) return;
+        items = items.filter(x=>x.id!==id);
+        renderTable(); showToast('Item dihapus');
+    }
+
+    function showToast(msg){
+        const t = document.getElementById('toast');
+        t.textContent=msg; t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'),2500);
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        try{
+            const s = localStorage.getItem('lunomi_session');
+            if(!s){window.location.href='index.html';return;}
+            const outlet = JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+            if(outlet) document.getElementById('outletLabel').textContent=outlet.name;
+        }catch(e){window.location.href='index.html';}
+        renderTable();
+    });
+</script>
 </body>
 </html>

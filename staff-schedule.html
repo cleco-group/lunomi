@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Staf - Lunomi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .shift-morning { background: rgba(56,189,248,0.1); border-left: 3px solid #38bdf8; }
+        .shift-afternoon { background: rgba(251,191,36,0.1); border-left: 3px solid #fbbf24; }
+        .shift-night { background: rgba(129,140,248,0.1); border-left: 3px solid #818cf8; }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Penjadwalan Staf</h1>
+                <p class="text-sm text-white/50">Atur shift dan penugasan karyawan mingguan</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+                <button class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold transition">+ Buat Jadwal</button>
+            </div>
+        </div>
+
+        <!-- Calendar Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+                <button class="p-2 glass-card rounded-lg"><span class="material-symbols-outlined">chevron_left</span></button>
+                <h3 class="text-lg font-bold">Mei 2026</h3>
+                <button class="p-2 glass-card rounded-lg"><span class="material-symbols-outlined">chevron_right</span></button>
+            </div>
+            <div class="flex gap-2">
+                <span class="px-3 py-1 rounded-full bg-white/5 text-[10px] font-bold uppercase">Mingguan</span>
+                <span class="px-3 py-1 rounded-full bg-indigo-600 text-[10px] font-bold uppercase">Harian</span>
+            </div>
+        </div>
+
+        <!-- Schedule Grid -->
+        <div class="glass-card rounded-3xl overflow-hidden">
+            <div class="grid grid-cols-8 border-b border-white/10 bg-white/5">
+                <div class="p-4 text-[10px] font-bold uppercase text-white/40 border-r border-white/10">Waktu</div>
+                <div class="p-4 text-[10px] font-bold uppercase text-white/40 text-center">Sen (04)</div>
+                <div class="p-4 text-[10px] font-bold uppercase text-white/40 text-center">Sel (05)</div>
+                <div class="p-4 text-[10px] font-bold uppercase text-white/40 text-center">Rab (06)</div>
+                <div class="p-4 text-[10px] font-bold uppercase text-white/40 text-center">Kam (07)</div>
+                <div class="p-4 text-[10px] font-bold uppercase text-white/40 text-center">Jum (08)</div>
+                <div class="p-4 text-[10px] font-bold uppercase text-white/40 text-center">Sab (09)</div>
+                <div class="p-4 text-[10px] font-bold uppercase text-white/40 text-center">Min (10)</div>
+            </div>
+            
+            <div class="grid grid-cols-8 divide-x divide-white/10">
+                <!-- Time Column -->
+                <div class="divide-y divide-white/10 bg-white/5">
+                    <div class="h-24 p-2 text-[10px] font-bold text-white/30">08:00</div>
+                    <div class="h-24 p-2 text-[10px] font-bold text-white/30">12:00</div>
+                    <div class="h-24 p-2 text-[10px] font-bold text-white/30">16:00</div>
+                </div>
+                
+                <!-- Monday -->
+                <div class="divide-y divide-white/10">
+                    <div class="h-24 p-2">
+                        <div class="shift-morning p-2 rounded-lg h-full">
+                            <p class="text-[10px] font-bold">Andi W.</p>
+                            <p class="text-[8px] opacity-60">Kasir Pagi</p>
+                        </div>
+                    </div>
+                    <div class="h-24 p-2">
+                        <div class="shift-afternoon p-2 rounded-lg h-full">
+                            <p class="text-[10px] font-bold">Siska P.</p>
+                            <p class="text-[8px] opacity-60">Kasir Siang</p>
+                        </div>
+                    </div>
+                    <div class="h-24 p-2"></div>
+                </div>
+                
+                <!-- Tuesday -->
+                <div class="divide-y divide-white/10">
+                    <div class="h-24 p-2">
+                        <div class="shift-morning p-2 rounded-lg h-full">
+                            <p class="text-[10px] font-bold">Budi S.</p>
+                            <p class="text-[8px] opacity-60">Kasir Pagi</p>
+                        </div>
+                    </div>
+                    <div class="h-24 p-2"></div>
+                    <div class="h-24 p-2"></div>
+                </div>
+                
+                <!-- Placeholder for other days -->
+                <div class="divide-y divide-white/10"><div class="h-24"></div><div class="h-24"></div><div class="h-24"></div></div>
+                <div class="divide-y divide-white/10"><div class="h-24"></div><div class="h-24"></div><div class="h-24"></div></div>
+                <div class="divide-y divide-white/10"><div class="h-24"></div><div class="h-24"></div><div class="h-24"></div></div>
+                <div class="divide-y divide-white/10"><div class="h-24"></div><div class="h-24"></div><div class="h-24"></div></div>
+                <div class="divide-y divide-white/10"><div class="h-24"></div><div class="h-24"></div><div class="h-24"></div></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

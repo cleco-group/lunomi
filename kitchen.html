@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi KDS - Kitchen Display System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
@@ -84,6 +85,7 @@
 
         /* Toast */
         #toast { transition:opacity 0.3s; pointer-events:none; }
+    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
@@ -297,7 +299,7 @@
             document.getElementById('timeNow').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
         }
 
-        function logout(){if(!confirm('Yakin ingin logout dari KDS?'))return;localStorage.removeItem('lunomi_session');window.location.href='index.html';}
+        function logout(){if(!confirm('Yakin ingin logout dari KDS?'))return;localStorage.removeItem('lunomi_session');localStorage.removeItem('lunomi_outlet');window.location.href='index.html';}
 
         function checkSession(){
             try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return false;}JSON.parse(s);return true;}

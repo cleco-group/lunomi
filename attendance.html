@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi Staf - Lunomi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .camera-preview { background: #000; border-radius: 2rem; aspect-ratio: 3/4; display: flex; items-center: center; justify-content: center; position: relative; overflow: hidden; }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Absensi Staf</h1>
+                <p class="text-sm text-white/50">Clock-in/out dengan verifikasi lokasi & foto</p>
+            </div>
+            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Attendance Action -->
+            <div class="space-y-6">
+                <div class="glass-card p-8 rounded-3xl text-center">
+                    <div class="text-4xl font-black mb-2" id="liveClock">00:00:00</div>
+                    <p class="text-xs text-white/40 font-bold uppercase tracking-widest mb-6" id="liveDate">Senin, 4 Mei 2026</p>
+                    
+                    <div class="camera-preview mb-6 border-2 border-white/10">
+                        <span class="material-symbols-outlined text-white/20 text-6xl">person</span>
+                        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-bold flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs">location_on</span> Lokasi Sesuai
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="py-4 bg-emerald-600 hover:bg-emerald-700 rounded-2xl font-bold transition shadow-lg shadow-emerald-500/20">Clock In</button>
+                        <button class="py-4 bg-rose-600 hover:bg-rose-700 rounded-2xl font-bold transition shadow-lg shadow-rose-500/20">Clock Out</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold">Aktivitas Hari Ini</h3>
+                <div class="space-y-3">
+                    <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs">AW</div>
+                            <div>
+                                <p class="text-sm font-bold">Andi Wijaya</p>
+                                <p class="text-[10px] text-emerald-400 font-bold uppercase">Clock In • 08:55</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-white/20">verified</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs">SP</div>
+                            <div>
+                                <p class="text-sm font-bold">Siska Putri</p>
+                                <p class="text-[10px] text-emerald-400 font-bold uppercase">Clock In • 09:02</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-white/20">verified</span>
+                    </div>
+                </div>
+                
+                <button class="w-full py-3 glass-card rounded-xl text-xs font-bold text-white/60 hover:text-white transition">Lihat Riwayat Lengkap</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+            document.getElementById('liveDate').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
