@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY ops_ai.py ops_ai_api.py ./
-COPY serviceAccountKey.json ./
+# Note: serviceAccountKey.json tidak di-copy karena menggunakan FIREBASE_SERVICE_ACCOUNT_BASE64 env var
 
 # Environment variables
 ENV PORT=8080
