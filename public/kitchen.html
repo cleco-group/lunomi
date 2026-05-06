@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi KDS - Kitchen Display System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="lunomi-core.js"></script>
+    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
+        /* Dark Modern — same palette as POS, dark slate */
         body { background:#020617; color:white; }
         .top-bar { background:#0a0f1e; border-bottom:1px solid rgba(255,255,255,0.06); }
         .stats-bar { background:#0f172a; border-bottom:1px solid rgba(255,255,255,0.06); }
+        /* Order cards with colored left glow */
         .order-card { border-radius:0.875rem; transition:all 0.25s; border:1px solid rgba(255,255,255,0.07); }
         .order-card.pending {
             background:#0f172a;
@@ -38,6 +40,7 @@
         .timer.warning { color:#f59e0b; }
         .timer.ok      { color:#34d399; }
         @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0.35} }
+        /* Column header accent line */
         .col-header {
             display:flex; align-items:center; gap:0.5rem;
             font-size:0.85rem; font-weight:800; margin-bottom:0.75rem;
@@ -53,6 +56,7 @@
         .badge-pending  { background:rgba(99,102,241,0.2); color:#a5b4fc; }
         .badge-cooking  { background:rgba(245,158,11,0.2); color:#fcd34d; }
         .badge-ready    { background:rgba(34,197,94,0.2);  color:#6ee7b7; }
+        /* Action buttons */
         .btn-cook  { flex:1;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#fcd34d; }
         .btn-cook:hover  { background:rgba(245,158,11,0.25); }
         .btn-done  { flex:1;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:#6ee7b7; }
@@ -63,9 +67,12 @@
         .btn-urgent-off { padding:0.5rem 0.75rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3); }
         .btn-urgent-on:hover  { background:rgba(239,68,68,0.3); }
         .btn-urgent-off:hover { background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6); }
+        /* Stat pill */
         .stat-pill { display:flex;align-items:center;gap:0.4rem;font-size:0.82rem; }
+        /* Modal */
         .modal-overlay { background:rgba(0,0,0,0.75);backdrop-filter:blur(8px); }
         .modal-box { background:#0f172a;border:1px solid rgba(255,255,255,0.1);border-radius:1.25rem; }
+        /* Toast */
         #toast { transition:opacity 0.3s; pointer-events:none; }
     @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
@@ -207,9 +214,9 @@
                 ?'<span style="font-size:0.6rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:4px;background:rgba(239,68,68,0.25);color:#fca5a5;margin-left:0.4rem">URGENT</span>'
                 :'';
             let action='';
-            if(o.st==='pending')      action=`<button class="btn-cook" onclick="startCooking('${o.id}')">&#9654; Mulai Masak</button>`;
-            else if(o.st==='cooking') action=`<button class="btn-done" onclick="markReady('${o.id}')">&#10003; Selesai</button>`;
-            else                      action=`<button class="btn-take" onclick="requestPickup('${o.id}')">&#128230; Ambil</button>`;
+            if(o.st==='pending')      action=`<button class="btn-cook" onclick="startCooking('${o.id}')">▶ Mulai Masak</button>`;
+            else if(o.st==='cooking') action=`<button class="btn-done" onclick="markReady('${o.id}')">✓ Selesai</button>`;
+            else                      action=`<button class="btn-take" onclick="requestPickup('${o.id}')">📦 Ambil</button>`;
             const urgentToggle=o.st!=='ready'
                 ?`<button class="${o.urgent?'btn-urgent-on':'btn-urgent-off'}" onclick="toggleUrgent('${o.id}')" title="${o.urgent?'Hapus urgent':'Tandai urgent'}">🚨</button>`
                 :'';
@@ -252,14 +259,81 @@
             const n=new Date();
             document.getElementById('timeNow').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
         }
+
         function logout(){if(!confirm('Yakin ingin logout dari KDS?'))return;localStorage.removeItem('lunomi_session');localStorage.removeItem('lunomi_outlet');window.location.href='index.html';}
+
         function checkSession(){
             try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return false;}JSON.parse(s);return true;}
             catch(e){window.location.href='index.html';return false;}
         }
+
+        function listenToOrders() {
+            if(!window.db) return;
+            const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+            let query = window.db.collection("transactions").where("status", "==", "pending");
+            if (outlet && outlet.id) {
+                query = window.db.collection("transactions").where("outlet_id", "==", outlet.id).where("status", "==", "pending");
+            }
+            
+            query.onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    const data = change.doc.data();
+                    if (change.type === "added") {
+                        // Cek apakah sudah ada di orders lokal (biar gak duplikat)
+                        if(!orders.find(o => o.id === data.id)) {
+                            const itemsStr = data.items.map(i => `${i.name} x${i.qty}`).join(', ');
+                            orders.push({
+                                id: data.id,
+                                time: data.time,
+                                items: itemsStr,
+                                st: 'pending',
+                                et: 10, // Est 10 menit
+                                urgent: false,
+                                docId: change.doc.id
+                            });
+                            elapsed[data.id] = 0;
+                            // Play sound notification
+                            try { new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU').play().catch(e=>{}); } catch(e){}
+                            showToast(`Order Baru: ${data.id}`, 'info');
+                        }
+                    }
+                });
+                render();
+            }, (error) => {
+                console.error("Firebase listen error:", error);
+            });
+        }
+
+        async function updateStatusInCloud(docId, newStatus) {
+            if(!window.db || !docId) return;
+            try {
+                await window.db.collection("transactions").doc(docId).update({ status: newStatus });
+            } catch(e) { console.error("Update error:", e); }
+        }
+
+        // Modifikasi fungsi update lokal untuk sinkronisasi cloud
+        const _startCooking = startCooking;
+        startCooking = function(id) {
+            const o=orders.find(x=>x.id===id);
+            if(o) { updateStatusInCloud(o.docId, 'cooking'); }
+            _startCooking(id);
+        };
+
+        const _markReady = markReady;
+        markReady = function(id) {
+            const o=orders.find(x=>x.id===id);
+            if(o) { updateStatusInCloud(o.docId, 'ready'); }
+            _markReady(id);
+        };
+
         document.addEventListener('DOMContentLoaded',()=>{
             if(!checkSession())return;
-            initElapsed();render();updateTime();
+            // Kosongkan order dummy, ganti dengan data real-time
+            orders = []; 
+            initElapsed();
+            render();
+            updateTime();
+            listenToOrders();
             setInterval(updateTime,1000);
             intervalId=setInterval(tick,1000);
         });

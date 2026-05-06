@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Customer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="lunomi-core.js"></script>
+    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
@@ -47,12 +47,14 @@
     </div>
 </nav>
 <div class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Customer</div><div class="text-2xl font-extrabold text-white">485</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(139,92,246,.7)">Platinum</div><div class="text-2xl font-extrabold text-purple-400">45</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(245,158,11,.7)">Gold</div><div class="text-2xl font-extrabold text-amber-400">128</div></div>
         <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Silver + Bronze</div><div class="text-2xl font-extrabold text-slate-300">312</div></div>
     </div>
+    <!-- Filter -->
     <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
         <input id="searchInput" type="text" placeholder="🔍  Cari nama / nomor HP..." class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[200px]" oninput="renderTable()">
         <div class="flex gap-2 flex-wrap">
@@ -63,6 +65,7 @@
             <button class="filter-btn" onclick="setTier('Bronze',this)">🥉 Bronze</button>
         </div>
     </div>
+    <!-- Table -->
     <div class="glass-card rounded-2xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -80,6 +83,8 @@
         <div id="emptyState" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Tidak ada customer ditemukan.</div>
     </div>
 </div>
+
+<!-- Add Customer Modal -->
 <div id="addModal" class="modal-overlay hidden fixed inset-0 flex items-center justify-center z-50 p-4">
     <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl">
         <div class="flex items-center justify-between mb-5">
@@ -117,6 +122,7 @@
     ];
     let customers = [...MOCK];
     let activeTier = 'all';
+
     function setTier(t, btn){
         activeTier = t;
         document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -125,6 +131,7 @@
     }
     function tierCls(t){ return {Platinum:'tier-platinum',Gold:'tier-gold',Silver:'tier-silver',Bronze:'tier-bronze'}[t]||''; }
     function rp(n){ return 'Rp '+n.toLocaleString('id-ID'); }
+
     function renderTable(){
         const q = document.getElementById('searchInput').value.toLowerCase();
         const filtered = customers.filter(c=>{
@@ -149,12 +156,14 @@
                 </td>
             </tr>`).join('');
     }
+
     function openAddModal(){
         ['cName','cPhone','cEmail','cAddr'].forEach(id=>document.getElementById(id).value='');
         document.getElementById('cErr').classList.add('hidden');
         document.getElementById('addModal').classList.remove('hidden');
     }
     function closeModal(){ document.getElementById('addModal').classList.add('hidden'); }
+
     function saveCustomer(){
         const name  = document.getElementById('cName').value.trim();
         const phone = document.getElementById('cPhone').value.trim();
@@ -164,10 +173,12 @@
         customers.unshift({id:Date.now(), name, phone, email:document.getElementById('cEmail').value.trim(), tier:'Bronze', total:0, points:0});
         closeModal(); renderTable(); showToast('Customer berhasil ditambahkan');
     }
+
     function viewDetail(id){
         const c = customers.find(x=>x.id===id);
         alert(`👤 ${c.name}\n📱 ${c.phone}\n🏆 Tier: ${c.tier}\n💰 Total: ${rp(c.total)}\n⭐ Poin: ${c.points}`);
     }
+
     function showToast(msg){
         const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
         setTimeout(()=>t.classList.remove('show'),2500);

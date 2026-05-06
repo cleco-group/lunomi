@@ -5,25 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi POS - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="lunomi-core.js"></script>
+    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root { --brand-teal: #0D3B4A; --brand-gold: #C9A84C; }
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         body {
             min-height: 100vh;
-            background: #020617;
+            background: #061820;
             background-image:
-                radial-gradient(ellipse 80% 60% at 20% 0%, rgba(99,102,241,0.35) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 50% at 80% 100%, rgba(59,130,246,0.3) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(139,92,246,0.15) 0%, transparent 70%);
+                radial-gradient(ellipse 80% 60% at 20% 0%, rgba(13,59,74,0.8) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 100%, rgba(201,168,76,0.1) 0%, transparent 60%);
             overflow: hidden;
         }
-        /* Glassmorphism — from UI/UX Pro Max skill */
         .glass {
-            background: rgba(255,255,255,0.07);
+            background: rgba(13,59,74,0.5);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.12);
+            border: 1px solid rgba(201,168,76,0.2);
         }
         .glass-card {
             background: rgba(255,255,255,0.06);
@@ -31,7 +30,6 @@
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255,255,255,0.1);
         }
-        /* Orbs */
         .orb {
             position: fixed;
             border-radius: 50%;
@@ -39,54 +37,51 @@
             pointer-events: none;
             animation: drift 12s ease-in-out infinite;
         }
-        .orb-1 { width:500px;height:500px;background:rgba(99,102,241,0.25);top:-200px;right:-150px;animation-delay:0s; }
-        .orb-2 { width:400px;height:400px;background:rgba(59,130,246,0.2);bottom:-150px;left:-100px;animation-delay:3s; }
-        .orb-3 { width:300px;height:300px;background:rgba(139,92,246,0.2);top:40%;left:30%;animation-delay:6s; }
+        .orb-1 { width:500px;height:500px;background:rgba(13,59,74,0.7);top:-200px;right:-150px;animation-delay:0s; }
+        .orb-2 { width:400px;height:400px;background:rgba(201,168,76,0.06);bottom:-150px;left:-100px;animation-delay:3s; }
+        .orb-3 { width:300px;height:300px;background:rgba(13,59,74,0.4);top:40%;left:30%;animation-delay:6s; }
         @keyframes drift {
             0%,100% { transform: translate(0,0) scale(1); }
             33% { transform: translate(30px,-20px) scale(1.05); }
             66% { transform: translate(-20px,15px) scale(0.97); }
         }
-        /* Input */
         .input-glass {
             background: rgba(255,255,255,0.07);
             border: 1px solid rgba(255,255,255,0.15);
             color: white;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
         .input-glass::placeholder { color: rgba(255,255,255,0.35); }
         .input-glass:focus {
             outline: none;
-            border-color: rgba(99,102,241,0.7);
+            border-color: var(--brand-gold);
             background: rgba(255,255,255,0.1);
-            box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.2);
         }
-        /* Role card */
         .role-card {
             background: rgba(255,255,255,0.05);
             border: 1.5px solid rgba(255,255,255,0.1);
             color: rgba(255,255,255,0.6);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
         .role-card:hover { background: rgba(255,255,255,0.1); color: white; }
         input[type="radio"]:checked + .role-card {
-            background: rgba(99,102,241,0.25);
-            border-color: rgba(99,102,241,0.7);
-            color: white;
-            box-shadow: 0 0 12px rgba(99,102,241,0.3);
+            background: rgba(201,168,76,0.18);
+            border-color: rgba(201,168,76,0.55);
+            color: var(--brand-gold);
+            box-shadow: 0 0 12px rgba(201,168,76,0.2);
         }
-        /* Button */
         .btn-primary {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
+            background: linear-gradient(135deg, var(--brand-gold), #a8863a);
+            color: var(--brand-teal);
             font-weight: 700;
             border: none;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 20px rgba(201,168,76,0.3);
         }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(99,102,241,0.5); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,168,76,0.4); }
         .btn-primary:disabled { opacity: 0.55; transform: none; cursor: not-allowed; }
         /* Error */
         .error-glass {
@@ -94,15 +89,14 @@
             border: 1px solid rgba(239,68,68,0.3);
             color: #fca5a5;
         }
-        /* Spinner */
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px; }
-        /* Demo box */
         .demo-glass {
-            background: rgba(255,193,7,0.08);
-            border: 1px solid rgba(255,193,7,0.2);
+            background: rgba(201,168,76,0.08);
+            border: 1px solid rgba(201,168,76,0.2);
             color: rgba(255,220,100,0.85);
         }
+        button:focus-visible, a:focus-visible { outline: 2px solid var(--brand-gold); outline-offset: 2px; }
         label { display:block; }
     @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
@@ -115,12 +109,16 @@
         <div class="w-full max-w-md">
             <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl glass mb-4 shadow-lg">
-                    <span class="text-3xl">🏪</span>
+                    <span class="font-black text-2xl" style="color:var(--brand-gold)">L</span>
                 </div>
                 <h1 class="text-3xl font-extrabold text-white tracking-tight">Lunomi POS</h1>
-                <p class="text-sm mt-1" style="color:rgba(255,255,255,0.45)">Sistem POS Pintar untuk F&B Indonesia</p>
+                <p class="text-xs font-semibold mt-1 tracking-widest" style="color:var(--brand-gold);letter-spacing:.12em">POS PINTAR</p>
+                <p class="text-sm mt-1" style="color:rgba(255,255,255,0.4)">Sistem POS Pintar untuk F&B Indonesia</p>
             </div>
+
+            <!-- STEP 1: Login Card -->
             <div id="step-login" class="glass rounded-3xl p-7 shadow-2xl">
+                <!-- Error -->
                 <div id="errorMsg" class="hidden mb-4 px-4 py-3 rounded-xl error-glass flex items-center gap-2 text-sm">
                     <span>⚠️</span><span id="errorText"></span>
                 </div>
@@ -181,6 +179,8 @@
                     </div>
                 </div>
             </div>
+
+            <!-- STEP 2: Outlet Selector (owner only) -->
             <div id="step-outlet" class="hidden glass rounded-3xl p-7 shadow-2xl">
                 <div class="flex items-center gap-3 mb-5">
                     <button onclick="backToLogin()" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
@@ -243,7 +243,9 @@
             owner:'dashboard.html', manager:'dashboard.html',
             cashier:'pos.html', kitchen:'kitchen.html'
         };
+
         let errorTimer = null, pendingSession = null;
+
         function updateRole() {
             const role = document.querySelector('input[name="role"]:checked').value;
             const acc = DEMO_ACCOUNTS[role];
@@ -267,22 +269,49 @@
             pw.type   = pw.type === 'password' ? 'text' : 'password';
             btn.textContent = pw.type === 'password' ? '👁️' : '🙈';
         }
-        function handleLogin() {
-            const email    = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const role     = document.querySelector('input[name="role"]:checked').value;
-            const btn      = document.getElementById('loginBtn');
-            if (!email || !password) { showError('Email dan password harus diisi'); return; }
-            const acc = DEMO_ACCOUNTS[role];
-            if (email !== acc.email || password !== acc.password) {
-                showError('Email atau password salah. Gunakan akun demo yang tersedia.');
-                return;
-            }
+        function finishLogin(role, email) {
             const displayName = role === 'cashier' ? 'Kasir' : role.charAt(0).toUpperCase() + role.slice(1);
             pendingSession = {
                 user: { email, id:`user_${role}_${Date.now()}`, role, name: displayName },
                 loginTime: new Date().toISOString()
             };
+            if (role === 'owner') {
+                document.getElementById('outletGreet').textContent = `Selamat datang, ${displayName}`;
+                document.getElementById('step-login').classList.add('hidden');
+                document.getElementById('step-outlet').classList.remove('hidden');
+            } else {
+                const outlet = DEFAULT_OUTLETS[role];
+                pendingSession.outlet_id   = outlet.id;
+                pendingSession.outlet_name = outlet.name;
+                localStorage.setItem('lunomi_session', JSON.stringify(pendingSession));
+                localStorage.setItem('lunomi_outlet', JSON.stringify(outlet));
+                const btn = document.getElementById('loginBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner"></span>Membuka...';
+                setTimeout(() => { window.location.href = DASHBOARDS[role]; }, 600);
+            }
+        }
+        async function handleLogin() {
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const role     = document.querySelector('input[name="role"]:checked').value;
+            const btn      = document.getElementById('loginBtn');
+            if (!email || !password) { showError('Email dan password harus diisi'); return; }
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Memverifikasi...';
+
+            const acc = DEMO_ACCOUNTS[role];
+            if (email !== acc.email || password !== acc.password) {
+                showError('Email atau password salah. Gunakan akun demo yang tersedia.');
+                return;
+            }
+
+            const displayName = role === 'cashier' ? 'Kasir' : role.charAt(0).toUpperCase() + role.slice(1);
+            pendingSession = {
+                user: { email, id:`user_${role}_${Date.now()}`, role, name: displayName },
+                loginTime: new Date().toISOString()
+            };
+
             if (role === 'owner') {
                 // Owner: show outlet selector
                 document.getElementById('outletGreet').textContent = `Selamat datang, ${displayName}`;
@@ -299,7 +328,7 @@
                 btn.innerHTML = '<span class="spinner"></span>Membuka...';
                 setTimeout(() => { window.location.href = DASHBOARDS[role]; }, 600);
             }
-        }
+
         function selectOutlet(id, name) {
             if (!pendingSession) return;
             pendingSession.outlet_id   = id;
@@ -308,11 +337,13 @@
             localStorage.setItem('lunomi_outlet', JSON.stringify({ id, name }));
             window.location.href = `dashboard.html?outlet=${id}`;
         }
+
         function backToLogin() {
             pendingSession = null;
             document.getElementById('step-outlet').classList.add('hidden');
             document.getElementById('step-login').classList.remove('hidden');
         }
+
         document.addEventListener('DOMContentLoaded', () => {
             updateRole();
             document.getElementById('password').addEventListener('keypress', e => {

@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi POS - Kasir Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="lunomi-core.js"></script>
+    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
+        /* Dark Modern — Financial Dashboard palette from UI/UX Pro Max skill
+           BG:#020617  Surface:#0F172A  Elevated:#1E293B  Accent:#3B82F6  CTA:#F97316 */
         body { background:#020617; color:white; }
+        /* Header */
         .top-bar { background:#0a0f1e; border-bottom:1px solid rgba(255,255,255,0.06); }
+        /* Product area */
         #productArea { background:#020617; }
         .cat-btn {
             padding:0.4rem 1rem; border-radius:9999px;
@@ -24,6 +28,7 @@
             background:rgba(59,130,246,0.2); border-color:rgba(59,130,246,0.6);
             color:#93c5fd; box-shadow:0 0 12px rgba(59,130,246,0.2);
         }
+        /* Product cards */
         .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:0.75rem; }
         .product-item {
             background:#0f172a; border:1px solid rgba(255,255,255,0.07);
@@ -35,6 +40,7 @@
             transform:translateY(-2px); box-shadow:0 6px 20px rgba(59,130,246,0.15);
         }
         .product-item:active { transform:scale(0.96); }
+        /* Cart sidebar */
         #cartSidebar { background:#0a0f1e; border-left:1px solid rgba(255,255,255,0.06); }
         @media(max-width:640px){
             .pos-layout { flex-direction:column; height:auto; }
@@ -50,7 +56,9 @@
             align-items:center; justify-content:center; transition:background 0.1s;
         }
         .qty-btn:hover { background:rgba(59,130,246,0.2); border-color:rgba(59,130,246,0.4); }
+        /* Summary area */
         #cartSummary { background:#0f172a; border-top:1px solid rgba(255,255,255,0.06); }
+        /* Buttons */
         .btn-pay {
             background:linear-gradient(135deg,#3b82f6,#2563eb);
             box-shadow:0 4px 16px rgba(59,130,246,0.35);
@@ -75,6 +83,7 @@
             color:#a78bfa; font-weight:600; border-radius:0.75rem; cursor:pointer; transition:all 0.15s;
         }
         .btn-purple:hover { background:rgba(139,92,246,0.2); }
+        /* Modal overlay */
         .modal-overlay {
             background:rgba(0,0,0,0.7);
             backdrop-filter:blur(8px);
@@ -105,7 +114,9 @@
             background:rgba(249,115,22,0.15); border-color:rgba(249,115,22,0.6);
             color:#fb923c; box-shadow:0 0 10px rgba(249,115,22,0.2);
         }
+        /* History item */
         .hist-item { background:#1e293b; border:1px solid rgba(255,255,255,0.07); border-radius:0.875rem; padding:1rem; }
+        /* Toast */
         #toast { transition:opacity 0.3s; pointer-events:none; }
     @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
@@ -137,7 +148,9 @@
             </div>
         </div>
     </div>
+
     <div class="flex pos-layout" style="height:calc(100vh - 61px)">
+        <!-- Products -->
         <div id="productArea" class="flex-1 p-4 overflow-y-auto min-w-0">
             <div class="flex gap-2 mb-4 pb-3 overflow-x-auto" style="border-bottom:1px solid rgba(255,255,255,0.06)">
                 <button class="cat-btn active" onclick="filterCat('all',this)">Semua</button>
@@ -265,7 +278,7 @@
             {id:7, n:'Jus',         c:'minuman',  p:15000, e:'🧃'},
             {id:8, n:'Smoothie',    c:'minuman',  p:18000, e:'🥤'},
             {id:9, n:'Roti Goreng', c:'snack',    p:10000, e:'🥐'},
-            {id:10,n:'Lumpia',      c:'snack',    p:12000, e:'🦟'},
+            {id:10,n:'Lumpia',      c:'snack',    p:12000, e:'🥟'},
             {id:11,n:'Kue Lapis',   c:'dessert',  p:25000, e:'🍰'},
             {id:12,n:'Bika Ambon',  c:'dessert',  p:20000, e:'🍮'}
         ];
@@ -282,6 +295,7 @@
         let cart=[],cat='all',disco=0,currentTotal=0;
         function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
         function genTrxId(){const d=new Date(),p=n=>String(n).padStart(2,'0');return`TRX-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${String(Math.floor(Math.random()*9000)+1000)}`;}
+
         function getMenuStock(){
             const stored=localStorage.getItem('lunomi_menu_stock');
             if(stored) return JSON.parse(stored);
@@ -291,6 +305,7 @@
             return d;
         }
         function saveMenuStock(s){localStorage.setItem('lunomi_menu_stock',JSON.stringify(s));}
+
         let toastTimer=null;
         function showToast(msg,type='success'){
             clearTimeout(toastTimer);
@@ -309,7 +324,8 @@
                 const s=stk[p.id]||{qty:0,min:5};
                 const oos=s.qty<=0;
                 const low=!oos&&s.qty<=s.min;
-                return`<div class="product-item${oos?' opacity-40 pointer-events-none':''}" onclick="add(${p.id})">
+                return`<div class="product-item${oos?' opacity-40 pointer-events-none':''}" onclick="add(${p.id})" style="position:relative">
+                    ${p.sku ? `<div style="position:absolute;top:5px;right:5px;font-size:8px;font-family:monospace;color:rgba(255,255,255,0.2)">${p.sku}</div>` : ''}
                     <div style="font-size:2rem;margin-bottom:0.4rem">${p.e}</div>
                     <div style="font-weight:700;font-size:0.78rem;color:rgba(255,255,255,0.9);line-height:1.3">${p.n}</div>
                     <div style="font-weight:700;font-size:0.78rem;margin-top:0.4rem;color:#60a5fa">${rp(p.p)}</div>
@@ -317,12 +333,36 @@
                 </div>`;
             }).join('');
         }
+
+        // Barcode Scanner Support
+        let barcodeBuffer = '';
+        let lastKeyTime = Date.now();
+        document.addEventListener('keydown', (e) => {
+            const now = Date.now();
+            if (now - lastKeyTime > 100) barcodeBuffer = ''; // Reset if slow typing
+            lastKeyTime = now;
+
+            if (e.key === 'Enter') {
+                if (barcodeBuffer.length > 0) {
+                    const product = PROD.find(i => i.sku === barcodeBuffer);
+                    if (product) {
+                        add(product.id);
+                        showToast(`Barcode: ${product.n} ditambahkan`, 'success');
+                    }
+                    barcodeBuffer = '';
+                }
+            } else if (e.key.length === 1) {
+                barcodeBuffer += e.key;
+            }
+        });
+
         function filterCat(c,btn){
             cat=c;
             document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
             btn.classList.add('active');
             render();
         }
+
         function add(id){
             const stk=getMenuStock();
             const s=stk[id]||{qty:0};
@@ -387,6 +427,11 @@
             calc();closeDiskon();
             showToast(`Diskon ${type==='percent'?v+'%':rp(disco)} diterapkan`,'success');
         }
+
+            disco = type === 'percent' ? Math.round(gross * v / 100) : Math.round(v);
+            calc(); closeDiskon();
+            showToast(`Diskon ${type === 'percent' ? v + '%' : rp(disco)} diterapkan`, 'success');
+        }
         function openPayment(){
             if(!cart.length)return;
             document.getElementById('payTotal').textContent=rp(currentTotal);
@@ -413,22 +458,227 @@
             if(ch<0){cr.classList.add('hidden');ir.classList.remove('hidden');cb.disabled=true;}
             else{ir.classList.add('hidden');cr.classList.remove('hidden');document.getElementById('changeAmt').textContent=rp(ch);cb.disabled=false;}
         }
-        function processPayment(){
+        async function processPayment(){
             const m=document.querySelector('input[name="payMethod"]:checked').value;
             const mMap={cash:'💵 Tunai',card:'💳 Kartu',ewallet:'📱 E-Wallet',bank:'🏦 Transfer'};
             const trxId=document.getElementById('payTrxId').textContent;
+            
+            // Deduct menu stock AND raw material stock via RecipeManager
             const stk=getMenuStock();
-            cart.forEach(i=>{if(stk[i.id]){stk[i.id].qty=Math.max(0,stk[i.id].qty-i.q);}});
+            cart.forEach(i=>{
+                if(stk[i.id]){stk[i.id].qty=Math.max(0,stk[i.id].qty-i.q);}
+                // NEW: Deduct raw materials based on recipe
+                if(typeof RecipeManager !== 'undefined') {
+                    RecipeManager.deductStock(i.id, i.q);
+                }
+            });
             saveMenuStock(stk);
+            
+            // Save transaction to localStorage
             const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
             const trxs=JSON.parse(localStorage.getItem('lunomi_transactions')||'[]');
             trxs.unshift({id:trxId,date:new Date().toISOString(),time:new Date().toTimeString().slice(0,5),total:currentTotal,method:m,items:cart.map(i=>({id:i.id,name:i.n,qty:i.q,price:i.p})),outlet_id:outlet?outlet.id:''});
             localStorage.setItem('lunomi_transactions',JSON.stringify(trxs));
             closePayment();
-            showToast(`Pembayaran ${rp(currentTotal)} via ${mMap[m]} berhasil!`,'success');
+            
+            // Show Success Dialog instead of just toast
+            showSuccessDialog(trxId, currentTotal, mMap[m]);
+            
             HIST.unshift({id:trxId,t:new Date().toTimeString().slice(0,5),tot:currentTotal,st:'paid',itm:cart.reduce((s,i)=>s+i.q,0),m});
             cart=[];disco=0;update();document.getElementById('trxId').textContent=genTrxId();
             render();
+        }
+
+        function showSuccessDialog(id, total, method) {
+            const modal = document.createElement('div');
+            modal.id = 'successModal';
+            modal.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4';
+            modal.innerHTML = `
+                <div class="glass-card w-full max-w-sm rounded-3xl p-8 text-center border border-white/10">
+                    <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="material-symbols-outlined text-4xl">check_circle</span>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-white mb-2">Pembayaran Berhasil!</h3>
+                    <p class="text-white/50 text-sm mb-6">Transaksi <span class="text-white font-mono">${id}</span> telah selesai via ${method}</p>
+                    
+                    <div class="bg-white/5 rounded-2xl p-4 mb-8">
+                        <p class="text-xs text-white/40 uppercase font-bold mb-1">Total Dibayar</p>
+                        <p class="text-2xl font-black text-white">${rp(total)}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <button onclick="printReceiptFromId('${id}'); document.getElementById('successModal').remove();" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined">print</span> Cetak Struk
+                        </button>
+                        <button onclick="document.getElementById('successModal').remove();" class="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold transition">
+                            Transaksi Baru
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function printReceiptFromId(id) {
+            const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
+            const t = trxs.find(x => x.id === id);
+            if(!t) return;
+            
+            const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
+            const win = window.open('', '', 'width=400,height=600');
+            win.document.write(`
+                <html>
+                <head>
+                    <style>
+                        body { font-family: monospace; padding: 20px; font-size: 12px; line-height: 1.4; }
+                        .text-center { text-align: center; }
+                        .hr { border-top: 1px dashed #000; margin: 10px 0; }
+                        .flex { display: flex; justify-content: space-between; }
+                        .bold { font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="text-center">
+                        <div class="bold" style="font-size: 16px;">${outlet.name || 'LUNOMI POS'}</div>
+                        <div>${outlet.address || ''}</div>
+                        <div>Telp: ${outlet.phone || '-'}</div>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="flex"><span>ID: ${t.id}</span><span>${t.time}</span></div>
+                    <div>Tgl: ${new Date(t.date).toLocaleDateString('id-ID')}</div>
+                    <div class="hr"></div>
+                    ${t.items.map(i => `
+                        <div class="flex"><span>${i.name}</span></div>
+                        <div class="flex"><span>  ${i.qty} x ${rp(i.price)}</span><span>${rp(i.qty * i.price)}</span></div>
+                    `).join('')}
+                    <div class="hr"></div>
+                    <div class="flex bold"><span>TOTAL</span><span>${rp(t.total)}</span></div>
+                    <div class="flex"><span>Metode</span><span>${t.method.toUpperCase()}</span></div>
+                    <div class="hr"></div>
+                    <div class="text-center" style="margin-top: 20px;">Terima Kasih Atas Kunjungan Anda</div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            win.print();
+            win.close();
+        }
+
+            // Deduct menu stock AND raw material stock via RecipeManager
+            const stk=getMenuStock();
+            cart.forEach(i=>{
+                if(stk[i.id]){stk[i.id].qty=Math.max(0,stk[i.id].qty-i.q);}
+                // NEW: Deduct raw materials based on recipe
+                if(typeof RecipeManager !== 'undefined') {
+                    RecipeManager.deductStock(i.id, i.q);
+                }
+            });
+            saveMenuStock(stk);
+
+            const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+            const newTrx = {
+                id: trxId,
+                date: new Date().toISOString(),
+                time: new Date().toTimeString().slice(0,5),
+                total: currentTotal,
+                method: m,
+                items: cart.map(i=>({id:i.id,name:i.n,qty:i.q,price:i.p})),
+                outlet_id: outlet ? outlet.id : '',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'pending' // For kitchen sync
+            };
+
+            try {
+                // Simpan transaksi ke Firebase Firestore
+                await window.db.collection("transactions").add(newTrx);
+
+                // Tetap simpan ke localStorage sebagai cache/fallback lokal
+                const trxs=JSON.parse(localStorage.getItem('lunomi_transactions')||'[]');
+                trxs.unshift(newTrx);
+                localStorage.setItem('lunomi_transactions',JSON.stringify(trxs));
+
+                closePayment();
+                cb.innerHTML = originalText;
+                showSuccessDialog(trxId, currentTotal, mMap[m]);
+                HIST.unshift({id:trxId,t:new Date().toTimeString().slice(0,5),tot:currentTotal,st:'paid',itm:cart.reduce((s,i)=>s+i.q,0),m});
+                cart=[];disco=0;update();document.getElementById('trxId').textContent=genTrxId();
+                render();
+            } catch (error) {
+                console.error("Firebase Error:", error);
+                showToast("Gagal menyimpan transaksi ke Cloud!", "error");
+                cb.innerHTML = originalText;
+                cb.disabled = false;
+            }
+        }
+        function showSuccessDialog(id, total, method) {
+            const modal = document.createElement('div');
+            modal.id = 'successModal';
+            modal.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4';
+            modal.innerHTML = `
+                <div class="glass-card w-full max-w-sm rounded-3xl p-8 text-center border border-white/10">
+                    <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="material-symbols-outlined text-4xl">check_circle</span>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-white mb-2">Pembayaran Berhasil!</h3>
+                    <p class="text-white/50 text-sm mb-6">Transaksi <span class="text-white font-mono">${id}</span> telah selesai via ${method}</p>
+                    <div class="bg-white/5 rounded-2xl p-4 mb-8">
+                        <p class="text-xs text-white/40 uppercase font-bold mb-1">Total Dibayar</p>
+                        <p class="text-2xl font-black text-white">${rp(total)}</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+                        <button onclick="printReceiptFromId('${id}'); document.getElementById('successModal').remove();" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined">print</span> Cetak Struk
+                        </button>
+                        <button onclick="document.getElementById('successModal').remove();" class="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold transition">
+                            Transaksi Baru
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        function printReceiptFromId(id) {
+            const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
+            const t = trxs.find(x => x.id === id);
+            if(!t) return;
+            const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
+            const win = window.open('', '', 'width=400,height=600');
+            win.document.write(`
+                <html>
+                <head>
+                    <style>
+                        body { font-family: monospace; padding: 20px; font-size: 12px; line-height: 1.4; }
+                        .text-center { text-align: center; }
+                        .hr { border-top: 1px dashed #000; margin: 10px 0; }
+                        .flex { display: flex; justify-content: space-between; }
+                        .bold { font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="text-center">
+                        <div class="bold" style="font-size: 16px;">${outlet.name || 'LUNOMI POS'}</div>
+                        <div>${outlet.address || ''}</div>
+                        <div>Telp: ${outlet.phone || '-'}</div>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="flex"><span>ID: ${t.id}</span><span>${t.time}</span></div>
+                    <div>Tgl: ${new Date(t.date).toLocaleDateString('id-ID')}</div>
+                    <div class="hr"></div>
+                    ${t.items.map(i => `
+                        <div class="flex"><span>${i.name}</span></div>
+                        <div class="flex"><span>  ${i.qty} x ${rp(i.price)}</span><span>${rp(i.qty * i.price)}</span></div>
+                    `).join('')}
+                    <div class="hr"></div>
+                    <div class="flex bold"><span>TOTAL</span><span>${rp(t.total)}</span></div>
+                    <div class="flex"><span>Metode</span><span>${t.method.toUpperCase()}</span></div>
+                    <div class="hr"></div>
+                    <div class="text-center" style="margin-top: 20px;">Terima Kasih Atas Kunjungan Anda</div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            win.print();
+            win.close();
         }
         function openHistory(){renderHistory();document.getElementById('historyModal').style.display='flex';}
         function closeHistory(){document.getElementById('historyModal').style.display='none';}
@@ -447,7 +697,9 @@
                             ${x.st==='paid'?'✓ Dibayar':'⏱ Pending'}</span>
                     </div></div>`).join('');
         }
+
         function logout(){if(!confirm('Yakin ingin logout?'))return;localStorage.removeItem('lunomi_session');localStorage.removeItem('lunomi_outlet');window.location.href='index.html';}
+
         document.addEventListener('DOMContentLoaded',()=>{
             try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}document.getElementById('kasirName').textContent=JSON.parse(s).user.name;}
             catch(e){window.location.href='index.html';return;}

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Pengeluaran OPEX</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="lunomi-core.js"></script>
+    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
@@ -40,7 +40,9 @@
         <button onclick="openAddModal()" class="btn-primary px-4 py-2 rounded-xl text-xs">+ Catat Pengeluaran</button>
     </div>
 </nav>
+
 <div class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Metrics -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div class="metric-card rounded-2xl p-4" style="border-left:3px solid #f87171">
             <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Hari Ini</div>
@@ -59,13 +61,15 @@
             <div class="text-xl font-extrabold text-white" id="statBiggest">—</div>
         </div>
     </div>
+
+    <!-- Filter -->
     <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
         <input id="searchExp" type="text" placeholder="🔍  Cari deskripsi..." oninput="renderList()"
             class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[160px]">
         <select id="filterCat" onchange="renderList()" class="input-glass px-3 py-2 rounded-xl text-sm">
             <option value="all">Semua Kategori</option>
-            <option>Gaji &amp; Upah</option>
-            <option>Listrik &amp; Air</option>
+            <option>Gaji & Upah</option>
+            <option>Listrik & Air</option>
             <option>Sewa</option>
             <option>Bahan Baku</option>
             <option>Marketing</option>
@@ -76,11 +80,15 @@
             <option value="">Semua Bulan</option>
         </select>
     </div>
+
+    <!-- List -->
     <div class="glass-card rounded-2xl overflow-hidden">
         <div id="expenseList" class="divide-y" style="divide-color:rgba(255,255,255,.06)"></div>
         <div id="emptyState" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Belum ada catatan pengeluaran.</div>
     </div>
 </div>
+
+<!-- Add Modal -->
 <div id="addModal" class="modal-overlay hidden fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4">
     <div class="modal-box w-full max-w-md shadow-2xl">
         <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
@@ -96,8 +104,8 @@
                 <div>
                     <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Kategori</label>
                     <select id="expCat" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
-                        <option>Gaji &amp; Upah</option>
-                        <option>Listrik &amp; Air</option>
+                        <option>Gaji & Upah</option>
+                        <option>Listrik & Air</option>
                         <option>Sewa</option>
                         <option>Bahan Baku</option>
                         <option>Marketing</option>
@@ -126,7 +134,9 @@
         </div>
     </div>
 </div>
+
 <div id="toast" class="hidden fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2" style="opacity:0;transition:opacity .3s"></div>
+
 <script>
     const CAT_COLORS = {
         'Gaji & Upah':  {bg:'rgba(99,102,241,.15)',  color:'#a5b4fc'},
@@ -141,11 +151,14 @@
         'Gaji & Upah':'👥','Listrik & Air':'💡','Sewa':'🏠',
         'Bahan Baku':'🥩','Marketing':'📣','Perawatan':'🔧','Lain-lain':'📎'
     };
+
     let editingId=null;
     let toastTimer=null;
+
     function getExpenses(){return JSON.parse(localStorage.getItem('lunomi_expenses')||'[]');}
     function saveExpenses(e){localStorage.setItem('lunomi_expenses',JSON.stringify(e));}
     function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
+
     function showToast(msg, type='success'){
         clearTimeout(toastTimer);
         const C={success:'rgba(34,197,94,.9)',error:'rgba(239,68,68,.9)',info:'rgba(99,102,241,.9)'};
@@ -155,6 +168,7 @@
         t.classList.remove('hidden');t.style.opacity='1';
         toastTimer=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.classList.add('hidden'),300);},3000);
     }
+
     function openAddModal(id){
         editingId=id||null;
         document.getElementById('expDate').value=new Date().toISOString().split('T')[0];
@@ -180,6 +194,7 @@
         document.getElementById('expDesc').focus();
     }
     function closeAddModal(){document.getElementById('addModal').classList.add('hidden');}
+
     function saveExpense(){
         const date=document.getElementById('expDate').value;
         const cat=document.getElementById('expCat').value;
@@ -204,6 +219,7 @@
         updateStats();
         showToast(editingId?'Pengeluaran diperbarui!':'Pengeluaran dicatat!','success');
     }
+
     function deleteExpense(id){
         if(!confirm('Hapus catatan ini?'))return;
         const exps=getExpenses().filter(x=>x.id!==id);
@@ -212,6 +228,7 @@
         updateStats();
         showToast('Catatan dihapus','info');
     }
+
     function renderList(){
         const q=(document.getElementById('searchExp').value||'').toLowerCase();
         const cf=document.getElementById('filterCat').value;
@@ -251,6 +268,7 @@
             </div>`;
         }).join('');
     }
+
     function updateStats(){
         const exps=getExpenses();
         const today=new Date().toISOString().split('T')[0];
@@ -258,6 +276,7 @@
         const todayTotal=exps.filter(e=>e.date===today).reduce((s,e)=>s+e.amount,0);
         const monthExps=exps.filter(e=>e.date.startsWith(nowMonth));
         const monthTotal=monthExps.reduce((s,e)=>s+e.amount,0);
+        // Find biggest category this month
         const catTotals={};
         monthExps.forEach(e=>{catTotals[e.cat]=(catTotals[e.cat]||0)+e.amount;});
         const bigCat=Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
@@ -266,6 +285,7 @@
         document.getElementById('statCount').textContent=exps.length;
         document.getElementById('statBiggest').textContent=bigCat?bigCat[0]:'—';
     }
+
     function populateMonthFilter(){
         const exps=getExpenses();
         const months=[...new Set(exps.map(e=>e.date.slice(0,7)))].sort().reverse();
@@ -274,6 +294,7 @@
         sel.innerHTML='<option value="">Semua Bulan</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');
         if(months.includes(cur)) sel.value=cur;
     }
+
     document.addEventListener('DOMContentLoaded',()=>{
         try{
             const s=localStorage.getItem('lunomi_session');
