@@ -1,6 +1,6 @@
 ---
 name: Global Skills Foundation
-description: "A foundational set of global skills integrating best practices from Karpathy-skills (code quality), Aider (precise editing), TypeChat (schema-driven LLM interaction), GenericAgent (self-evolving agents), Kronos (task scheduling), and OpenSRE (reliability engineering). This foundation also incorporates UI/UX Pro Max visual rules with a Dark Teal (#0D3B4A) and Gold (#C9A84C) color palette and the 'ruang ketiga' tagline."
+description: "A foundational set of global skills integrating best practices from Karpathy-skills (code quality), Aider (precise editing), TypeChat (schema-driven LLM interaction), GenericAgent (self-evolving agents), Kronos (task scheduling), and OpenSRE (reliability engineering). This foundation also incorporates UI/UX Pro Max visual rules with a Dark Teal (#0D3B4A) and Gold (#C9A84C) color palette and the 'POS PINTAR' tagline."
 ---
 # Global Skills Foundation: Fondasi Kerja Terpadu
 
@@ -83,7 +83,7 @@ Aturan visual ini memperluas `ui-ux-pro-max` yang sudah ada dengan skema warna d
 
 ### Tagline:
 
-*   **"ruang ketiga"**
+*   **"POS PINTAR"**
 
 ### Prinsip UI/UX Tambahan (dari `ui-ux-pro-max`):
 
@@ -106,7 +106,7 @@ Saat melakukan tugas apa pun, agen harus merujuk pada fondasi Global Skills ini.
 4.  **Orkestrasi Agen:** Pertimbangkan prinsip GenericAgent saat merancang atau mengelola alur kerja agen, dengan fokus pada evolusi diri dan manajemen memori.
 5.  **Penjadwalan Tugas:** Terapkan Kronos untuk penjadwalan tugas yang andal dan pelacakan siklus hidup, terutama untuk operasi yang sensitif terhadap waktu.
 6.  **Keandalan Sistem:** Integrasikan praktik OpenSRE untuk investigasi insiden proaktif, analisis akar masalah, dan peningkatan keandalan sistem secara keseluruhan.
-7.  **Desain UI/UX:** Patuhi aturan visual UI/UX Pro Max, menggunakan skema warna Dark Teal dan Gold, serta tagline "ruang ketiga" untuk semua elemen visual.
+7.  **Desain UI/UX:** Patuhi aturan visual UI/UX Pro Max, menggunakan skema warna Dark Teal dan Gold, serta tagline "POS PINTAR" untuk semua elemen visual.
 
 ## Referensi
 
