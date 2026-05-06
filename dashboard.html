@@ -386,6 +386,55 @@
                     <p class="text-[10px] mt-1 text-amber-400">Aktif hari ini</p>
                 </div>
             </div>
+            </div>
+
+            <!-- ═══ OPS AI STATUS PANEL ═══ -->
+            <div class="glass-card rounded-2xl p-5 sm:p-6 mb-6" id="opsAiPanel" style="border:1px solid rgba(201,168,76,0.2)">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.25)">🤖</div>
+                        <div>
+                            <h3 class="font-extrabold text-white text-sm">OPS AI — Manajer Operasional</h3>
+                            <p class="text-xs" style="color:rgba(255,255,255,0.4)">Powered by Gemini · Analisis stok & transaksi otomatis</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="opsLastUpdated" class="text-xs hidden" style="color:rgba(255,255,255,0.35)"></span>
+                        <button onclick="triggerOpsAnalysis()" id="opsAnalyzeBtn"
+                            class="btn-gold px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5"
+                            style="box-shadow:0 4px 12px rgba(201,168,76,0.2)">
+                            <span id="opsBtnIcon">⚡</span><span id="opsBtnText">Analisis Sekarang</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Badge + Score -->
+                <div class="flex items-center gap-4 mb-4">
+                    <div id="opsStatusBadge" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold"
+                         style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.4)">
+                        <span id="opsStatusIcon">⏳</span>
+                        <span id="opsStatusText">Menunggu Analisis</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs" style="color:rgba(255,255,255,0.35)">OPS Score</span>
+                        <span id="opsScore" class="text-2xl font-extrabold" style="color:var(--brand-gold)">—</span>
+                        <span class="text-xs" style="color:rgba(255,255,255,0.35)">/100</span>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <p id="opsSummary" class="text-sm mb-4" style="color:rgba(255,255,255,0.55);min-height:1.25rem"></p>
+
+                <!-- Alerts List -->
+                <div id="opsAlerts" class="space-y-2"></div>
+
+                <!-- Placeholder saat belum ada data -->
+                <div id="opsPlaceholder" class="rounded-xl p-4 text-xs text-center" style="background:rgba(0,0,0,0.2);color:rgba(255,255,255,0.3)">
+                    Klik <b>Analisis Sekarang</b> atau gunakan endpoint mock untuk melihat status operasional.
+                    <br>Pastikan <code>ops_ai_api.py</code> sudah berjalan di <code>localhost:5050</code>.
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <div class="lg:col-span-2 glass-card rounded-2xl p-5 sm:p-6">
                     <h3 class="font-bold text-white text-sm mb-4">📋 HO Activity Log</h3>
@@ -402,6 +451,128 @@
         </div>
     </main>
     <script>
+        // ══════════════════════════════════════════
+        // OPS AI PANEL
+        // ══════════════════════════════════════════
+        const OPS_API_BASE  = 'http://localhost:5050/api/ops';
+        const OPS_AI_TOKEN  = 'lunomi-ops-secret-ganti-ini'; // harus sama dgn .env
+
+        const OPS_STATUS_CONFIG = {
+            SAFE:          { icon: '🟢', label: 'SAFE — Semua Normal',          bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.3)',   color: '#4ade80' },
+            ALERT:         { icon: '🟡', label: 'ALERT — Stok Menipis',         bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.35)', color: '#fbbf24' },
+            WARNING_VOID:  { icon: '🔴', label: 'WARNING — Order Abnormal',     bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.35)',  color: '#f87171' },
+            CRITICAL:      { icon: '🚨', label: 'CRITICAL — Butuh Tindakan!',   bg: 'rgba(239,68,68,0.18)',  border: 'rgba(239,68,68,0.5)',   color: '#fca5a5' },
+        };
+
+        function renderOpsResult(data) {
+            const cfg = OPS_STATUS_CONFIG[data.status] || OPS_STATUS_CONFIG.SAFE;
+            const badge = document.getElementById('opsStatusBadge');
+            badge.style.background   = cfg.bg;
+            badge.style.borderColor  = cfg.border;
+            badge.style.color        = cfg.color;
+            document.getElementById('opsStatusIcon').textContent = cfg.icon;
+            document.getElementById('opsStatusText').textContent = cfg.label;
+
+            const score = data.ops_score ?? data.opsScore;
+            if (score !== undefined) {
+                document.getElementById('opsScore').textContent = score;
+                const scoreColor = score >= 80 ? '#4ade80' : score >= 50 ? '#fbbf24' : '#f87171';
+                document.getElementById('opsScore').style.color = scoreColor;
+            }
+
+            document.getElementById('opsSummary').textContent = data.summary || '';
+
+            const alertsEl = document.getElementById('opsAlerts');
+            const placeholder = document.getElementById('opsPlaceholder');
+            placeholder.classList.add('hidden');
+
+            const alerts = data.alerts || [];
+            if (alerts.length === 0) {
+                alertsEl.innerHTML = '<div class="text-xs text-emerald-400/70 py-2">✅ Tidak ada peringatan aktif saat ini.</div>';
+            } else {
+                alertsEl.innerHTML = alerts.map(a => {
+                    const aType = a.type === 'LOW_STOCK' ? { bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.25)', tag: '📦 Stok Rendah', tagColor: '#fbbf24' }
+                                : a.type === 'ABNORMAL_ORDER' ? { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', tag: '⚠️ Order Abnormal', tagColor: '#f87171' }
+                                : { bg: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.1)', tag: 'ℹ️ Info', tagColor: 'rgba(255,255,255,0.5)' };
+                    return `<div class="rounded-xl p-3" style="background:${aType.bg};border:1px solid ${aType.border}">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:${aType.bg};color:${aType.tagColor};border:1px solid ${aType.border}">${aType.tag}</span>
+                                    <span class="text-xs font-semibold text-white">${a.item || ''}</span>
+                                </div>
+                                <p class="text-xs" style="color:rgba(255,255,255,0.55)">${a.detail || ''}</p>
+                                ${a.action ? `<p class="text-xs mt-1 font-semibold" style="color:var(--brand-gold)">→ ${a.action}</p>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            const ts = data.analyzed_at ? new Date(data.analyzed_at).toLocaleString('id-ID') : 'Baru saja';
+            const lastUpdated = document.getElementById('opsLastUpdated');
+            lastUpdated.textContent = 'Update: ' + ts;
+            lastUpdated.classList.remove('hidden');
+        }
+
+        async function triggerOpsAnalysis() {
+            const btn     = document.getElementById('opsAnalyzeBtn');
+            const btnIcon = document.getElementById('opsBtnIcon');
+            const btnText = document.getElementById('opsBtnText');
+            btn.disabled  = true;
+            btnIcon.textContent = '⏳';
+            btnText.textContent = 'Menganalisis...';
+
+            try {
+                // Coba endpoint /status (butuh ops_ai_api.py berjalan)
+                const res = await fetch(`${OPS_API_BASE}/status`, {
+                    headers: { 'Authorization': `Bearer ${OPS_AI_TOKEN}` },
+                    signal: AbortSignal.timeout(30000)
+                });
+                if (!res.ok) throw new Error('API status ' + res.status);
+                const json = await res.json();
+                if (json.success) renderOpsResult(json.data);
+                else throw new Error(json.error);
+            } catch(e) {
+                // Fallback ke mock endpoint (tidak butuh serviceAccountKey)
+                console.warn('OPS AI API tidak tersedia, mencoba mock...', e.message);
+                try {
+                    const res = await fetch(`${OPS_API_BASE}/mock`, {
+                        signal: AbortSignal.timeout(5000)
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        renderOpsResult(json.data);
+                        document.getElementById('opsSummary').textContent = '[DEMO MODE] ' + (json.data.summary || '');
+                    }
+                } catch(e2) {
+                    document.getElementById('opsSummary').textContent = '⚠️ OPS AI API tidak tersedia. Jalankan ops_ai_api.py terlebih dahulu.';
+                }
+            } finally {
+                btn.disabled    = false;
+                btnIcon.textContent = '⚡';
+                btnText.textContent = 'Analisis Sekarang';
+            }
+        }
+
+        // Auto-load latest alert dari Firestore ops_alerts (real-time)
+        function listenOpsAlerts() {
+            if (!window.db) return;
+            window.db.collection('ops_alerts')
+                .orderBy('analyzed_at', 'desc')
+                .limit(1)
+                .onSnapshot(snap => {
+                    if (!snap.empty) {
+                        const d = snap.docs[0].data();
+                        // Konversi Firestore Timestamp
+                        if (d.analyzed_at && d.analyzed_at.toDate) {
+                            d.analyzed_at = d.analyzed_at.toDate().toISOString();
+                        }
+                        renderOpsResult(d);
+                    }
+                });
+        }
+
         function rp(n){ return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -494,6 +665,8 @@
                 </div>`;
             });
             loadDashboardMetrics();
+            // Wire OPS AI panel: auto-load latest alert dari Firestore
+            setTimeout(listenOpsAlerts, 1500); // tunggu window.db ready
         });
     </script>
 </body>
