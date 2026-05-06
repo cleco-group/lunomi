@@ -1,0 +1,213 @@
+<!-- Sidebar Component with Sub-menus, No Icons -->
+<style>
+    :root {
+        --brand-teal: #0D3B4A;
+        --brand-gold: #C9A84C;
+        --sidebar-bg: #061820;
+        --sidebar-hover: rgba(201, 168, 76, 0.1);
+        --text-dim: rgba(255, 255, 255, 0.6);
+    }
+
+    #sidebar {
+        width: 260px;
+        background: var(--sidebar-bg);
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        flex-direction: column;
+        color: white;
+        z-index: 1000;
+    }
+
+    .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--brand-gold);
+    }
+
+    .sidebar-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 0;
+    }
+
+    .menu-item {
+        padding: 0.75rem 1.5rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-dim);
+    }
+
+    .menu-item:hover {
+        background: var(--sidebar-hover);
+        color: white;
+    }
+
+    .menu-item.active {
+        color: var(--brand-gold);
+        border-left: 3px solid var(--brand-gold);
+        background: var(--sidebar-hover);
+    }
+
+    .sub-menu {
+        display: none;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 0.5rem 0;
+    }
+
+    .sub-menu.open {
+        display: block;
+    }
+
+    .sub-menu-item {
+        padding: 0.5rem 2.5rem;
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .sub-menu-item:hover {
+        color: var(--brand-gold);
+    }
+
+    .arrow {
+        font-size: 0.7rem;
+        transition: transform 0.3s;
+    }
+
+    .menu-item.open .arrow {
+        transform: rotate(90deg);
+    }
+
+    .sidebar-footer {
+        padding: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .logout-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+        text-align: center;
+    }
+</style>
+
+<aside id="sidebar">
+    <div class="sidebar-header">
+        LUNOMI
+    </div>
+    
+    <div class="sidebar-content">
+        <!-- Dashboard -->
+        <a href="dashboard.html" class="menu-item active" style="text-decoration: none;">
+            Dashboard
+        </a>
+
+        <!-- Operasional Group -->
+        <div class="menu-group">
+            <div class="menu-item" onclick="toggleSubMenu(this)">
+                Operasional
+                <span class="arrow">▶</span>
+            </div>
+            <div class="sub-menu">
+                <a href="pos.html" class="sub-menu-item">POS Kasir</a>
+                <a href="tables.html" class="sub-menu-item">Manajemen Meja</a>
+                <a href="kitchen.html" class="sub-menu-item">Kitchen Display</a>
+                <a href="invoice.html" class="sub-menu-item">Invoice</a>
+                <a href="shift.html" class="sub-menu-item">Rekonsiliasi Shift</a>
+            </div>
+        </div>
+
+        <!-- Inventory Group -->
+        <div class="menu-group">
+            <div class="menu-item" onclick="toggleSubMenu(this)">
+                Inventory & Produk
+                <span class="arrow">▶</span>
+            </div>
+            <div class="sub-menu">
+                <a href="inventory.html" class="sub-menu-item">Stok Barang</a>
+                <a href="product.html" class="sub-menu-item">Master Menu</a>
+                <a href="recipe.html" class="sub-menu-item">Master Resep</a>
+                <a href="purchase.html" class="sub-menu-item">Pembelian</a>
+                <a href="supplier.html" class="sub-menu-item">Supplier</a>
+                <a href="stockopname.html" class="sub-menu-item">Stock Opname</a>
+            </div>
+        </div>
+
+        <!-- Keuangan Group -->
+        <div class="menu-group">
+            <div class="menu-item" onclick="toggleSubMenu(this)">
+                Keuangan & Analisa
+                <span class="arrow">▶</span>
+            </div>
+            <div class="sub-menu">
+                <a href="keuangan.html" class="sub-menu-item">Laporan Keuangan</a>
+                <a href="product-report.html" class="sub-menu-item">Laporan Produk</a>
+                <a href="tax-report.html" class="sub-menu-item">Pajak PB1</a>
+                <a href="financial-statements.html" class="sub-menu-item">Laporan Formal</a>
+                <a href="expense.html" class="sub-menu-item">Pengeluaran OPEX</a>
+                <a href="analytics.html" class="sub-menu-item">Analytics</a>
+            </div>
+        </div>
+
+        <!-- SDM Group -->
+        <div class="menu-group">
+            <div class="menu-item" onclick="toggleSubMenu(this)">
+                SDM & Pelanggan
+                <span class="arrow">▶</span>
+            </div>
+            <div class="sub-menu">
+                <a href="hr.html" class="sub-menu-item">Karyawan</a>
+                <a href="attendance.html" class="sub-menu-item">Absensi Staf</a>
+                <a href="staff-schedule.html" class="sub-menu-item">Jadwal Staf</a>
+                <a href="customer.html" class="sub-menu-item">Customer</a>
+                <a href="booking.html" class="sub-menu-item">Booking Online</a>
+                <a href="loyalty.html" class="sub-menu-item">Loyalty & CRM</a>
+            </div>
+        </div>
+
+        <!-- Sistem -->
+        <a href="settings.html" class="menu-item" style="text-decoration: none;">
+            Pengaturan
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        <button class="logout-btn">Logout</button>
+    </div>
+</aside>
+
+<script>
+    function toggleSubMenu(element) {
+        const subMenu = element.nextElementSibling;
+        const isOpen = subMenu.classList.contains('open');
+        
+        // Close all other sub-menus (optional)
+        document.querySelectorAll('.sub-menu').forEach(menu => {
+            menu.classList.remove('open');
+            menu.previousElementSibling.classList.remove('open');
+        });
+
+        if (!isOpen) {
+            subMenu.classList.add('open');
+            element.classList.add('open');
+        }
+    }
+</script>

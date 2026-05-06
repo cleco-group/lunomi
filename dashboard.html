@@ -5,18 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; font-family:'Material Symbols Outlined'; }
-        :root {
-            --brand-teal: #0D3B4A;
-            --brand-gold: #C9A84C;
-            --brand-gold-dim: rgba(201,168,76,0.15);
-            --brand-teal-dim: rgba(13,59,74,0.6);
-        }
         body {
             background: #061820;
             background-image:
@@ -26,102 +18,6 @@
             color: white;
             overflow-x: hidden;
         }
-
-        .glass-nav {
-            background: rgba(2,6,23,0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .glass-card {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .glass-card-accent {
-            background: rgba(99,102,241,0.08);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(99,102,241,0.25);
-        }
-        .glass-input {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
-            color: white;
-        }
-        .glass-input::placeholder { color: rgba(255,255,255,0.3); }
-        .glass-input:focus { outline:none; border-color:rgba(99,102,241,0.6); box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
-
-        /* Sidebar Styles */
-        #sidebar {
-            width: 260px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(2,6,23,0.9);
-            backdrop-filter: blur(24px);
-            border-right: 1px solid rgba(255,255,255,0.08);
-            z-index: 100;
-        }
-        #sidebar.collapsed {
-            width: 80px;
-        }
-        #sidebar.collapsed .sidebar-text, 
-        #sidebar.collapsed .sidebar-category {
-            display: none;
-        }
-        #sidebar.collapsed .sidebar-item {
-            justify-content: center;
-            padding: 0.75rem;
-        }
-        #sidebar.collapsed .sidebar-item span:first-child {
-            margin-right: 0;
-        }
-
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.15s;
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 0.25rem;
-            border: 1px solid transparent;
-        }
-        .sidebar-item:hover, .sidebar-item.active {
-            background: rgba(99,102,241,0.12);
-            border-color: rgba(99,102,241,0.2);
-            color: #a5b4fc;
-        }
-        .sidebar-item.active .material-symbols-outlined {
-            color: #818cf8 !important;
-        }
-        .sidebar-category {
-            font-size: 0.65rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: rgba(255,255,255,0.3);
-            margin: 1.5rem 0 0.5rem 1rem;
-        }
-
-        /* Main Content Adjustment */
-        #mainContent {
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Sidebar Overlay */
-        #sidebarOverlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            z-index: 90;
-        }
-
-        /* Metric cards */
         .metric-card {
             background: rgba(13,59,74,0.4);
             backdrop-filter: blur(16px);
@@ -129,350 +25,173 @@
             transition: transform 0.2s;
         }
         .metric-card:hover { transform: translateY(-2px); }
-        .metric-blue   { border-left: 3px solid #3b82f6; }
-        .metric-green  { border-left: 3px solid #22c55e; }
-        .metric-red    { border-left: 3px solid #ef4444; }
-        .metric-amber  { border-left: 3px solid #f59e0b; }
-
-        .dot { display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px; }
-        .dot.active   { background:#22c55e; animation:pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-        @media(max-width:768px){
-            #sidebar { position: fixed; left: -260px; width: 260px !important; }
-            #sidebar.mobile-open { left: 0; }
-            #sidebar.mobile-open + #sidebarOverlay { display: block; }
-            #mainContent { margin-left: 0 !important; }
-            #sidebar.collapsed { width: 260px !important; } /* Disable collapse on mobile */
-            #sidebar.collapsed .sidebar-text, #sidebar.collapsed .sidebar-category { display: block; }
-            #sidebar.collapsed .sidebar-item { justify-content: flex-start; padding: 0.75rem 1rem; }
-            #sidebar.collapsed .sidebar-item span:first-child { margin-right: 0.75rem; }
-            
-            .metric-grid { grid-template-cols: repeat(1, minmax(0, 1fr)); }
-            .stats-grid { grid-template-cols: repeat(1, minmax(0, 1fr)); }
+        .glass-nav {
+            background: rgba(2,6,23,0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
     </style>
 </head>
 <body class="flex">
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="fixed h-screen flex flex-col">
-        <div class="p-4 flex items-center justify-between border-b border-white/5">
-            <div class="flex items-center gap-3 sidebar-text">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-                    <span class="text-sm">🏪</span>
-                </div>
-                <span class="font-extrabold text-white text-lg">Lunomi</span>
-            </div>
-            <button onclick="toggleSidebar()" class="hidden sm:block p-2 rounded-lg hover:bg-white/5 text-white/50 hover:text-white transition">
-                <span class="material-symbols-outlined" id="toggleIcon">menu_open</span>
-            </button>
-            <button onclick="toggleMobileSidebar()" class="sm:hidden p-2 rounded-lg hover:bg-white/5 text-white/50 hover:text-white transition">
-                <span class="material-symbols-outlined">close</span>
-            </button>
+    <!-- Sidebar Component -->
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            LUNOMI
         </div>
-
-        <div class="flex-1 overflow-y-auto p-3 custom-scrollbar">
-            <!-- Utama -->
-            <div class="sidebar-category">Utama</div>
-            <a href="dashboard.html" class="sidebar-item active">
-                <span class="material-symbols-outlined text-indigo-400 mr-3">dashboard</span>
-                <span class="sidebar-text">Dashboard</span>
+        
+        <div class="sidebar-content">
+            <!-- Dashboard -->
+            <a href="dashboard.html" class="menu-item active">
+                Dashboard
             </a>
 
-            <!-- Operasional -->
-            <div class="sidebar-category">Operasional</div>
-            <a href="pos.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-blue-400 mr-3">point_of_sale</span>
-                <span class="sidebar-text">POS Kasir</span>
-            </a>
-            <a href="tables.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-amber-500 mr-3">table_restaurant</span>
-                <span class="sidebar-text">Manajemen Meja</span>
-            </a>
-            <a href="kitchen.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-orange-400 mr-3">soup_kitchen</span>
-                <span class="sidebar-text">Kitchen Display</span>
-            </a>
-            <a href="invoice.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-cyan-400 mr-3">receipt_long</span>
-                <span class="sidebar-text">Invoice</span>
-            </a>
-            <a href="shift.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-slate-400 mr-3">account_balance_wallet</span>
-                <span class="sidebar-text">Rekonsiliasi Shift</span>
-            </a>
+            <!-- Operasional Group -->
+            <div class="menu-group">
+                <div class="menu-item" onclick="toggleSubMenu(this)">
+                    Operasional
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="sub-menu">
+                    <a href="pos.html" class="sub-menu-item">POS Kasir</a>
+                    <a href="tables.html" class="sub-menu-item">Manajemen Meja</a>
+                    <a href="kitchen.html" class="sub-menu-item">Kitchen Display</a>
+                    <a href="invoice.html" class="sub-menu-item">Invoice</a>
+                    <a href="shift.html" class="sub-menu-item">Rekonsiliasi Shift</a>
+                </div>
+            </div>
 
-            <!-- Inventory & Produk -->
-            <div class="sidebar-category">Inventory & Produk</div>
-            <a href="inventory.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-green-400 mr-3">inventory_2</span>
-                <span class="sidebar-text">Stok Barang</span>
-            </a>
-            <a href="product.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-orange-400 mr-3">restaurant_menu</span>
-                <span class="sidebar-text">Master Menu</span>
-            </a>
-            <a href="recipe.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-yellow-400 mr-3">menu_book</span>
-                <span class="sidebar-text">Master Resep</span>
-            </a>
-            <a href="purchase.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-indigo-400 mr-3">shopping_cart</span>
-                <span class="sidebar-text">Pembelian</span>
-            </a>
-            <a href="supplier.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-blue-300 mr-3">local_shipping</span>
-                <span class="sidebar-text">Supplier</span>
-            </a>
-            <a href="stockopname.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-yellow-400 mr-3">fact_check</span>
-                <span class="sidebar-text">Stock Opname</span>
-            </a>
+            <!-- Inventory Group -->
+            <div class="menu-group">
+                <div class="menu-item" onclick="toggleSubMenu(this)">
+                    Inventory & Produk
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="sub-menu">
+                    <a href="inventory.html" class="sub-menu-item">Stok Barang</a>
+                    <a href="product.html" class="sub-menu-item">Master Menu</a>
+                    <a href="recipe.html" class="sub-menu-item">Master Resep</a>
+                    <a href="purchase.html" class="sub-menu-item">Pembelian</a>
+                    <a href="supplier.html" class="sub-menu-item">Supplier</a>
+                    <a href="stockopname.html" class="sub-menu-item">Stock Opname</a>
+                </div>
+            </div>
 
-            <!-- Keuangan & Analisa -->
-            <div class="sidebar-category">Keuangan & Analisa</div>
-            <a href="keuangan.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-emerald-400 mr-3">account_balance</span>
-                <span class="sidebar-text">Laporan Keuangan</span>
-            </a>
-            <a href="product-report.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-amber-400 mr-3">assessment</span>
-                <span class="sidebar-text">Laporan Produk</span>
-            </a>
-            <a href="tax-report.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-orange-400 mr-3">account_balance_wallet</span>
-                <span class="sidebar-text">Pajak PB1</span>
-            </a>
-            <a href="financial-statements.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-emerald-400 mr-3">account_balance</span>
-                <span class="sidebar-text">Laporan Formal</span>
-            </a>
-            <a href="expense.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-red-400 mr-3">payments</span>
-                <span class="sidebar-text">Pengeluaran OPEX</span>
-            </a>
-            <a href="analytics.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-teal-400 mr-3">bar_chart</span>
-                <span class="sidebar-text">Analytics</span>
-            </a>
+            <!-- Keuangan Group -->
+            <div class="menu-group">
+                <div class="menu-item" onclick="toggleSubMenu(this)">
+                    Keuangan & Analisa
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="sub-menu">
+                    <a href="keuangan.html" class="sub-menu-item">Laporan Keuangan</a>
+                    <a href="product-report.html" class="sub-menu-item">Laporan Produk</a>
+                    <a href="tax-report.html" class="sub-menu-item">Pajak PB1</a>
+                    <a href="financial-statements.html" class="sub-menu-item">Laporan Formal</a>
+                    <a href="expense.html" class="sub-menu-item">Pengeluaran OPEX</a>
+                    <a href="analytics.html" class="sub-menu-item">Analytics</a>
+                </div>
+            </div>
 
-            <!-- SDM & Pelanggan -->
-            <div class="sidebar-category">SDM & Pelanggan</div>
-            <a href="hr.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-pink-400 mr-3">badge</span>
-                <span class="sidebar-text">Karyawan</span>
-            </a>
-            <a href="attendance.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-rose-400 mr-3">location_on</span>
-                <span class="sidebar-text">Absensi Staf</span>
-            </a>
-            <a href="staff-schedule.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-blue-400 mr-3">calendar_month</span>
-                <span class="sidebar-text">Jadwal Staf</span>
-            </a>
-            <a href="customer.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-purple-400 mr-3">group</span>
-                <span class="sidebar-text">Customer</span>
-            </a>
-            <a href="booking.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-cyan-400 mr-3">event_available</span>
-                <span class="sidebar-text">Booking Online</span>
-            </a>
-            <a href="loyalty.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-yellow-500 mr-3">military_tech</span>
-                <span class="sidebar-text">Loyalty & CRM</span>
-            </a>
+            <!-- SDM Group -->
+            <div class="menu-group">
+                <div class="menu-item" onclick="toggleSubMenu(this)">
+                    SDM & Pelanggan
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="sub-menu">
+                    <a href="hr.html" class="sub-menu-item">Karyawan</a>
+                    <a href="attendance.html" class="sub-menu-item">Absensi Staf</a>
+                    <a href="staff-schedule.html" class="sub-menu-item">Jadwal Staf</a>
+                    <a href="customer.html" class="sub-menu-item">Customer</a>
+                    <a href="booking.html" class="sub-menu-item">Booking Online</a>
+                    <a href="loyalty.html" class="sub-menu-item">Loyalty & CRM</a>
+                </div>
+            </div>
 
             <!-- Sistem -->
-            <div class="sidebar-category">Sistem</div>
-            <a href="settings.html" class="sidebar-item">
-                <span class="material-symbols-outlined text-slate-400 mr-3">settings</span>
-                <span class="sidebar-text">Pengaturan</span>
+            <a href="settings.html" class="menu-item">
+                Pengaturan
             </a>
         </div>
 
-        <div class="p-4 border-t border-white/5">
-            <button onclick="logout()" class="sidebar-item w-full text-red-400 hover:bg-red-400/10">
-                <span class="material-symbols-outlined mr-3">logout</span>
-                <span class="sidebar-text">Logout</span>
-            </button>
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="window.location.href='login.html'">Logout</button>
         </div>
     </aside>
 
-    <!-- Sidebar Overlay -->
-    <div id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-
     <!-- Main Content -->
-    <main id="mainContent" class="flex-1 ml-[260px] min-h-screen w-full">
-        <!-- Navbar -->
-        <nav class="glass-nav sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-16">
-                    <div class="flex items-center gap-3">
-                        <button onclick="toggleMobileSidebar()" class="sm:hidden text-white/50 hover:text-white p-2">
-                            <span class="material-symbols-outlined">menu</span>
-                        </button>
-                        <div>
-                            <div class="font-extrabold text-white text-base leading-none">Dashboard</div>
-                            <div class="text-xs leading-none mt-0.5" style="color:rgba(255,255,255,0.4)"><span id="outletBadge"></span></div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button onclick="openChatAI()"
-                            class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-white transition"
-                            style="background:linear-gradient(135deg,#6366f1,#7c3aed);box-shadow:0 4px 16px rgba(99,102,241,0.35)">
-                            <span>💬</span><span class="hidden xs:inline">Tanya Lunomi</span>
-                        </button>
-                    </div>
-                </div>
+    <main class="main-container flex-1 min-h-screen">
+        <!-- Header -->
+        <header class="glass-nav sticky top-0 z-50 px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleMobileSidebar()" class="md:hidden text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+                <h1 class="text-xl font-bold">Dashboard Utama</h1>
             </div>
-        </nav>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-            <!-- Header -->
-            <div class="mb-6 sm:mb-8">
-                <h2 class="text-xl sm:text-2xl font-extrabold text-white">Ringkasan Bisnis</h2>
-                <p class="text-xs sm:text-sm mt-1" style="color:rgba(255,255,255,0.45)">Selamat datang kembali, <span id="userName" class="text-white font-semibold">Owner</span>!</p>
-            </div>
-
-            <!-- CEO Orchestrator -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-                <div class="lg:col-span-2 glass-card-accent rounded-2xl p-5 sm:p-6">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xl">🤖</span>
-                            <h3 class="font-bold text-white text-sm sm:text-base">CEO Orchestrator</h3>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="dot active"></span>
-                            <span class="text-[10px] sm:text-xs font-semibold text-emerald-400">ACTIVE</span>
-                        </div>
-                    </div>
-                    <div id="chatArea" class="rounded-xl p-4 mb-3 space-y-3 overflow-y-auto" style="background:rgba(0,0,0,0.2);min-height:5rem;max-height:11rem">
-                        <div class="flex gap-2">
-                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style="background:rgba(99,102,241,0.3)">🤖</div>
-                            <div class="rounded-xl px-3 py-2 text-xs sm:text-sm max-w-[85%]" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)">
-                                Halo! Ada 3 alert penting — stok ayam menipis, 1 outlet offline, absensi terlambat. Perlu bantuan?
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="aiInput" placeholder="Tanya apapun..." class="glass-input flex-1 px-4 py-2 rounded-xl text-xs sm:text-sm">
-                        <button class="px-3 py-2 rounded-xl font-semibold text-white transition flex items-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-                            <span class="material-symbols-outlined text-sm">send</span>
-                        </button>
-                    </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold">Admin Lunomi</p>
+                    <p class="text-xs text-white/50">Owner Access</p>
                 </div>
+                <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold">A</div>
+            </div>
+        </header>
 
-                <!-- Sub-Agents -->
-                <div class="glass-card rounded-2xl p-5 sm:p-6">
-                    <h4 class="font-bold text-white text-sm mb-4">6 Sub-Agents</h4>
-                    <div class="space-y-2 sm:space-y-3" id="agentList"></div>
+        <!-- Dashboard Content -->
+        <div class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="metric-card p-6 rounded-2xl">
+                    <p class="text-white/50 text-sm mb-1">Total Penjualan</p>
+                    <h3 class="text-2xl font-bold">Rp 12.450.000</h3>
+                    <p class="text-green-400 text-xs mt-2">↑ 12% dari kemarin</p>
+                </div>
+                <div class="metric-card p-6 rounded-2xl">
+                    <p class="text-white/50 text-sm mb-1">Total Transaksi</p>
+                    <h3 class="text-2xl font-bold">142</h3>
+                    <p class="text-green-400 text-xs mt-2">↑ 5% dari kemarin</p>
+                </div>
+                <div class="metric-card p-6 rounded-2xl">
+                    <p class="text-white/50 text-sm mb-1">Rata-rata Order</p>
+                    <h3 class="text-2xl font-bold">Rp 87.676</h3>
+                    <p class="text-red-400 text-xs mt-2">↓ 2% dari kemarin</p>
+                </div>
+                <div class="metric-card p-6 rounded-2xl">
+                    <p class="text-white/50 text-sm mb-1">Customer Baru</p>
+                    <h3 class="text-2xl font-bold">28</h3>
+                    <p class="text-green-400 text-xs mt-2">↑ 18% dari kemarin</p>
                 </div>
             </div>
 
-            <!-- Metrics Grid -->
-            <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div class="metric-card metric-blue rounded-2xl p-4 sm:p-5">
-                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Penjualan Hari Ini</p>
-                    <p class="text-xl sm:text-2xl font-extrabold text-white">Rp 24.5M</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="metric-card p-6 rounded-2xl min-h-[300px]">
+                    <h3 class="font-bold mb-4">Grafik Penjualan</h3>
+                    <div class="flex items-center justify-center h-48 text-white/20">
+                        [ Area Grafik ]
+                    </div>
                 </div>
-                <div class="metric-card metric-green rounded-2xl p-4 sm:p-5">
-                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Laba Bersih</p>
-                    <p class="text-xl sm:text-2xl font-extrabold text-white">Rp 8.2M</p>
-                </div>
-                <div class="metric-card metric-red rounded-2xl p-4 sm:p-5">
-                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Stok Kritis</p>
-                    <p class="text-xl sm:text-2xl font-extrabold text-white">12 Item</p>
-                </div>
-                <div class="metric-card metric-amber rounded-2xl p-4 sm:p-5">
-                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Pesanan Aktif</p>
-                    <p class="text-xl sm:text-2xl font-extrabold text-white">45</p>
-                </div>
-            </div>
-
-            <!-- Secondary Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                <div class="lg:col-span-2 glass-card rounded-2xl p-5 sm:p-6">
-                    <h3 class="font-bold text-white text-sm mb-4">📋 HO Activity Log</h3>
-                    <div id="activityLog" class="space-y-2 sm:space-y-3 max-h-80 overflow-y-auto"></div>
-                </div>
-                <div class="space-y-5">
-                    <!-- OPEX Card -->
-                    <div class="glass-card rounded-2xl p-5">
-                        <p class="text-[10px] sm:text-xs font-medium mb-1 text-white/50">Pengeluaran OPEX</p>
-                        <p class="text-xl sm:text-2xl font-extrabold text-white" id="opexTotal">Rp 0</p>
-                        <button onclick="window.location.href='expense.html'" class="mt-3 w-full py-2 rounded-xl text-xs font-semibold bg-white/5 border border-white/10 text-white/60">+ Catat Pengeluaran</button>
+                <div class="metric-card p-6 rounded-2xl min-h-[300px]">
+                    <h3 class="font-bold mb-4">Produk Terlaris</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span>Nasi Goreng Spesial</span>
+                            <span class="font-bold">42 porsi</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Es Teh Manis</span>
+                            <span class="font-bold">38 gelas</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Ayam Bakar Madu</span>
+                            <span class="font-bold">25 porsi</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
-            const toggleIcon = document.getElementById('toggleIcon');
-            
-            sidebar.classList.toggle('collapsed');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '80px';
-                toggleIcon.textContent = 'menu';
-            } else {
-                mainContent.style.marginLeft = '260px';
-                toggleIcon.textContent = 'menu_open';
-            }
-        }
-
-        function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('mobile-open');
-        }
-
-        // Initialize agents and logs
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeLunomi();
-            
-            const agents = [
-                { name: 'FIN AI', status: 'active', task: 'Audit Laporan' },
-                { name: 'OPS AI', status: 'active', task: 'Monitoring Stok' },
-                { name: 'HR AI', status: 'active', task: 'Cek Absensi' },
-                { name: 'MKT AI', status: 'active', task: 'Analisa Promo' },
-                { name: 'SUP AI', status: 'active', task: 'Cek Supplier' },
-                { name: 'SEC AI', status: 'active', task: 'Audit CCTV' }
-            ];
-
-            const agentList = document.getElementById('agentList');
-            agents.forEach(a => {
-                agentList.innerHTML += `
-                    <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
-                        <div class="flex items-center gap-2">
-                            <span class="dot active"></span>
-                            <span class="text-[10px] sm:text-xs font-bold text-white">${a.name}</span>
-                        </div>
-                        <span class="text-[9px] sm:text-[10px] text-white/40">${a.task}</span>
-                    </div>
-                `;
-            });
-
-            const logs = [
-                { time: '2m ago', msg: 'FIN AI: Laporan harian outlet A selesai' },
-                { time: '15m ago', msg: 'OPS AI: Stok beras kritis di outlet B' },
-                { time: '1h ago', msg: 'HR AI: 2 karyawan terlambat di outlet C' }
-            ];
-
-            const activityLog = document.getElementById('activityLog');
-            logs.forEach(l => {
-                activityLog.innerHTML += `
-                    <div class="flex gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                        <span class="text-[9px] sm:text-[10px] text-white/30 whitespace-nowrap">${l.time}</span>
-                        <span class="text-[11px] sm:text-xs text-white/70">${l.msg}</span>
-                    </div>
-                `;
-            });
-        });
-    </script>
+    <script src="assets/js/sidebar.js"></script>
 </body>
 </html>
