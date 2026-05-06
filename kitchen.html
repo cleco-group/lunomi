@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi KDS - Kitchen Display System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -264,9 +267,74 @@
             try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return false;}JSON.parse(s);return true;}
             catch(e){window.location.href='index.html';return false;}
         }
+
+        function listenToOrders() {
+            if(!window.db) return;
+            const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+            let query = window.db.collection("transactions").where("status", "==", "pending");
+            if (outlet && outlet.id) {
+                query = window.db.collection("transactions").where("outlet_id", "==", outlet.id).where("status", "==", "pending");
+            }
+            
+            query.onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    const data = change.doc.data();
+                    if (change.type === "added") {
+                        // Cek apakah sudah ada di orders lokal (biar gak duplikat)
+                        if(!orders.find(o => o.id === data.id)) {
+                            const itemsStr = data.items.map(i => `${i.name} x${i.qty}`).join(', ');
+                            orders.push({
+                                id: data.id,
+                                time: data.time,
+                                items: itemsStr,
+                                st: 'pending',
+                                et: 10, // Est 10 menit
+                                urgent: false,
+                                docId: change.doc.id
+                            });
+                            elapsed[data.id] = 0;
+                            // Play sound notification
+                            try { new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU').play().catch(e=>{}); } catch(e){}
+                            showToast(`Order Baru: ${data.id}`, 'info');
+                        }
+                    }
+                });
+                render();
+            }, (error) => {
+                console.error("Firebase listen error:", error);
+            });
+        }
+
+        async function updateStatusInCloud(docId, newStatus) {
+            if(!window.db || !docId) return;
+            try {
+                await window.db.collection("transactions").doc(docId).update({ status: newStatus });
+            } catch(e) { console.error("Update error:", e); }
+        }
+
+        // Modifikasi fungsi update lokal untuk sinkronisasi cloud
+        const _startCooking = startCooking;
+        startCooking = function(id) {
+            const o=orders.find(x=>x.id===id);
+            if(o) { updateStatusInCloud(o.docId, 'cooking'); }
+            _startCooking(id);
+        };
+
+        const _markReady = markReady;
+        markReady = function(id) {
+            const o=orders.find(x=>x.id===id);
+            if(o) { updateStatusInCloud(o.docId, 'ready'); }
+            _markReady(id);
+        };
+
         document.addEventListener('DOMContentLoaded',()=>{
             if(!checkSession())return;
-            initElapsed();render();updateTime();
+            // Kosongkan order dummy, ganti dengan data real-time
+            orders = []; 
+            initElapsed();
+            render();
+            updateTime();
+            listenToOrders();
             setInterval(updateTime,1000);
             intervalId=setInterval(tick,1000);
         });

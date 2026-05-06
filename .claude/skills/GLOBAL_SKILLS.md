@@ -117,3 +117,9 @@ Saat melakukan tugas apa pun, agen harus merujuk pada fondasi Global Skills ini.
 [5] [GitHub - Reqeique/Kronos](https://github.com/Reqeique/Kronos)
 [6] [GitHub - Tracer-Cloud/opensre](https://github.com/Tracer-Cloud/opensre)
 [7] [SKILL.md - /home/ubuntu/lunomi/.claude/skills/ui-ux-pro-max/SKILL.md](file:///home/ubuntu/lunomi/.claude/skills/ui-ux-pro-max/SKILL.md)
+
+## Aturan Khusus: FIN AI (Financial AI)
+Saat mensimulasikan, merancang, atau menjalankan logika untuk **FIN AI**, patuhi secara ketat:
+1. **Formula Baku (Absolut):** `OPEX = Beban Pokok + Biaya Variabel`. Definisi operasional ini tidak boleh diganti.
+2. **Anti-Halusinasi (Zero Hallucination):** Dilarang keras mengarang atau menebak angka. Semua data dan kalkulasi harus berdasarkan *input* sistem yang riil.
+3. **Standar TypeChat:** Semua *output* struktural, analisis, dan integrasi FIN AI harus dipaksa menggunakan format **JSON skema ketat**, memastikan tidak ada deviasi dari tipe data yang diharapkan.

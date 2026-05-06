@@ -5,18 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; font-family:'Material Symbols Outlined'; }
+        :root {
+            --brand-teal: #0D3B4A;
+            --brand-gold: #C9A84C;
+            --brand-gold-dim: rgba(201,168,76,0.15);
+            --brand-teal-dim: rgba(13,59,74,0.6);
+        }
         body {
-            background: #020617;
+            background: #061820;
             background-image:
-                radial-gradient(ellipse 70% 50% at 10% 0%,  rgba(99,102,241,0.25) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 45% at 90% 100%, rgba(59,130,246,0.2)  0%, transparent 60%),
-                radial-gradient(ellipse 40% 35% at 60% 40%,  rgba(139,92,246,0.12) 0%, transparent 70%);
+                radial-gradient(ellipse 70% 50% at 10% 0%,  rgba(13,59,74,0.6) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 45% at 90% 100%, rgba(201,168,76,0.08) 0%, transparent 60%);
             min-height: 100vh;
             color: white;
             overflow-x: hidden;
@@ -50,25 +58,18 @@
         #sidebar {
             width: 260px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(2,6,23,0.9);
+            background: var(--brand-teal);
             backdrop-filter: blur(24px);
-            border-right: 1px solid rgba(255,255,255,0.08);
+            border-right: 1px solid rgba(201,168,76,0.15);
             z-index: 100;
         }
         #sidebar.collapsed {
             width: 80px;
         }
-        #sidebar.collapsed .sidebar-text, 
-        #sidebar.collapsed .sidebar-category {
-            display: none;
-        }
-        #sidebar.collapsed .sidebar-item {
-            justify-content: center;
-            padding: 0.75rem;
-        }
-        #sidebar.collapsed .sidebar-item span:first-child {
-            margin-right: 0;
-        }
+        #sidebar.collapsed .sidebar-text,
+        #sidebar.collapsed .sidebar-category { display: none; }
+        #sidebar.collapsed .sidebar-item { justify-content: center; padding: 0.75rem; }
+        #sidebar.collapsed .sidebar-item span:first-child { margin-right: 0; }
         .sidebar-item {
             display: flex;
             align-items: center;
@@ -76,18 +77,29 @@
             border-radius: 0.75rem;
             font-size: 0.85rem;
             font-weight: 600;
-            transition: all 0.15s;
-            color: rgba(255,255,255,0.6);
+            transition: all 0.2s ease;
+            color: rgba(255,255,255,0.55);
             margin-bottom: 0.25rem;
             border: 1px solid transparent;
+            cursor: pointer;
         }
-        .sidebar-item:hover, .sidebar-item.active {
-            background: rgba(99,102,241,0.12);
-            border-color: rgba(99,102,241,0.2);
-            color: #a5b4fc;
+        .sidebar-item:hover {
+            background: rgba(201,168,76,0.12);
+            border-color: rgba(201,168,76,0.25);
+            color: var(--brand-gold);
+            box-shadow: 0 0 0 0 transparent;
+        }
+        .sidebar-item.active {
+            background: rgba(201,168,76,0.18);
+            border-color: rgba(201,168,76,0.4);
+            color: var(--brand-gold);
+        }
+        .sidebar-item:focus-visible {
+            outline: 2px solid var(--brand-gold);
+            outline-offset: 2px;
         }
         .sidebar-item.active .material-symbols-outlined {
-            color: #818cf8 !important;
+            color: var(--brand-gold) !important;
         }
         .sidebar-category {
             font-size: 0.65rem;
@@ -112,19 +124,30 @@
         }
         /* Metric cards */
         .metric-card {
-            background: rgba(255,255,255,0.04);
+            background: rgba(13,59,74,0.4);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255,255,255,0.08);
-            transition: transform 0.2s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .metric-card:hover { transform: translateY(-2px); }
-        .metric-blue   { border-left: 3px solid #3b82f6; }
+        .metric-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .metric-blue   { border-left: 3px solid var(--brand-gold); }
         .metric-green  { border-left: 3px solid #22c55e; }
         .metric-red    { border-left: 3px solid #ef4444; }
         .metric-amber  { border-left: 3px solid #f59e0b; }
         .dot { display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px; }
         .dot.active   { background:#22c55e; animation:pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        button:focus-visible, a:focus-visible {
+            outline: 2px solid var(--brand-gold);
+            outline-offset: 2px;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, var(--brand-gold), #a8863a);
+            color: var(--brand-teal);
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .btn-gold:hover { opacity: 0.88; transform: translateY(-1px); }
         @media(max-width:768px){
             #sidebar { position: fixed; left: -260px; width: 260px !important; }
             #sidebar.mobile-open { left: 0; }
@@ -141,12 +164,15 @@
 </head>
 <body class="flex">
     <aside id="sidebar" class="fixed h-screen flex flex-col">
-        <div class="p-4 flex items-center justify-between border-b border-white/5">
+        <div class="p-4 flex items-center justify-between" style="border-bottom:1px solid rgba(201,168,76,0.15)">
             <div class="flex items-center gap-3 sidebar-text">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-                    <span class="text-sm">🏪</span>
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,var(--brand-gold),#a8863a)">
+                    <span class="text-sm font-black" style="color:var(--brand-teal)">L</span>
                 </div>
-                <span class="font-extrabold text-white text-lg">Lunomi</span>
+                <div>
+                    <span class="font-extrabold text-white text-lg">Lunomi</span>
+                    <div class="text-[9px] font-semibold" style="color:var(--brand-gold);letter-spacing:.08em">RUANG KETIGA</div>
+                </div>
             </div>
             <button onclick="toggleSidebar()" class="hidden sm:block p-2 rounded-lg hover:bg-white/5 text-white/50 hover:text-white transition">
                 <span class="material-symbols-outlined" id="toggleIcon">menu_open</span>
@@ -177,6 +203,10 @@
             <a href="invoice.html" class="sidebar-item">
                 <span class="material-symbols-outlined text-cyan-400 mr-3">receipt_long</span>
                 <span class="sidebar-text">Invoice</span>
+            </a>
+            <a href="refund.html" class="sidebar-item">
+                <span class="material-symbols-outlined text-rose-400 mr-3">assignment_return</span>
+                <span class="sidebar-text">Retur & Refund</span>
             </a>
             <a href="shift.html" class="sidebar-item">
                 <span class="material-symbols-outlined text-slate-400 mr-3">account_balance_wallet</span>
@@ -263,8 +293,8 @@
                 <span class="sidebar-text">Pengaturan</span>
             </a>
         </div>
-        <div class="p-4 border-t border-white/5">
-            <button onclick="logout()" class="sidebar-item w-full text-red-400 hover:bg-red-400/10">
+        <div class="p-4" style="border-top:1px solid rgba(201,168,76,0.15)">
+            <button onclick="logout()" class="sidebar-item w-full" style="color:rgba(239,68,68,0.7)">
                 <span class="material-symbols-outlined mr-3">logout</span>
                 <span class="sidebar-text">Logout</span>
             </button>
@@ -285,11 +315,14 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button onclick="openChatAI()"
-                            class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-white transition"
-                            style="background:linear-gradient(135deg,#6366f1,#7c3aed);box-shadow:0 4px 16px rgba(99,102,241,0.35)">
-                            <span>💬</span><span class="hidden xs:inline">Tanya Lunomi</span>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <div class="text-xs font-semibold px-2 py-1 rounded-lg" id="firebaseStatus" style="background:rgba(201,168,76,0.15);color:var(--brand-gold);border:1px solid rgba(201,168,76,0.3)">⏳ Connecting...</div>
+                            <button onclick="openChatAI()"
+                                class="btn-gold flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm"
+                                style="box-shadow:0 4px 16px rgba(201,168,76,0.3)">
+                                <span>💬</span><span class="hidden xs:inline">Tanya Lunomi</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -334,19 +367,23 @@
             <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div class="metric-card metric-blue rounded-2xl p-4 sm:p-5">
                     <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Penjualan Hari Ini</p>
-                    <p class="text-xl sm:text-2xl font-extrabold text-white">Rp 24.5M</p>
+                    <p class="text-xl sm:text-2xl font-extrabold text-white" id="metricSales">Rp 0</p>
+                    <p class="text-[10px] mt-1" style="color:var(--brand-gold)" id="metricTxCount">0 transaksi</p>
                 </div>
                 <div class="metric-card metric-green rounded-2xl p-4 sm:p-5">
-                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Laba Bersih</p>
-                    <p class="text-xl sm:text-2xl font-extrabold text-white">Rp 8.2M</p>
+                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Total Invoice</p>
+                    <p class="text-xl sm:text-2xl font-extrabold text-white" id="metricInvoice">Rp 0</p>
+                    <p class="text-[10px] mt-1 text-emerald-400" id="metricInvoiceCount">0 invoice</p>
                 </div>
                 <div class="metric-card metric-red rounded-2xl p-4 sm:p-5">
-                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Stok Kritis</p>
-                    <p class="text-xl sm:text-2xl font-extrabold text-white">12 Item</p>
+                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Total Customer</p>
+                    <p class="text-xl sm:text-2xl font-extrabold text-white" id="metricCustomers">0</p>
+                    <p class="text-[10px] mt-1 text-rose-400">Terdaftar di Cloud</p>
                 </div>
                 <div class="metric-card metric-amber rounded-2xl p-4 sm:p-5">
-                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Pesanan Aktif</p>
-                    <p class="text-xl sm:text-2xl font-extrabold text-white">45</p>
+                    <p class="text-[10px] sm:text-xs font-medium mb-1 sm:mb-2 text-white/50">Pesanan Dapur</p>
+                    <p class="text-xl sm:text-2xl font-extrabold text-white" id="metricOrders">0</p>
+                    <p class="text-[10px] mt-1 text-amber-400">Aktif hari ini</p>
                 </div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -365,60 +402,98 @@
         </div>
     </main>
     <script>
+        function rp(n){ return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
             const toggleIcon = document.getElementById('toggleIcon');
             sidebar.classList.toggle('collapsed');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '80px';
-                toggleIcon.textContent = 'menu';
-            } else {
-                mainContent.style.marginLeft = '260px';
-                toggleIcon.textContent = 'menu_open';
-            }
+            mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '80px' : '260px';
+            toggleIcon.textContent = sidebar.classList.contains('collapsed') ? 'menu' : 'menu_open';
         }
         function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('mobile-open');
+            document.getElementById('sidebar').classList.toggle('mobile-open');
         }
-        // Initialize agents and logs
+        function setFirebaseStatus(ok) {
+            const el = document.getElementById('firebaseStatus');
+            if(!el) return;
+            if(ok) {
+                el.textContent = '🔥 Firebase LIVE';
+                el.style.color = '#4ade80';
+                el.style.background = 'rgba(34,197,94,0.12)';
+                el.style.borderColor = 'rgba(34,197,94,0.3)';
+            } else {
+                el.textContent = '⚠️ Offline';
+                el.style.color = '#fbbf24';
+            }
+        }
+        function loadDashboardMetrics() {
+            if(!window.db) { setFirebaseStatus(false); return; }
+            setFirebaseStatus(true);
+            // Today's transactions
+            const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+            window.db.collection('transactions')
+                .where('timestamp', '>=', todayStart)
+                .onSnapshot(snap => {
+                    let total = 0;
+                    snap.forEach(d => { total += (d.data().total || 0); });
+                    document.getElementById('metricSales').textContent = rp(total);
+                    document.getElementById('metricTxCount').textContent = snap.size + ' transaksi';
+                    // Active kitchen orders
+                    const active = snap.docs.filter(d => d.data().status === 'new' || d.data().status === 'cooking').length;
+                    document.getElementById('metricOrders').textContent = active;
+                }, () => setFirebaseStatus(false));
+            // Invoices
+            window.db.collection('invoices').onSnapshot(snap => {
+                let invTotal = 0;
+                snap.forEach(d => { invTotal += (d.data().total || 0); });
+                document.getElementById('metricInvoice').textContent = rp(invTotal);
+                document.getElementById('metricInvoiceCount').textContent = snap.size + ' invoice';
+            });
+            // Customers
+            window.db.collection('customers').onSnapshot(snap => {
+                document.getElementById('metricCustomers').textContent = snap.size;
+            });
+            // Activity log from recent transactions
+            window.db.collection('transactions').orderBy('timestamp','desc').limit(5)
+                .onSnapshot(snap => {
+                    const log = document.getElementById('activityLog');
+                    if(!log) return;
+                    log.innerHTML = '';
+                    if(snap.empty) {
+                        log.innerHTML = '<div class="text-xs text-white/30 p-3">Belum ada transaksi hari ini.</div>';
+                        return;
+                    }
+                    snap.forEach(d => {
+                        const tx = d.data();
+                        const t = tx.timestamp?.toDate ? tx.timestamp.toDate() : new Date();
+                        const timeStr = t.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+                        log.innerHTML += `<div class="flex gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-[10px] text-white/30 whitespace-nowrap">${timeStr}</span>
+                            <span class="text-xs text-white/70">💳 Transaksi <b>${tx.id||d.id.slice(-6)}</b> — ${rp(tx.total||0)}</span>
+                        </div>`;
+                    });
+                });
+        }
         document.addEventListener('DOMContentLoaded', () => {
             initializeLunomi();
+            // Sub-agents panel
             const agents = [
-                { name: 'FIN AI', status: 'active', task: 'Audit Laporan' },
-                { name: 'OPS AI', status: 'active', task: 'Monitoring Stok' },
-                { name: 'HR AI', status: 'active', task: 'Cek Absensi' },
-                { name: 'MKT AI', status: 'active', task: 'Analisa Promo' },
-                { name: 'SUP AI', status: 'active', task: 'Cek Supplier' },
-                { name: 'SEC AI', status: 'active', task: 'Audit CCTV' }
+                { name: 'FIN AI', task: 'Audit Laporan' },
+                { name: 'OPS AI', task: 'Monitoring Stok' },
+                { name: 'HR AI',  task: 'Cek Absensi' },
+                { name: 'MKT AI', task: 'Analisa Promo' },
+                { name: 'SUP AI', task: 'Cek Supplier' },
+                { name: 'SEC AI', task: 'Audit CCTV' }
             ];
             const agentList = document.getElementById('agentList');
             agents.forEach(a => {
-                agentList.innerHTML += `
-                    <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
-                        <div class="flex items-center gap-2">
-                            <span class="dot active"></span>
-                            <span class="text-[10px] sm:text-xs font-bold text-white">${a.name}</span>
-                        </div>
-                        <span class="text-[9px] sm:text-[10px] text-white/40">${a.task}</span>
-                    </div>
-                `;
+                agentList.innerHTML += `<div class="flex items-center justify-between p-2 rounded-xl" style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15)">
+                    <div class="flex items-center gap-2"><span class="dot active"></span><span class="text-[10px] sm:text-xs font-bold text-white">${a.name}</span></div>
+                    <span class="text-[9px] sm:text-[10px] text-white/40">${a.task}</span>
+                </div>`;
             });
-            const logs = [
-                { time: '2m ago', msg: 'FIN AI: Laporan harian outlet A selesai' },
-                { time: '15m ago', msg: 'OPS AI: Stok beras kritis di outlet B' },
-                { time: '1h ago', msg: 'HR AI: 2 karyawan terlambat di outlet C' }
-            ];
-            const activityLog = document.getElementById('activityLog');
-            logs.forEach(l => {
-                activityLog.innerHTML += `
-                    <div class="flex gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                        <span class="text-[9px] sm:text-[10px] text-white/30 whitespace-nowrap">${l.time}</span>
-                        <span class="text-[11px] sm:text-xs text-white/70">${l.msg}</span>
-                    </div>
-                `;
-            });
+            loadDashboardMetrics();
         });
     </script>
 </body>

@@ -5,25 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="lunomi-core.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root { --brand-teal: #0D3B4A; --brand-gold: #C9A84C; }
         *{font-family:'Plus Jakarta Sans',sans-serif;}
-        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
-        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        body{min-height:100vh;background:#061820;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(13,59,74,0.65) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(201,168,76,0.07) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(13,59,74,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.2);}
         .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
         .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
-        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);}
-        .metric-card{position:relative;overflow:hidden;}
+        .input-glass:focus{outline:none;border-color:var(--brand-gold);}
+        .metric-card{position:relative;overflow:hidden;background:rgba(13,59,74,0.4);border:1px solid rgba(255,255,255,.08);}
         .metric-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
-        .mc-blue::before{background:#3b82f6;} .mc-green::before{background:#22c55e;}
+        .mc-blue::before{background:var(--brand-gold);} .mc-green::before{background:#22c55e;}
         .mc-amber::before{background:#f59e0b;} .mc-purple::before{background:#a78bfa;}
         .row-item{border-bottom:1px solid rgba(255,255,255,.06);}
-        .row-item:hover{background:rgba(255,255,255,.03);}
-        .period-btn{padding:.4rem .9rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);transition:all .2s;background:transparent;}
-        .period-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.6);color:white;}
-    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+        .row-item:hover{background:rgba(201,168,76,0.04);}
+        .period-btn{padding:.4rem .9rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);transition:all .2s ease;background:transparent;}
+        .period-btn.active{background:rgba(201,168,76,0.18);border-color:rgba(201,168,76,0.45);color:var(--brand-gold);}
+        button:focus-visible,a:focus-visible{outline:2px solid var(--brand-gold);outline-offset:2px;}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
@@ -31,7 +36,7 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>📈</span></div>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm" style="background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal)">📈</div>
             <div>
                 <div class="font-extrabold text-white text-sm">Analytics</div>
                 <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
@@ -169,14 +174,16 @@
         });
         payChart = new Chart(document.getElementById('payChart'), {
             type:'doughnut',
-            data:{labels:PAY_DATA.labels, datasets:[{data:PAY_DATA.data, backgroundColor:PAY_DATA.colors.map(c=>c+'cc'), borderColor:PAY_DATA.colors, borderWidth:2}]},
+            data:{labels:PAY_DATA.labels, datasets:[{data:PAY_DATA.data, backgroundColor:['rgba(201,168,76,0.8)','rgba(34,197,94,0.7)','rgba(168,132,58,0.7)','rgba(6,182,212,0.7)'], borderColor:['#C9A84C','#22c55e','#a8863a','#06b6d4'], borderWidth:2}]},
             options:{responsive:true, plugins:{legend:{display:false}}, cutout:'65%'}
         });
-        document.getElementById('payLegend').innerHTML = PAY_DATA.labels.map((l,i)=>`
-            <div class="flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full" style="background:${PAY_DATA.colors[i]}"></div><span style="color:rgba(255,255,255,.6)">${l}</span></div>
+        document.getElementById('payLegend').innerHTML = PAY_DATA.labels.map((l,i)=>{
+            const colors=['#C9A84C','#22c55e','#a8863a','#06b6d4'];
+            return `<div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full" style="background:${colors[i]}"></div><span style="color:rgba(255,255,255,.6)">${l}</span></div>
                 <span class="font-bold text-white">${PAY_DATA.data[i]}%</span>
-            </div>`).join('');
+            </div>`;
+        }).join('');
         document.getElementById('topProducts').innerHTML = TOP_PRODUCTS.map((p,i)=>`
             <div class="flex items-center gap-3">
                 <span class="w-4 text-xs font-bold" style="color:rgba(255,255,255,.3)">${i+1}</span>
@@ -192,12 +199,74 @@
                 <td class="py-2.5 text-right text-sm" style="color:rgba(255,255,255,.5)">${o.trx.toLocaleString()}</td>
             </tr>`).join('');
     }
+    function listenFirebaseAnalytics() {
+        if(!window.db) return;
+        window.db.collection('transactions').orderBy('timestamp','desc').limit(500)
+            .onSnapshot(snap => {
+                const txs = snap.docs.map(d => d.data());
+                const revenue = txs.reduce((s,t) => s+(t.total||0), 0);
+                const avg = txs.length ? Math.round(revenue/txs.length) : 0;
+
+                // Update KPIs
+                document.getElementById('kpi_rev').textContent  = 'Rp '+Math.round(revenue).toLocaleString('id-ID');
+                document.getElementById('kpi_trx').textContent  = txs.length;
+                document.getElementById('kpi_aov').textContent  = 'Rp '+avg.toLocaleString('id-ID');
+                document.getElementById('kpi_rev_d').textContent  = '🔥 Firebase LIVE';
+                document.getElementById('kpi_rev_d').style.color  = '#C9A84C';
+                document.getElementById('kpi_trx_d').textContent  = 'Semua waktu';
+
+                // Top products from real items
+                const counts = {};
+                txs.forEach(t => {
+                    (t.items||[]).forEach(item => {
+                        if(!counts[item.name]) counts[item.name]={rev:0,qty:0};
+                        counts[item.name].rev += (item.price||0)*(item.qty||1);
+                        counts[item.name].qty += (item.qty||1);
+                    });
+                });
+                const top = Object.entries(counts).sort((a,b)=>b[1].rev-a[1].rev).slice(0,5);
+                const maxRev = top[0] ? top[0][1].rev : 1;
+                document.getElementById('topProducts').innerHTML = top.length
+                    ? top.map(([name,d],i)=>`
+                        <div class="flex items-center gap-3">
+                            <span class="w-4 text-xs font-bold" style="color:rgba(255,255,255,.3)">${i+1}</span>
+                            <div class="flex-1">
+                                <div class="flex justify-between text-sm mb-1"><span class="font-semibold text-white">${name}</span><span class="font-bold text-white">Rp ${Math.round(d.rev).toLocaleString('id-ID')}</span></div>
+                                <div class="h-1.5 rounded-full" style="background:rgba(255,255,255,.1)"><div class="h-full rounded-full" style="width:${Math.round(d.rev/maxRev*100)}%;background:var(--brand-gold)"></div></div>
+                            </div>
+                        </div>`).join('')
+                    : '<div class="text-xs text-white/30">Belum ada data produk.</div>';
+
+                // Update chart with last 7 days
+                if(revenueChart) {
+                    const days = {};
+                    const now = new Date();
+                    for(let i=6;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i); days[d.toLocaleDateString('id-ID',{weekday:'short'})]=0; }
+                    txs.forEach(t => {
+                        if(!t.timestamp?.toDate) return;
+                        const d = t.timestamp.toDate();
+                        const key = d.toLocaleDateString('id-ID',{weekday:'short'});
+                        if(key in days) days[key] += (t.total||0)/1000000;
+                    });
+                    revenueChart.data.labels = Object.keys(days);
+                    revenueChart.data.datasets[0].data = Object.values(days).map(v=>Math.round(v*10)/10);
+                    revenueChart.update();
+                }
+            }, err => console.error('analytics:', err));
+
+        // Customers count
+        window.db.collection('customers').onSnapshot(snap => {
+            document.getElementById('kpi_cust').textContent = snap.size;
+            document.getElementById('kpi_cust_d').textContent = snap.size + ' terdaftar';
+        });
+    }
     document.addEventListener('DOMContentLoaded',()=>{
         try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
         const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
         if(outlet)document.getElementById('outletLabel').textContent=outlet.name;}
         catch(e){window.location.href='index.html';}
         initCharts();
+        listenFirebaseAnalytics();
     });
 </script>
 </body>

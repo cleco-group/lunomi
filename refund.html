@@ -3,37 +3,475 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi — Proses Retur</title>
+    <title>Lunomi — Proses Retur & Refund</title>
+    <meta name="description" content="Kelola retur dan refund transaksi Lunomi POS secara real-time dengan Firebase.">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>*{font-family:'Plus Jakarta Sans',sans-serif;}body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}.glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}.glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}</style>
+    <style>
+        :root {
+            --brand-teal: #0D3B4A;
+            --brand-gold: #C9A84C;
+        }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #061820;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 10% 0%, rgba(13,59,74,0.7) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 90% 100%, rgba(201,168,76,0.08) 0%, transparent 60%);
+            color: white;
+            overflow-x: hidden;
+        }
+        .glass-nav {
+            background: rgba(13,59,74,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(201,168,76,0.2);
+        }
+        .glass-card {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.09);
+        }
+        .card-gold {
+            background: rgba(201,168,76,0.07);
+            border: 1px solid rgba(201,168,76,0.2);
+        }
+        .input-glass {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: white;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input-glass::placeholder { color: rgba(255,255,255,0.3); }
+        .input-glass:focus {
+            outline: none;
+            border-color: var(--brand-gold);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, var(--brand-gold), #a8863a);
+            color: var(--brand-teal);
+            font-weight: 700;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-gold:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .btn-ghost {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.7);
+            transition: all 0.2s ease;
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.12); }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .status-approved { background: rgba(34,197,94,0.12); color: #4ade80; }
+        .status-pending  { background: rgba(251,191,36,0.12); color: #fbbf24; }
+        .status-rejected { background: rgba(239,68,68,0.12);  color: #f87171; }
+        .item-check {
+            accent-color: var(--brand-gold);
+            width: 1rem; height: 1rem;
+            cursor: pointer;
+        }
+        .toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            padding: .75rem 1.25rem; border-radius: 1rem;
+            font-size: .85rem; font-weight: 600; z-index: 999;
+            transform: translateY(100px); opacity: 0;
+            transition: all .3s ease;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast-success { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.3); color: #4ade80; }
+        .toast-error   { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); color: #f87171; }
+        button:focus-visible, a:focus-visible {
+            outline: 2px solid var(--brand-gold);
+            outline-offset: 2px;
+        }
+        @media(max-width:768px){ input,select,textarea { font-size: 16px !important; } }
+    </style>
 </head>
 <body>
+
+<!-- NAV -->
 <nav class="glass-nav sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">↩️</div>
-        <div><div class="font-extrabold text-white text-sm">Proses Retur</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='dashboard.html'" class="text-white/50 hover:text-white transition text-lg" aria-label="Kembali">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm" style="background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal)">↩</div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Retur & Refund</div>
+                <div class="text-xs" id="outletLabel" style="color:var(--brand-gold)">Semua Outlet</div>
+            </div>
+        </div>
+        <div class="text-xs font-semibold px-2 py-1 rounded-lg" id="fbStatus"
+             style="background:rgba(201,168,76,0.1);color:var(--brand-gold);border:1px solid rgba(201,168,76,0.3)">
+            ⏳ Connecting...
+        </div>
     </div>
 </nav>
-<div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <div class="text-6xl mb-6">↩️</div>
-    <h1 class="text-2xl font-extrabold text-white mb-2">Proses Retur</h1>
-    <p class="mb-8 max-w-md mx-auto" style="color:rgba(255,255,255,.5)">Kelola retur dan refund transaksi dengan mudah.</p>
-    <div class="glass-card rounded-2xl p-6 max-w-sm mx-auto text-left">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(255,255,255,.35)">Fitur yang akan hadir</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.6)"><li>✦ Retur produk dari transaksi</li><li>✦ Refund tunai & e-wallet</li><li>✦ Laporan retur per periode</li><li>✦ Approval retur manager</li></ul>
+
+<div class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- STEP 1: CARI TRANSAKSI -->
+    <div class="glass-card rounded-2xl p-5">
+        <h2 class="font-extrabold text-white text-sm mb-4">① Cari Transaksi yang Akan Diretur</h2>
+        <div class="flex gap-3 flex-wrap">
+            <input id="searchTxId" type="text" placeholder="Masukkan ID Transaksi (cth: TRX-20260505-...)"
+                   class="input-glass flex-1 min-w-[220px] px-4 py-2.5 rounded-xl text-sm">
+            <button onclick="searchTransaction()" class="btn-gold px-5 py-2.5 rounded-xl text-sm">
+                🔍 Cari
+            </button>
+        </div>
+        <p class="text-xs mt-2" style="color:rgba(255,255,255,0.35)">Atau klik transaksi dari riwayat di bawah.</p>
+
+        <!-- Result Card -->
+        <div id="txResult" class="hidden mt-4"></div>
     </div>
-    <button onclick="window.location.href='dashboard.html'" class="mt-8 px-6 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">← Kembali ke Dashboard</button>
+
+    <!-- STEP 2: FORM RETUR (hidden until transaction found) -->
+    <div id="returForm" class="hidden card-gold rounded-2xl p-5 space-y-4">
+        <h2 class="font-extrabold text-white text-sm">② Pilih Item & Alasan Retur</h2>
+
+        <div id="itemCheckList" class="space-y-2"></div>
+
+        <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,0.5)">Alasan Retur</label>
+            <select id="returReason" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm">
+                <option value="">— Pilih alasan —</option>
+                <option value="salah_pesanan">Salah Pesanan</option>
+                <option value="kualitas_buruk">Kualitas Tidak Sesuai</option>
+                <option value="pesanan_ganda">Pesanan Ganda / Double Order</option>
+                <option value="customer_batal">Customer Batalkan</option>
+                <option value="lainnya">Lainnya</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,0.5)">Metode Refund</label>
+            <div class="flex gap-2 flex-wrap">
+                <button onclick="selectRefundMethod('tunai')" id="method_tunai"
+                        class="px-3 py-2 rounded-xl text-xs font-semibold method-btn transition-all duration-200"
+                        style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6)">
+                    💵 Tunai
+                </button>
+                <button onclick="selectRefundMethod('ewallet')" id="method_ewallet"
+                        class="px-3 py-2 rounded-xl text-xs font-semibold method-btn transition-all duration-200"
+                        style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6)">
+                    📱 E-Wallet
+                </button>
+                <button onclick="selectRefundMethod('kredit')" id="method_kredit"
+                        class="px-3 py-2 rounded-xl text-xs font-semibold method-btn transition-all duration-200"
+                        style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6)">
+                    🏷️ Store Credit
+                </button>
+            </div>
+        </div>
+
+        <div>
+            <label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,0.5)">Catatan Tambahan (opsional)</label>
+            <textarea id="returNote" rows="2" placeholder="Tulis keterangan tambahan..."
+                      class="input-glass w-full px-4 py-2.5 rounded-xl text-sm resize-none"></textarea>
+        </div>
+
+        <div class="card-gold rounded-xl p-4 flex items-center justify-between">
+            <div>
+                <div class="text-xs text-white/50 mb-0.5">Total Refund</div>
+                <div class="text-2xl font-extrabold text-white" id="refundAmount">Rp 0</div>
+            </div>
+            <button id="submitBtn" onclick="submitRefund()" class="btn-gold px-6 py-3 rounded-xl text-sm">
+                ✔ Proses Retur
+            </button>
+        </div>
+    </div>
+
+    <!-- RIWAYAT RETUR -->
+    <div class="glass-card rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-extrabold text-white text-sm">📋 Riwayat Retur</h2>
+            <span class="text-xs" style="color:var(--brand-gold)" id="refundCount">0 retur</span>
+        </div>
+        <div id="refundHistory" class="space-y-3">
+            <div class="text-xs text-white/30 py-4 text-center">Belum ada retur tercatat.</div>
+        </div>
+    </div>
+
 </div>
+
+<div id="toast" class="toast"></div>
+
 <script>
-document.addEventListener('DOMContentLoaded',()=>{
-    try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
-    const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-    if(o)document.getElementById('outletLabel').textContent=o.name;}
-    catch(e){window.location.href='index.html';}
-});
+    // ═══ STATE ═══
+    let currentTx = null;
+    let selectedMethod = '';
+    const REASON_LABELS = {
+        salah_pesanan: 'Salah Pesanan',
+        kualitas_buruk: 'Kualitas Buruk',
+        pesanan_ganda: 'Pesanan Ganda',
+        customer_batal: 'Customer Batal',
+        lainnya: 'Lainnya'
+    };
+
+    // ═══ UTILS ═══
+    function rp(n) { return 'Rp ' + Math.round(n || 0).toLocaleString('id-ID'); }
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast toast-${type} show`;
+        setTimeout(() => t.classList.remove('show'), 2800);
+    }
+    function setFbStatus(ok) {
+        const el = document.getElementById('fbStatus');
+        if (ok) {
+            el.textContent = '🔥 Firebase LIVE';
+            el.style.color = '#4ade80';
+            el.style.borderColor = 'rgba(34,197,94,0.3)';
+            el.style.background = 'rgba(34,197,94,0.1)';
+        } else {
+            el.textContent = '⚠️ Offline';
+            el.style.color = '#fbbf24';
+        }
+    }
+
+    // ═══ SEARCH TRANSACTION ═══
+    async function searchTransaction() {
+        const txId = document.getElementById('searchTxId').value.trim();
+        const resultEl = document.getElementById('txResult');
+        if (!txId) { showToast('Masukkan ID transaksi terlebih dahulu.', 'error'); return; }
+        if (!window.db) { showToast('Firebase tidak terhubung.', 'error'); return; }
+
+        resultEl.innerHTML = '<div class="text-xs text-white/40 py-3">🔍 Mencari...</div>';
+        resultEl.classList.remove('hidden');
+
+        try {
+            const snap = await window.db.collection('transactions').where('id', '==', txId).limit(1).get();
+            if (snap.empty) {
+                resultEl.innerHTML = `<div class="p-3 rounded-xl text-xs" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171">Transaksi <b>${txId}</b> tidak ditemukan. Periksa kembali ID transaksi.</div>`;
+                document.getElementById('returForm').classList.add('hidden');
+                return;
+            }
+            const doc = snap.docs[0];
+            loadTransaction({ docId: doc.id, ...doc.data() });
+        } catch(e) {
+            console.error(e);
+            resultEl.innerHTML = `<div class="text-xs text-red-400 p-3">Gagal mencari: ${e.message}</div>`;
+        }
+    }
+
+    function loadTransaction(tx) {
+        currentTx = tx;
+        const resultEl = document.getElementById('txResult');
+        const items = tx.items || [];
+        const dateStr = tx.timestamp?.toDate ? tx.timestamp.toDate().toLocaleString('id-ID') : (tx.date || '');
+
+        resultEl.innerHTML = `
+            <div class="p-4 rounded-xl" style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25)">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <div class="font-extrabold text-white text-sm">${tx.id}</div>
+                        <div class="text-xs" style="color:rgba(255,255,255,0.45)">${dateStr}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-extrabold text-white">${rp(tx.total)}</div>
+                        <div class="text-xs" style="color:rgba(255,255,255,0.45)">${items.length} item</div>
+                    </div>
+                </div>
+                <div class="text-xs text-white/50">${items.map(i => `${i.name} x${i.qty}`).join(' · ')}</div>
+            </div>`;
+
+        // Build item checklist
+        const listEl = document.getElementById('itemCheckList');
+        listEl.innerHTML = items.map((item, idx) => `
+            <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 hover:bg-white/5" style="border:1px solid rgba(255,255,255,0.07)">
+                <input type="checkbox" class="item-check" data-idx="${idx}" data-price="${item.price}" data-qty="${item.qty}" onchange="calcRefundAmount()">
+                <div class="flex-1">
+                    <div class="text-sm font-semibold text-white">${item.name}</div>
+                    <div class="text-xs" style="color:rgba(255,255,255,0.45)">${rp(item.price)} × ${item.qty}</div>
+                </div>
+                <div class="font-bold text-white text-sm">${rp(item.price * item.qty)}</div>
+            </label>`).join('');
+
+        document.getElementById('returForm').classList.remove('hidden');
+        calcRefundAmount();
+    }
+
+    function calcRefundAmount() {
+        let total = 0;
+        document.querySelectorAll('.item-check:checked').forEach(cb => {
+            total += parseInt(cb.dataset.price) * parseInt(cb.dataset.qty);
+        });
+        document.getElementById('refundAmount').textContent = rp(total);
+    }
+
+    function selectRefundMethod(method) {
+        selectedMethod = method;
+        document.querySelectorAll('.method-btn').forEach(btn => {
+            btn.style.background = 'rgba(255,255,255,0.07)';
+            btn.style.borderColor = 'rgba(255,255,255,0.15)';
+            btn.style.color = 'rgba(255,255,255,0.6)';
+        });
+        const active = document.getElementById('method_' + method);
+        if (active) {
+            active.style.background = 'rgba(201,168,76,0.18)';
+            active.style.borderColor = 'rgba(201,168,76,0.45)';
+            active.style.color = '#C9A84C';
+        }
+    }
+
+    // ═══ SUBMIT REFUND (TypeChat-style validation) ═══
+    async function submitRefund() {
+        if (!currentTx) return;
+
+        const checkedItems = [];
+        document.querySelectorAll('.item-check:checked').forEach(cb => {
+            const idx = parseInt(cb.dataset.idx);
+            checkedItems.push(currentTx.items[idx]);
+        });
+        const reason = document.getElementById('returReason').value;
+        const note   = document.getElementById('returNote').value.trim();
+        const amount = checkedItems.reduce((s, i) => s + i.price * i.qty, 0);
+
+        // ── TypeChat-style strict validation ──
+        const errors = [];
+        if (!checkedItems.length)  errors.push('Pilih minimal 1 item untuk diretur.');
+        if (!reason)               errors.push('Pilih alasan retur.');
+        if (!selectedMethod)       errors.push('Pilih metode refund.');
+        if (amount <= 0)           errors.push('Jumlah refund tidak valid.');
+
+        if (errors.length) { showToast(errors[0], 'error'); return; }
+
+        // ── Structured refund object (validated schema) ──
+        const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || 'null');
+        const refundDoc = {
+            refundId:     'RFD-' + Date.now(),
+            originalTxId: currentTx.id,
+            originalDocId:currentTx.docId || '',
+            items:        checkedItems,
+            amount:       amount,
+            reason:       reason,
+            reasonLabel:  REASON_LABELS[reason] || reason,
+            method:       selectedMethod,
+            note:         note,
+            status:       'approved',
+            outlet_id:    outlet ? outlet.id : '',
+            processedBy:  JSON.parse(localStorage.getItem('lunomi_session') || '{}').name || 'Kasir',
+            timestamp:    firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        const btn = document.getElementById('submitBtn');
+        btn.textContent = 'Memproses...';
+        btn.disabled = true;
+
+        try {
+            await window.db.collection('refunds').add(refundDoc);
+            // Mark original transaction as partially-refunded
+            if (currentTx.docId) {
+                await window.db.collection('transactions').doc(currentTx.docId).update({
+                    hasRefund: true,
+                    refundAmount: firebase.firestore.FieldValue.increment(amount)
+                });
+            }
+            showToast(`✔ Refund ${rp(amount)} berhasil diproses!`);
+            // Reset form
+            currentTx = null; selectedMethod = '';
+            document.getElementById('returForm').classList.add('hidden');
+            document.getElementById('txResult').classList.add('hidden');
+            document.getElementById('searchTxId').value = '';
+        } catch(e) {
+            console.error(e);
+            showToast('Gagal menyimpan ke Cloud: ' + e.message, 'error');
+        } finally {
+            btn.textContent = '✔ Proses Retur';
+            btn.disabled = false;
+        }
+    }
+
+    // ═══ LISTEN REFUND HISTORY (real-time) ═══
+    function listenRefunds() {
+        if (!window.db) { setFbStatus(false); return; }
+        setFbStatus(true);
+
+        window.db.collection('refunds')
+            .orderBy('timestamp', 'desc')
+            .limit(20)
+            .onSnapshot(snap => {
+                const el = document.getElementById('refundHistory');
+                document.getElementById('refundCount').textContent = snap.size + ' retur';
+                if (snap.empty) {
+                    el.innerHTML = '<div class="text-xs text-white/30 py-4 text-center">Belum ada retur tercatat.</div>';
+                    return;
+                }
+                el.innerHTML = '';
+                snap.forEach(doc => {
+                    const r = doc.data();
+                    const t = r.timestamp?.toDate ? r.timestamp.toDate().toLocaleString('id-ID') : '—';
+                    el.innerHTML += `
+                        <div class="flex items-start justify-between p-4 rounded-xl" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07)">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                    <span class="font-mono text-xs font-bold text-white">${r.refundId}</span>
+                                    <span class="status-badge status-${r.status || 'approved'}">${r.status === 'approved' ? '✓ Disetujui' : r.status}</span>
+                                </div>
+                                <div class="text-xs text-white/50 mb-0.5">Dari: <span class="text-white/70">${r.originalTxId}</span></div>
+                                <div class="text-xs text-white/40">${r.reasonLabel || r.reason} · ${r.method} · ${t}</div>
+                                ${r.note ? `<div class="text-xs mt-1 italic text-white/35">"${r.note}"</div>` : ''}
+                            </div>
+                            <div class="text-right ml-4 flex-shrink-0">
+                                <div class="font-extrabold text-white">${rp(r.amount)}</div>
+                                <div class="text-[10px] text-white/40 mt-0.5">${r.processedBy || 'Kasir'}</div>
+                            </div>
+                        </div>`;
+                });
+            }, err => {
+                console.error(err);
+                if (err.code === 'failed-precondition') {
+                    // Fallback without orderBy
+                    window.db.collection('refunds').limit(20).onSnapshot(snap => {
+                        document.getElementById('refundCount').textContent = snap.size + ' retur';
+                    });
+                }
+            });
+    }
+
+    // ═══ ALSO: load recent transactions for quick select ═══
+    function loadRecentTx() {
+        if (!window.db) return;
+        window.db.collection('transactions').orderBy('timestamp', 'desc').limit(8)
+            .onSnapshot(snap => {
+                if (snap.empty) return;
+                const hintEl = document.querySelector('#searchTxId').parentElement.nextElementSibling;
+                if (!hintEl) return;
+                const ids = snap.docs.map(d => d.data().id).filter(Boolean);
+                hintEl.innerHTML = `<p class="text-xs mt-2" style="color:rgba(255,255,255,0.35)">Transaksi terakhir: ${ids.map(id =>
+                    `<button onclick="document.getElementById('searchTxId').value='${id}';searchTransaction()"
+                     class="underline hover:text-white transition ml-1" style="color:var(--brand-gold)">${id.slice(-8)}</button>`
+                ).join('')}</p>`;
+            });
+    }
+
+    // ═══ INIT ═══
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            const s = localStorage.getItem('lunomi_session');
+            if (!s) { window.location.href = 'index.html'; return; }
+            const o = JSON.parse(localStorage.getItem('lunomi_outlet') || 'null');
+            if (o) document.getElementById('outletLabel').textContent = o.name;
+        } catch(e) { window.location.href = 'index.html'; }
+
+        listenRefunds();
+        loadRecentTx();
+    });
 </script>
 </body>
 </html>

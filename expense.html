@@ -5,24 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Pengeluaran OPEX</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root { --brand-teal: #0D3B4A; --brand-gold: #C9A84C; }
         *{font-family:'Plus Jakarta Sans',sans-serif;}
-        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
-        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        body{min-height:100vh;background:#061820;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(13,59,74,0.65) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(201,168,76,0.07) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(13,59,74,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.2);}
         .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
         .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
         .input-glass::placeholder{color:rgba(255,255,255,.3);}
-        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
-        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
-        .btn-primary:hover{transform:translateY(-1px);}
+        .input-glass:focus{outline:none;border-color:var(--brand-gold);box-shadow:0 0 0 3px rgba(201,168,76,0.15);}
+        .btn-primary{background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal);font-weight:700;cursor:pointer;transition:all .2s ease;border:none;}
+        .btn-primary:hover{transform:translateY(-1px);opacity:.9;}
         .row-item{border-bottom:1px solid rgba(255,255,255,.06);transition:background .15s;}
-        .row-item:hover{background:rgba(255,255,255,.03);}
+        .row-item:hover{background:rgba(201,168,76,0.04);}
         .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(8px);}
-        .modal-box{background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:1.25rem;}
+        .modal-box{background:var(--brand-teal);border:1px solid rgba(201,168,76,0.2);border-radius:1.25rem;}
         .cat-badge{display:inline-block;padding:.2rem .6rem;border-radius:9999px;font-size:.68rem;font-weight:700;}
-        .metric-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
+        .metric-card{background:rgba(13,59,74,0.4);border:1px solid rgba(255,255,255,.08);transition:transform 0.2s ease;}
+        .metric-card:hover{transform:translateY(-1px);}
+        button:focus-visible,a:focus-visible{outline:2px solid var(--brand-gold);outline-offset:2px;}
         @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
@@ -31,7 +37,7 @@
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>💸</span></div>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm" style="background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal)">💸</div>
             <div>
                 <div class="font-extrabold text-white text-sm">Pengeluaran Operasional</div>
                 <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
@@ -141,10 +147,9 @@
         'Gaji & Upah':'👥','Listrik & Air':'💡','Sewa':'🏠',
         'Bahan Baku':'🥩','Marketing':'📣','Perawatan':'🔧','Lain-lain':'📎'
     };
-    let editingId=null;
-    let toastTimer=null;
-    function getExpenses(){return JSON.parse(localStorage.getItem('lunomi_expenses')||'[]');}
-    function saveExpenses(e){localStorage.setItem('lunomi_expenses',JSON.stringify(e));}
+    let expenses = [];
+    let editingId = null;
+    let toastTimer = null;
     function rp(n){return'Rp '+Math.max(0,n).toLocaleString('id-ID');}
     function showToast(msg, type='success'){
         clearTimeout(toastTimer);
@@ -180,51 +185,59 @@
         document.getElementById('expDesc').focus();
     }
     function closeAddModal(){document.getElementById('addModal').classList.add('hidden');}
-    function saveExpense(){
-        const date=document.getElementById('expDate').value;
-        const cat=document.getElementById('expCat').value;
-        const desc=document.getElementById('expDesc').value.trim();
-        const amount=parseFloat(document.getElementById('expAmount').value)||0;
-        const note=document.getElementById('expNote').value.trim();
-        const err=document.getElementById('expError');
-        if(!date){err.textContent='Tanggal harus diisi.';err.classList.remove('hidden');return;}
-        if(!desc){err.textContent='Deskripsi harus diisi.';err.classList.remove('hidden');return;}
-        if(amount<=0){err.textContent='Jumlah harus lebih dari 0.';err.classList.remove('hidden');return;}
-        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-        const exps=getExpenses();
-        if(editingId){
-            const idx=exps.findIndex(x=>x.id===editingId);
-            if(idx>=0) exps[idx]={...exps[idx],date,cat,desc,amount,note};
-        } else {
-            exps.unshift({id:'EXP-'+Date.now(),date,cat,desc,amount,note,outlet_id:outlet?outlet.id:''});
+    async function saveExpense(){
+        const date   = document.getElementById('expDate').value;
+        const cat    = document.getElementById('expCat').value;
+        const desc   = document.getElementById('expDesc').value.trim();
+        const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+        const note   = document.getElementById('expNote').value.trim();
+        const err    = document.getElementById('expError');
+        if(!date)  { err.textContent='Tanggal harus diisi.';  err.classList.remove('hidden'); return; }
+        if(!desc)  { err.textContent='Deskripsi harus diisi.'; err.classList.remove('hidden'); return; }
+        if(amount<=0){ err.textContent='Jumlah harus lebih dari 0.'; err.classList.remove('hidden'); return; }
+        const outlet = JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        const btn = document.getElementById('saveBtn');
+        btn.textContent = 'Menyimpan...'; btn.disabled = true;
+        try {
+            if(editingId) {
+                await window.db.collection('expenses').doc(editingId).update({date,cat,desc,amount,note});
+                showToast('Pengeluaran diperbarui!','success');
+            } else {
+                await window.db.collection('expenses').add({
+                    id: 'EXP-'+Date.now(), date, cat, desc, amount, note,
+                    outlet_id: outlet ? outlet.id : '',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Pengeluaran dicatat!','success');
+            }
+            closeAddModal();
+        } catch(e) {
+            err.textContent = 'Gagal menyimpan: ' + e.message;
+            err.classList.remove('hidden');
+        } finally {
+            btn.textContent = 'Simpan'; btn.disabled = false;
         }
-        saveExpenses(exps);
-        closeAddModal();
-        renderList();
-        updateStats();
-        showToast(editingId?'Pengeluaran diperbarui!':'Pengeluaran dicatat!','success');
     }
-    function deleteExpense(id){
-        if(!confirm('Hapus catatan ini?'))return;
-        const exps=getExpenses().filter(x=>x.id!==id);
-        saveExpenses(exps);
-        renderList();
-        updateStats();
-        showToast('Catatan dihapus','info');
+    async function deleteExpense(docId){
+        if(!confirm('Hapus catatan ini?')) return;
+        try {
+            await window.db.collection('expenses').doc(docId).delete();
+            showToast('Catatan dihapus','info');
+        } catch(e) { showToast('Gagal hapus','error'); }
     }
     function renderList(){
         const q=(document.getElementById('searchExp').value||'').toLowerCase();
         const cf=document.getElementById('filterCat').value;
         const mf=document.getElementById('filterMonth').value;
-        let exps=getExpenses().filter(e=>{
-            const mKey=e.date.slice(0,7);
+        let filtered=expenses.filter(e=>{
+            const mKey=(e.date||'').slice(0,7);
             return(!q||e.desc.toLowerCase().includes(q))&&(cf==='all'||e.cat===cf)&&(!mf||mKey===mf);
         });
         const list=document.getElementById('expenseList');
         const empty=document.getElementById('emptyState');
-        if(!exps.length){list.innerHTML='';empty.classList.remove('hidden');return;}
+        if(!filtered.length){list.innerHTML='';empty.classList.remove('hidden');return;}
         empty.classList.add('hidden');
-        list.innerHTML=exps.map(e=>{
+        list.innerHTML=filtered.map(e=>{
             const cs=CAT_COLORS[e.cat]||CAT_COLORS['Lain-lain'];
             const ico=CAT_ICONS[e.cat]||'📎';
             return`<div class="row-item px-5 py-3.5 flex items-center justify-between">
@@ -244,36 +257,46 @@
                         ${e.note?`<div class="text-xs" style="color:rgba(255,255,255,.3)">${e.note}</div>`:''}
                     </div>
                     <div class="flex flex-col gap-1">
-                        <button onclick="openAddModal('${e.id}')" class="text-xs px-2 py-1 rounded-lg font-semibold" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)">Edit</button>
-                        <button onclick="deleteExpense('${e.id}')" class="text-xs px-2 py-1 rounded-lg font-semibold" style="background:rgba(239,68,68,.1);color:#f87171">Hapus</button>
+                        <button onclick="openAddModal('${e.docId}')" class="text-xs px-2 py-1 rounded-lg font-semibold" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)">Edit</button>
+                        <button onclick="deleteExpense('${e.docId}')" class="text-xs px-2 py-1 rounded-lg font-semibold" style="background:rgba(239,68,68,.1);color:#f87171">Hapus</button>
                     </div>
                 </div>
             </div>`;
         }).join('');
     }
     function updateStats(){
-        const exps=getExpenses();
-        const today=new Date().toISOString().split('T')[0];
-        const nowMonth=today.slice(0,7);
-        const todayTotal=exps.filter(e=>e.date===today).reduce((s,e)=>s+e.amount,0);
-        const monthExps=exps.filter(e=>e.date.startsWith(nowMonth));
-        const monthTotal=monthExps.reduce((s,e)=>s+e.amount,0);
-        // Find biggest category this month
-        const catTotals={};
+        const today = new Date().toISOString().split('T')[0];
+        const nowMonth = today.slice(0,7);
+        const todayTotal = expenses.filter(e=>e.date===today).reduce((s,e)=>s+e.amount,0);
+        const monthExps  = expenses.filter(e=>(e.date||'').startsWith(nowMonth));
+        const monthTotal = monthExps.reduce((s,e)=>s+e.amount,0);
+        const catTotals  = {};
         monthExps.forEach(e=>{catTotals[e.cat]=(catTotals[e.cat]||0)+e.amount;});
-        const bigCat=Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
-        document.getElementById('statToday').textContent=rp(todayTotal);
-        document.getElementById('statMonth').textContent=rp(monthTotal);
-        document.getElementById('statCount').textContent=exps.length;
-        document.getElementById('statBiggest').textContent=bigCat?bigCat[0]:'—';
+        const bigCat = Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
+        document.getElementById('statToday').textContent   = rp(todayTotal);
+        document.getElementById('statMonth').textContent   = rp(monthTotal);
+        document.getElementById('statCount').textContent   = expenses.length;
+        document.getElementById('statBiggest').textContent = bigCat ? bigCat[0] : '—';
     }
     function populateMonthFilter(){
-        const exps=getExpenses();
-        const months=[...new Set(exps.map(e=>e.date.slice(0,7)))].sort().reverse();
-        const sel=document.getElementById('filterMonth');
-        const cur=sel.value;
-        sel.innerHTML='<option value="">Semua Bulan</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');
-        if(months.includes(cur)) sel.value=cur;
+        const months = [...new Set(expenses.map(e=>(e.date||'').slice(0,7)))].filter(Boolean).sort().reverse();
+        const sel = document.getElementById('filterMonth');
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">Semua Bulan</option>' + months.map(m=>`<option value="${m}">${m}</option>`).join('');
+        if(months.includes(cur)) sel.value = cur;
+    }
+    function listenExpenses() {
+        if(!window.db) return;
+        const outlet = JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        let q = window.db.collection('expenses').orderBy('timestamp','desc');
+        if(outlet && outlet.id) q = window.db.collection('expenses').where('outlet_id','==',outlet.id).orderBy('timestamp','desc');
+        q.onSnapshot(snap => {
+            expenses = [];
+            snap.forEach(doc => expenses.push({ docId: doc.id, ...doc.data() }));
+            populateMonthFilter();
+            renderList();
+            updateStats();
+        }, err => console.error('Expense listen:', err));
     }
     document.addEventListener('DOMContentLoaded',()=>{
         try{
@@ -282,9 +305,7 @@
             const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
             if(o) document.getElementById('outletLabel').textContent=o.name;
         }catch(e){window.location.href='index.html';}
-        populateMonthFilter();
-        renderList();
-        updateStats();
+        listenExpenses();
     });
 </script>
 </body>

@@ -5,29 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Invoice</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root { --brand-teal: #0D3B4A; --brand-gold: #C9A84C; }
         *{font-family:'Plus Jakarta Sans',sans-serif;}
-        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}
-        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
-        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        body{min-height:100vh;background:#061820;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(13,59,74,0.65) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(201,168,76,0.07) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(13,59,74,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.2);}
+        .glass-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);}
         .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
         .input-glass::placeholder{color:rgba(255,255,255,.3);}
-        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
-        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
-        .btn-primary:hover{transform:translateY(-1px);}
+        .input-glass:focus{outline:none;border-color:var(--brand-gold);box-shadow:0 0 0 3px rgba(201,168,76,0.15);}
+        .btn-primary{background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal);font-weight:700;cursor:pointer;border:none;transition:all .2s ease;}
+        .btn-primary:hover{transform:translateY(-1px);opacity:.9;}
         .status-paid{background:rgba(34,197,94,.12);color:#4ade80;}
         .status-pending{background:rgba(245,158,11,.12);color:#fbbf24;}
         .status-sent{background:rgba(59,130,246,.12);color:#60a5fa;}
         .row-item{border-bottom:1px solid rgba(255,255,255,.06);}
-        .row-item:hover{background:rgba(255,255,255,.03);}
+        .row-item:hover{background:rgba(201,168,76,0.04);}
         .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(4px);}
         .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;}
         .toast.show{transform:translateY(0);opacity:1;}
         .toast-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+        button:focus-visible,a:focus-visible{outline:2px solid var(--brand-gold);outline-offset:2px;}
         @media print{.no-print{display:none!important;}}
-    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
@@ -35,7 +40,7 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>🧾</span></div>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm" style="background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal)">🧾</div>
             <div>
                 <div class="font-extrabold text-white text-sm">Manajemen Invoice</div>
                 <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
@@ -118,17 +123,12 @@
 </div>
 <div id="toast" class="toast toast-success"></div>
 <script>
-    let invoices = [
-        {id:'INV-202605-001', cust:'PT Sejahtera',      date:'2026-05-01', sub:44000,  ppn:4400,  total:48400,  status:'paid'},
-        {id:'INV-202605-002', cust:'CV Maju Jaya',      date:'2026-05-01', sub:132000, ppn:13200, total:145200, status:'paid'},
-        {id:'INV-202604-018', cust:'Budi Santoso',      date:'2026-04-28', sub:88000,  ppn:8800,  total:96800,  status:'sent'},
-        {id:'INV-202604-017', cust:'PT Berkah Mandiri', date:'2026-04-25', sub:220000, ppn:22000, total:242000, status:'paid'},
-        {id:'INV-202604-016', cust:'Ahmad Fauzi',       date:'2026-04-20', sub:55000,  ppn:5500,  total:60500,  status:'pending'},
-    ];
+    let invoices = [];
     let invItemsList = [];
     function genInvNo(){
         const d=new Date(); const m=String(d.getMonth()+1).padStart(2,'0');
-        return `INV-${d.getFullYear()}${m}-${String(invoices.length+1).padStart(3,'0')}`;
+        const rnd=Math.floor(Math.random()*10000).toString().padStart(4,'0');
+        return `INV-${d.getFullYear()}${m}-${rnd}`;
     }
     function rp(n){return'Rp '+n.toLocaleString('id-ID');}
     function renderTable(){
@@ -193,7 +193,7 @@
         document.getElementById('createModal').classList.remove('hidden');
     }
     function closeCreate(){ document.getElementById('createModal').classList.add('hidden'); }
-    function saveInvoice(){
+    async function saveInvoice(){
         const cust=document.getElementById('invCust').value.trim();
         const err=document.getElementById('invErr');
         if(!cust){err.textContent='Nama customer harus diisi.';err.classList.remove('hidden');return;}
@@ -201,12 +201,32 @@
         const sub=parseInt(subText.replace(/[^\d]/g,''))||0;
         if(sub===0){err.textContent='Tambahkan minimal 1 item dengan harga.';err.classList.remove('hidden');return;}
         const ppn=Math.round(sub*0.1);
-        invoices.unshift({
+        
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        const newInv = {
             id:document.getElementById('invNo').value,
             cust, date:document.getElementById('invDate').value,
-            sub, ppn, total:sub+ppn, status:'pending'
-        });
-        closeCreate(); renderTable(); showToast('Invoice berhasil dibuat');
+            sub, ppn, total:sub+ppn, status:'pending',
+            outlet_id: outlet ? outlet.id : '',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        const btn = document.querySelector('#createModal .btn-primary');
+        const ogText = btn.innerText;
+        btn.innerText = "Menyimpan...";
+        btn.disabled = true;
+
+        try {
+            await window.db.collection("invoices").add(newInv);
+            closeCreate(); 
+            showToast('Invoice berhasil dibuat & sinkron Cloud!');
+        } catch(e) {
+            console.error(e);
+            err.textContent='Gagal menyimpan ke Cloud.';err.classList.remove('hidden');
+        } finally {
+            btn.innerText = ogText;
+            btn.disabled = false;
+        }
     }
     function previewInv(id){
         const inv=invoices.find(x=>x.id===id);
@@ -228,20 +248,46 @@
     function closePreview(){ document.getElementById('previewModal').classList.add('hidden'); }
     function printInvoice(){ window.print(); }
     function mockAction(type){ showToast(`${type} dikirim (simulasi)`); }
-    function markPaid(id){
-        invoices.find(x=>x.id===id).status='paid';
-        renderTable(); showToast('Invoice ditandai lunas');
+    async function markPaid(id){
+        const inv=invoices.find(x=>x.id===id);
+        if(!inv || !inv.docId) return;
+        try {
+            await window.db.collection("invoices").doc(inv.docId).update({ status: 'paid' });
+            showToast('Invoice ditandai lunas di Cloud');
+        } catch(e) { console.error(e); }
     }
     function showToast(msg){
         const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
         setTimeout(()=>t.classList.remove('show'),2500);
     }
+    function listenToInvoices() {
+        if(!window.db) return;
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        let query = window.db.collection("invoices").orderBy("timestamp", "desc");
+        if (outlet && outlet.id) {
+            query = window.db.collection("invoices").where("outlet_id", "==", outlet.id).orderBy("timestamp", "desc");
+        }
+        
+        query.onSnapshot((snapshot) => {
+            invoices = [];
+            snapshot.forEach((doc) => {
+                invoices.push({ docId: doc.id, ...doc.data() });
+            });
+            renderTable();
+        }, (error) => {
+            console.error("Firebase listen error:", error);
+            if(error.code === 'failed-precondition') {
+                showToast('Index Firestore sedang dibangun, query fallback aktif.', 'warning');
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded',()=>{
         try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
         const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
         if(outlet)document.getElementById('outletLabel').textContent=outlet.name;}
         catch(e){window.location.href='index.html';}
-        renderTable();
+        listenToInvoices();
     });
 </script>
 </body>

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi POS - Kasir Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -412,12 +415,23 @@
             const sub=cart.reduce((s,i)=>s+(i.p*i.q),0);
             const gross=sub+Math.round(sub*0.1);
             err.classList.add('hidden');
-            if(v<=0){err.textContent='Masukkan jumlah diskon yang valid.';err.classList.remove('hidden');return;}
-            if(type==='percent'&&v>100){err.textContent='Persentase tidak boleh lebih dari 100%.';err.classList.remove('hidden');return;}
-            if(type==='nominal'&&v>=gross){err.textContent='Diskon tidak boleh melebihi total tagihan.';err.classList.remove('hidden');return;}
-            disco=type==='percent'?Math.round(gross*v/100):Math.round(v);
-            calc();closeDiskon();
-            showToast(`Diskon ${type==='percent'?v+'%':rp(disco)} diterapkan`,'success');
+            
+            // ── TypeChat-style strict validation schema ──
+            const errors = [];
+            if(isNaN(v) || v <= 0) errors.push('Jumlah diskon harus berupa angka positif yang valid.');
+            if(type !== 'percent' && type !== 'nominal') errors.push('Tipe diskon tidak dikenali.');
+            if(type === 'percent' && v > 100) errors.push('Persentase diskon tidak boleh melebihi 100%.');
+            if(type === 'nominal' && v >= gross) errors.push('Nominal diskon tidak boleh melebihi atau sama dengan total tagihan (' + rp(gross) + ').');
+            
+            if(errors.length > 0) {
+                err.innerHTML = errors.map(e => `• ${e}`).join('<br>');
+                err.classList.remove('hidden');
+                return;
+            }
+
+            disco = type === 'percent' ? Math.round(gross * v / 100) : Math.round(v);
+            calc(); closeDiskon();
+            showToast(`Diskon ${type === 'percent' ? v + '%' : rp(disco)} diterapkan`, 'success');
         }
         function openPayment(){
             if(!cart.length)return;
@@ -445,10 +459,15 @@
             if(ch<0){cr.classList.add('hidden');ir.classList.remove('hidden');cb.disabled=true;}
             else{ir.classList.add('hidden');cr.classList.remove('hidden');document.getElementById('changeAmt').textContent=rp(ch);cb.disabled=false;}
         }
-        function processPayment(){
+        async function processPayment(){
             const m=document.querySelector('input[name="payMethod"]:checked').value;
             const mMap={cash:'💵 Tunai',card:'💳 Kartu',ewallet:'📱 E-Wallet',bank:'🏦 Transfer'};
             const trxId=document.getElementById('payTrxId').textContent;
+            const cb=document.getElementById('confirmPayBtn');
+            const originalText = cb.innerHTML;
+            cb.innerHTML = "Memproses...";
+            cb.disabled = true;
+
             // Deduct menu stock AND raw material stock via RecipeManager
             const stk=getMenuStock();
             cart.forEach(i=>{
@@ -459,17 +478,41 @@
                 }
             });
             saveMenuStock(stk);
-            // Save transaction to localStorage
+
             const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-            const trxs=JSON.parse(localStorage.getItem('lunomi_transactions')||'[]');
-            trxs.unshift({id:trxId,date:new Date().toISOString(),time:new Date().toTimeString().slice(0,5),total:currentTotal,method:m,items:cart.map(i=>({id:i.id,name:i.n,qty:i.q,price:i.p})),outlet_id:outlet?outlet.id:''});
-            localStorage.setItem('lunomi_transactions',JSON.stringify(trxs));
-            closePayment();
-            // Show Success Dialog instead of just toast
-            showSuccessDialog(trxId, currentTotal, mMap[m]);
-            HIST.unshift({id:trxId,t:new Date().toTimeString().slice(0,5),tot:currentTotal,st:'paid',itm:cart.reduce((s,i)=>s+i.q,0),m});
-            cart=[];disco=0;update();document.getElementById('trxId').textContent=genTrxId();
-            render();
+            const newTrx = {
+                id: trxId,
+                date: new Date().toISOString(),
+                time: new Date().toTimeString().slice(0,5),
+                total: currentTotal,
+                method: m,
+                items: cart.map(i=>({id:i.id,name:i.n,qty:i.q,price:i.p})),
+                outlet_id: outlet ? outlet.id : '',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'pending' // For kitchen sync
+            };
+
+            try {
+                // Simpan transaksi ke Firebase Firestore
+                await window.db.collection("transactions").add(newTrx);
+
+                // Tetap simpan ke localStorage sebagai cache/fallback lokal
+                const trxs=JSON.parse(localStorage.getItem('lunomi_transactions')||'[]');
+                trxs.unshift(newTrx);
+                localStorage.setItem('lunomi_transactions',JSON.stringify(trxs));
+
+                closePayment();
+                cb.innerHTML = originalText;
+                showSuccessDialog(trxId, currentTotal, mMap[m]);
+                HIST.unshift({id:trxId,t:new Date().toTimeString().slice(0,5),tot:currentTotal,st:'paid',itm:cart.reduce((s,i)=>s+i.q,0),m});
+                cart=[];disco=0;update();document.getElementById('trxId').textContent=genTrxId();
+                render();
+            } catch (error) {
+                console.error("Firebase Error:", error);
+                showToast("Gagal menyimpan transaksi ke Cloud!", "error");
+                cb.innerHTML = originalText;
+                cb.disabled = false;
+            }
         }
         function showSuccessDialog(id, total, method) {
             const modal = document.createElement('div');

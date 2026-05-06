@@ -5,31 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Customer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root { --brand-teal: #0D3B4A; --brand-gold: #C9A84C; }
         *{font-family:'Plus Jakarta Sans',sans-serif;}
-        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
-        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        body{min-height:100vh;background:#061820;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(13,59,74,0.65) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(201,168,76,0.07) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(13,59,74,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.2);}
         .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
         .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
         .input-glass::placeholder{color:rgba(255,255,255,.3);}
-        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
-        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
-        .btn-primary:hover{transform:translateY(-1px);}
+        .input-glass:focus{outline:none;border-color:var(--brand-gold);box-shadow:0 0 0 3px rgba(201,168,76,0.15);}
+        .btn-primary{background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal);font-weight:700;cursor:pointer;transition:all .2s ease;border:none;}
+        .btn-primary:hover{transform:translateY(-1px);opacity:.9;}
         .tier-platinum{background:rgba(139,92,246,.15);color:#c4b5fd;}
         .tier-gold{background:rgba(245,158,11,.15);color:#fcd34d;}
         .tier-silver{background:rgba(148,163,184,.15);color:#cbd5e1;}
         .tier-bronze{background:rgba(217,119,6,.15);color:#fbbf24;}
         .row-item{border-bottom:1px solid rgba(255,255,255,.06);transition:background .15s;}
-        .row-item:hover{background:rgba(255,255,255,.03);}
+        .row-item:hover{background:rgba(201,168,76,0.04);}
         .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(4px);}
         .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;}
         .toast.show{transform:translateY(0);opacity:1;}
         .toast-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
-        .filter-btn{padding:.4rem .9rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);}
-        .filter-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.6);color:white;}
-    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+        .filter-btn{padding:.4rem .9rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s ease;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);}
+        .filter-btn.active{background:rgba(201,168,76,0.18);border-color:rgba(201,168,76,0.45);color:var(--brand-gold);}
+        button:focus-visible,a:focus-visible{outline:2px solid var(--brand-gold);outline-offset:2px;}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
@@ -37,10 +42,10 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>👥</span></div>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm" style="background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal)">👥</div>
             <div>
                 <div class="font-extrabold text-white text-sm">Customer</div>
-                <div class="text-xs" style="color:rgba(255,255,255,.4)" id="outletLabel">Semua Outlet</div>
+                <div class="text-xs" style="color:var(--brand-gold)" id="outletLabel">Semua Outlet</div>
             </div>
         </div>
         <button onclick="openAddModal()" class="btn-primary px-4 py-2 rounded-xl text-xs flex items-center gap-2">+ Tambah Customer</button>
@@ -48,10 +53,10 @@
 </nav>
 <div class="max-w-6xl mx-auto px-4 py-6">
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Customer</div><div class="text-2xl font-extrabold text-white">485</div></div>
-        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(139,92,246,.7)">Platinum</div><div class="text-2xl font-extrabold text-purple-400">45</div></div>
-        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(245,158,11,.7)">Gold</div><div class="text-2xl font-extrabold text-amber-400">128</div></div>
-        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Silver + Bronze</div><div class="text-2xl font-extrabold text-slate-300">312</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Customer</div><div class="text-2xl font-extrabold text-white" id="statTotal">0</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(139,92,246,.7)">Platinum</div><div class="text-2xl font-extrabold text-purple-400" id="statPlatinum">0</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(245,158,11,.7)">Gold</div><div class="text-2xl font-extrabold text-amber-400" id="statGold">0</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Silver + Bronze</div><div class="text-2xl font-extrabold text-slate-300" id="statSilverBronze">0</div></div>
     </div>
     <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
         <input id="searchInput" type="text" placeholder="🔍  Cari nama / nomor HP..." class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[200px]" oninput="renderTable()">
@@ -105,17 +110,7 @@
 </div>
 <div id="toast" class="toast toast-success"></div>
 <script>
-    const MOCK = [
-        {id:1, name:'Budi Santoso',   phone:'0812-1234-5678', email:'budi@gmail.com', tier:'Platinum', total:12500000, points:1250},
-        {id:2, name:'Siti Rahayu',    phone:'0813-2345-6789', email:'siti@gmail.com',  tier:'Gold',     total:7800000,  points:780},
-        {id:3, name:'Ahmad Fauzi',    phone:'0857-3456-7890', email:'',               tier:'Gold',     total:6200000,  points:620},
-        {id:4, name:'Dewi Lestari',   phone:'0878-4567-8901', email:'dewi@gmail.com', tier:'Silver',   total:3100000,  points:310},
-        {id:5, name:'Eko Prasetyo',   phone:'0811-5678-9012', email:'',               tier:'Silver',   total:2800000,  points:280},
-        {id:6, name:'Fina Maharani',  phone:'0819-6789-0123', email:'fina@gmail.com', tier:'Bronze',   total:900000,   points:90},
-        {id:7, name:'Gilang Ramadan', phone:'0856-7890-1234', email:'',               tier:'Bronze',   total:450000,   points:45},
-        {id:8, name:'Hani Kusuma',    phone:'0821-8901-2345', email:'hani@gmail.com', tier:'Platinum', total:18200000, points:1820},
-    ];
-    let customers = [...MOCK];
+    let customers = [];
     let activeTier = 'all';
     function setTier(t, btn){
         activeTier = t;
@@ -127,6 +122,13 @@
     function rp(n){ return 'Rp '+n.toLocaleString('id-ID'); }
     function renderTable(){
         const q = document.getElementById('searchInput').value.toLowerCase();
+        
+        // Update Stats
+        document.getElementById('statTotal').textContent = customers.length;
+        document.getElementById('statPlatinum').textContent = customers.filter(c=>c.tier==='Platinum').length;
+        document.getElementById('statGold').textContent = customers.filter(c=>c.tier==='Gold').length;
+        document.getElementById('statSilverBronze').textContent = customers.filter(c=>c.tier==='Silver'||c.tier==='Bronze').length;
+
         const filtered = customers.filter(c=>{
             return (activeTier==='all'||c.tier===activeTier) &&
                    (!q || c.name.toLowerCase().includes(q) || c.phone.includes(q));
@@ -155,14 +157,42 @@
         document.getElementById('addModal').classList.remove('hidden');
     }
     function closeModal(){ document.getElementById('addModal').classList.add('hidden'); }
-    function saveCustomer(){
+    async function saveCustomer(){
         const name  = document.getElementById('cName').value.trim();
         const phone = document.getElementById('cPhone').value.trim();
         const err   = document.getElementById('cErr');
         if(!name){ err.textContent='Nama harus diisi.'; err.classList.remove('hidden'); return; }
         if(!phone || !/^08\d{8,11}$/.test(phone.replace(/-/g,''))){ err.textContent='Format HP tidak valid.'; err.classList.remove('hidden'); return; }
-        customers.unshift({id:Date.now(), name, phone, email:document.getElementById('cEmail').value.trim(), tier:'Bronze', total:0, points:0});
-        closeModal(); renderTable(); showToast('Customer berhasil ditambahkan');
+        
+        const outlet = JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        const newCust = {
+            name, phone, 
+            email: document.getElementById('cEmail').value.trim(), 
+            addr: document.getElementById('cAddr').value.trim(),
+            tier: 'Bronze', 
+            total: 0, 
+            points: 0,
+            outlet_id: outlet ? outlet.id : '',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        const btn = document.querySelector('#addModal .btn-primary');
+        const ogText = btn.innerText;
+        btn.innerText = "Menyimpan...";
+        btn.disabled = true;
+
+        try {
+            await window.db.collection("customers").add(newCust);
+            closeModal(); 
+            showToast('Customer berhasil ditambahkan ke Cloud!');
+        } catch(e) {
+            console.error(e);
+            err.textContent = 'Gagal menyimpan ke Cloud.';
+            err.classList.remove('hidden');
+        } finally {
+            btn.innerText = ogText;
+            btn.disabled = false;
+        }
     }
     function viewDetail(id){
         const c = customers.find(x=>x.id===id);
@@ -172,12 +202,34 @@
         const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
         setTimeout(()=>t.classList.remove('show'),2500);
     }
+    function listenToCustomers() {
+        if(!window.db) return;
+        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        let query = window.db.collection("customers").orderBy("timestamp", "desc");
+        if (outlet && outlet.id) {
+            query = window.db.collection("customers").where("outlet_id", "==", outlet.id).orderBy("timestamp", "desc");
+        }
+        
+        query.onSnapshot((snapshot) => {
+            customers = [];
+            snapshot.forEach((doc) => {
+                customers.push({ docId: doc.id, ...doc.data() });
+            });
+            renderTable();
+        }, (error) => {
+            console.error("Firebase listen error:", error);
+            if(error.code === 'failed-precondition') {
+                showToast('Index Firestore sedang dibangun.', 'warning');
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded',()=>{
         try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
         const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
         if(outlet)document.getElementById('outletLabel').textContent=outlet.name;}
         catch(e){window.location.href='index.html';}
-        renderTable();
+        listenToCustomers();
     });
 </script>
 </body>

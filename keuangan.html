@@ -5,28 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Laporan Keuangan</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root { --brand-teal: #0D3B4A; --brand-gold: #C9A84C; }
         *{font-family:'Plus Jakarta Sans',sans-serif;}
-        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
-        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        body{min-height:100vh;background:#061820;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(13,59,74,0.65) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(201,168,76,0.07) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(13,59,74,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.2);}
         .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
         .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
-        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.6);}
-        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
-        .btn-primary:hover{transform:translateY(-1px);}
-        .tab-btn{padding:.5rem 1rem;border-radius:.75rem;font-size:.8rem;font-weight:600;cursor:pointer;color:rgba(255,255,255,.5);transition:all .2s;border:none;background:transparent;}
-        .tab-btn.active{background:rgba(99,102,241,.2);color:white;border:1px solid rgba(99,102,241,.4);}
-        .metric-card{position:relative;overflow:hidden;}
+        .input-glass:focus{outline:none;border-color:var(--brand-gold);}
+        .btn-primary{background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal);font-weight:700;cursor:pointer;border:none;transition:all .2s ease;}
+        .btn-primary:hover{transform:translateY(-1px);opacity:.9;}
+        .tab-btn{padding:.5rem 1rem;border-radius:.75rem;font-size:.8rem;font-weight:600;cursor:pointer;color:rgba(255,255,255,.5);transition:all .2s ease;border:none;background:transparent;}
+        .tab-btn.active{background:rgba(201,168,76,0.15);color:var(--brand-gold);border:1px solid rgba(201,168,76,0.35);}
+        .metric-card{position:relative;overflow:hidden;background:rgba(13,59,74,0.4);border:1px solid rgba(255,255,255,.08);}
         .metric-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
-        .metric-blue::before{background:#3b82f6;}
+        .metric-blue::before{background:var(--brand-gold);}
         .metric-green::before{background:#22c55e;}
         .metric-red::before{background:#ef4444;}
         .metric-amber::before{background:#f59e0b;}
         .row-item{border-bottom:1px solid rgba(255,255,255,.06);}
-        .row-item:hover{background:rgba(255,255,255,.03);}
-    @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+        .row-item:hover{background:rgba(201,168,76,0.04);}
+        button:focus-visible,a:focus-visible{outline:2px solid var(--brand-gold);outline-offset:2px;}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
 <body>
@@ -34,7 +39,7 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><span>💰</span></div>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm" style="background:linear-gradient(135deg,var(--brand-gold),#a8863a);color:var(--brand-teal)">💰</div>
             <div>
                 <div class="font-extrabold text-white text-sm">Laporan Keuangan</div>
                 <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div>
@@ -59,23 +64,23 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="glass-card metric-card metric-blue rounded-2xl p-4 pl-5">
                 <div class="text-xs mb-1" style="color:rgba(255,255,255,.45)">Total Pendapatan</div>
-                <div id="m_revenue" class="text-xl font-extrabold text-white">Rp 52.3 jt</div>
-                <div class="text-xs mt-1 text-blue-400">↑ 12% vs periode lalu</div>
+                <div id="m_revenue" class="text-xl font-extrabold text-white">Rp 0</div>
+                <div class="text-xs mt-1" id="m_revenue_sub" style="color:var(--brand-gold)">0 transaksi</div>
             </div>
             <div class="glass-card metric-card metric-red rounded-2xl p-4 pl-5">
                 <div class="text-xs mb-1" style="color:rgba(255,255,255,.45)">Total Pengeluaran</div>
-                <div id="m_expense" class="text-xl font-extrabold text-white">Rp 31.8 jt</div>
-                <div class="text-xs mt-1 text-red-400">↑ 8% vs periode lalu</div>
+                <div id="m_expense" class="text-xl font-extrabold text-white">Rp 0</div>
+                <div class="text-xs mt-1 text-red-400" id="m_expense_sub">0 catatan</div>
             </div>
             <div class="glass-card metric-card metric-green rounded-2xl p-4 pl-5">
                 <div class="text-xs mb-1" style="color:rgba(255,255,255,.45)">Laba Bersih</div>
-                <div id="m_profit" class="text-xl font-extrabold text-white">Rp 20.5 jt</div>
-                <div class="text-xs mt-1 text-green-400">↑ 18% vs periode lalu</div>
+                <div id="m_profit" class="text-xl font-extrabold text-white">Rp 0</div>
+                <div class="text-xs mt-1 text-green-400" id="m_profit_sub">dari Firebase</div>
             </div>
             <div class="glass-card metric-card metric-amber rounded-2xl p-4 pl-5">
                 <div class="text-xs mb-1" style="color:rgba(255,255,255,.45)">Total Transaksi</div>
-                <div id="m_trx" class="text-xl font-extrabold text-white">1.285</div>
-                <div class="text-xs mt-1 text-amber-400">Avg Rp 40.7K/trx</div>
+                <div id="m_trx" class="text-xl font-extrabold text-white">0</div>
+                <div class="text-xs mt-1 text-amber-400" id="m_avg">Avg Rp 0/trx</div>
             </div>
         </div>
         <div class="grid lg:grid-cols-2 gap-4">
@@ -147,60 +152,126 @@
         document.getElementById('tab-'+t).classList.remove('hidden');
         document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
-        if(t==='transaksi') renderTrx();
-        if(t==='pengeluaran') renderExp();
     }
-    function rp(n){return'Rp '+n.toLocaleString('id-ID');}
-    const TRX=[
-        {time:'09:14',id:'TRX-20260502-1234',method:'💵 Tunai',  amount:57200, status:'paid'},
-        {time:'10:22',id:'TRX-20260502-2345',method:'📱 GoPay',  amount:44000, status:'paid'},
-        {time:'11:05',id:'TRX-20260502-3456',method:'💳 BCA',    amount:88000, status:'paid'},
-        {time:'11:47',id:'TRX-20260502-4567',method:'💵 Tunai',  amount:33000, status:'paid'},
-        {time:'12:30',id:'TRX-20260502-5678',method:'📱 OVO',    amount:121000,status:'paid'},
-        {time:'13:15',id:'TRX-20260502-6789',method:'🏦 Transfer',amount:275000,status:'pending'},
-    ];
-    const EXP=[
-        {date:'2026-05-01',desc:'Beli Bahan Baku',   cat:'HPP',           amount:3200000},
-        {date:'2026-05-01',desc:'Gaji Karyawan',      cat:'SDM',           amount:5200000},
-        {date:'2026-05-02',desc:'Listrik & Air',      cat:'Operasional',   amount:850000},
-        {date:'2026-05-02',desc:'Beli Minyak Goreng', cat:'HPP',           amount:420000},
-        {date:'2026-05-02',desc:'Marketing Online',   cat:'Pemasaran',     amount:300000},
-    ];
+    function rp(n){return 'Rp '+Math.round(n||0).toLocaleString('id-ID');}
+
+    // ── Firebase Data ──
+    let allTx = [], allExp = [];
+
+    function calcAndRender() {
+        const revenue = allTx.reduce((s,t) => s + (t.total||0), 0);
+        const expTotal = allExp.reduce((s,e) => s + (e.amount||0), 0);
+        const profit   = revenue - expTotal;
+        const avg      = allTx.length ? Math.round(revenue / allTx.length) : 0;
+
+        document.getElementById('m_revenue').textContent = rp(revenue);
+        document.getElementById('m_revenue_sub').textContent = allTx.length + ' transaksi';
+        document.getElementById('m_expense').textContent = rp(expTotal);
+        document.getElementById('m_expense_sub').textContent = allExp.length + ' catatan';
+        document.getElementById('m_profit').textContent = rp(profit);
+        document.getElementById('m_profit_sub').textContent = profit >= 0 ? '✓ Surplus' : '⚠ Defisit';
+        document.getElementById('m_profit_sub').style.color = profit >= 0 ? '#4ade80' : '#f87171';
+        document.getElementById('m_trx').textContent = allTx.length;
+        document.getElementById('m_avg').textContent = 'Avg ' + rp(avg) + '/trx';
+
+        renderTrx();
+        renderExp();
+        renderTop5();
+        renderLabaRugi(revenue, expTotal, profit);
+    }
+
     function renderTrx(){
-        document.getElementById('trxBody').innerHTML=TRX.map(t=>`
-            <tr class="row-item">
-                <td class="px-5 py-3 text-sm" style="color:rgba(255,255,255,.5)">${t.time}</td>
-                <td class="px-4 py-3 font-mono text-xs text-white">${t.id}</td>
-                <td class="px-4 py-3 text-sm" style="color:rgba(255,255,255,.7)">${t.method}</td>
-                <td class="px-4 py-3 text-right font-bold text-white">${rp(t.amount)}</td>
-                <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${t.status==='paid'?'text-green-400':'text-amber-400'}" style="background:${t.status==='paid'?'rgba(34,197,94,.12)':'rgba(245,158,11,.12)'}">${t.status==='paid'?'✓ Lunas':'⏱ Pending'}</span></td>
-            </tr>`).join('');
+        const tbody = document.getElementById('trxBody');
+        if(!allTx.length) { tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-8 text-center text-xs" style="color:rgba(255,255,255,.3)">Belum ada transaksi.</td></tr>'; return; }
+        tbody.innerHTML = allTx.slice(0,50).map(t=>{
+            const d = t.timestamp?.toDate ? t.timestamp.toDate() : new Date();
+            const time = d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+            return `<tr class="row-item">
+                <td class="px-5 py-3 text-sm" style="color:rgba(255,255,255,.5)">${time}</td>
+                <td class="px-4 py-3 font-mono text-xs text-white">${t.id||'—'}</td>
+                <td class="px-4 py-3 text-sm" style="color:rgba(255,255,255,.7)">${t.paymentMethod||'Tunai'}</td>
+                <td class="px-4 py-3 text-right font-bold text-white">${rp(t.total)}</td>
+                <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold text-green-400" style="background:rgba(34,197,94,.12)">✓ Lunas</span></td>
+            </tr>`;
+        }).join('');
     }
+
     function renderExp(){
-        document.getElementById('expBody').innerHTML=EXP.map(e=>`
+        const tbody = document.getElementById('expBody');
+        if(!allExp.length) { tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-8 text-center text-xs" style="color:rgba(255,255,255,.3)">Belum ada pengeluaran.</td></tr>'; return; }
+        tbody.innerHTML = allExp.slice(0,50).map(e=>`
             <tr class="row-item">
-                <td class="px-5 py-3 text-sm" style="color:rgba(255,255,255,.5)">${e.date}</td>
-                <td class="px-4 py-3 font-semibold text-white text-sm">${e.desc}</td>
-                <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold" style="background:rgba(239,68,68,.1);color:#f87171">${e.cat}</span></td>
+                <td class="px-5 py-3 text-sm" style="color:rgba(255,255,255,.5)">${e.date||'—'}</td>
+                <td class="px-4 py-3 font-semibold text-white text-sm">${e.desc||'—'}</td>
+                <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold" style="background:rgba(239,68,68,.1);color:#f87171">${e.cat||'Lain-lain'}</span></td>
                 <td class="px-4 py-3 text-right font-bold text-red-400">- ${rp(e.amount)}</td>
             </tr>`).join('');
     }
-    const TOP5 = [['Nasi Goreng','Rp 11.4 jt',218],['Mie Ayam','Rp 8.2 jt',164],['Es Teh','Rp 4.1 jt',512],['Soto Ayam','Rp 7.6 jt',152],['Ayam Bakar','Rp 5.9 jt',118]];
+
     function renderTop5(){
-        document.getElementById('top5Produk').innerHTML = TOP5.map((p,i)=>`
+        // Count by product name from transactions
+        const counts = {};
+        allTx.forEach(t => {
+            (t.items||[]).forEach(item => {
+                if(!counts[item.name]) counts[item.name] = {rev:0, qty:0};
+                counts[item.name].rev += (item.price||0) * (item.qty||1);
+                counts[item.name].qty += (item.qty||1);
+            });
+        });
+        const top5 = Object.entries(counts).sort((a,b)=>b[1].rev-a[1].rev).slice(0,5);
+        const el = document.getElementById('top5Produk');
+        if(!top5.length) { el.innerHTML = '<div class="text-xs text-white/30">Data produk belum tersedia.</div>'; return; }
+        el.innerHTML = top5.map(([name,d],i)=>`
             <div class="flex items-center gap-3">
                 <span class="w-5 text-xs font-bold" style="color:rgba(255,255,255,.3)">${i+1}</span>
-                <div class="flex-1"><div class="text-sm font-semibold text-white">${p[0]}</div></div>
-                <div class="text-right"><div class="text-sm font-bold text-white">${p[1]}</div><div class="text-xs" style="color:rgba(255,255,255,.35)">${p[2]} porsi</div></div>
+                <div class="flex-1"><div class="text-sm font-semibold text-white">${name}</div></div>
+                <div class="text-right"><div class="text-sm font-bold text-white">${rp(d.rev)}</div><div class="text-xs" style="color:rgba(255,255,255,.35)">${d.qty} porsi</div></div>
             </div>`).join('');
     }
+
+    function renderLabaRugi(revenue, expTotal, profit){
+        const hpp = allExp.filter(e=>e.cat==='Bahan Baku').reduce((s,e)=>s+(e.amount||0),0);
+        const ops = allExp.filter(e=>e.cat!=='Bahan Baku').reduce((s,e)=>s+(e.amount||0),0);
+        const ppn = Math.round(revenue * 0.1);
+        const netRev = revenue - ppn;
+        const el = document.querySelector('#tab-laba .glass-card .space-y-2');
+        if(!el) return;
+        el.innerHTML = `
+            <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span class="font-semibold text-white">Pendapatan Kotor</span><span class="font-bold text-white">${rp(revenue)}</span></div>
+            <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(255,255,255,.5)">PPN (10%)</span><span style="color:rgba(255,255,255,.6)">${rp(ppn)}</span></div>
+            <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(255,255,255,.5)">Pendapatan Bersih</span><span style="color:rgba(255,255,255,.8)">${rp(netRev)}</span></div>
+            <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(239,68,68,.8)">HPP (Bahan Baku)</span><span class="text-red-400">- ${rp(hpp)}</span></div>
+            <div class="flex justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:rgba(239,68,68,.8)">Biaya Operasional</span><span class="text-red-400">- ${rp(ops)}</span></div>
+            <div class="flex justify-between py-3 mt-2 rounded-xl px-3" style="background:${profit>=0?'rgba(34,197,94,.1)':'rgba(239,68,68,.1)'};border:1px solid ${profit>=0?'rgba(34,197,94,.2)':'rgba(239,68,68,.2)'}">
+                <span class="font-extrabold text-white">LABA BERSIH (OPEX)</span>
+                <span class="font-extrabold" style="color:${profit>=0?'#4ade80':'#f87171'}">${rp(profit)}</span>
+            </div>
+            <div class="text-xs mt-2" style="color:rgba(255,255,255,.3)">*OPEX = Beban Pokok (HPP) + Biaya Variabel (Operasional). Data real-time dari Firebase.</div>`;
+    }
+
+    function listenData() {
+        if(!window.db) return;
+        // Transactions
+        window.db.collection('transactions').orderBy('timestamp','desc').limit(200)
+            .onSnapshot(snap => {
+                allTx = snap.docs.map(d => ({docId:d.id,...d.data()}));
+                calcAndRender();
+            }, err => console.error('keuangan tx:', err));
+        // Expenses
+        window.db.collection('expenses').orderBy('timestamp','desc').limit(200)
+            .onSnapshot(snap => {
+                allExp = snap.docs.map(d => ({docId:d.id,...d.data()}));
+                calcAndRender();
+            }, err => console.error('keuangan exp:', err));
+    }
+
     function render(){}
     document.addEventListener('DOMContentLoaded',()=>{
         try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
         const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
         if(outlet)document.getElementById('outletLabel').textContent=outlet.name;}
         catch(e){window.location.href='index.html';}
-        renderTop5();
+        listenData();
     });
 </script>
 </body>
