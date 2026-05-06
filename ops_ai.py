@@ -51,7 +51,18 @@ TRANSACTION_LOOKBACK_DAYS = 7    # Analisis transaksi N hari terakhir
 def init_firebase() -> firestore.Client:
     """Inisialisasi Firebase Admin SDK (singleton-safe)."""
     if not firebase_admin._apps:
-        cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
+        # Support Base64-encoded service account for cloud deployment (Railway/Cloud Run)
+        base64_key = os.environ.get("FIREBASE_SERVICE_ACCOUNT_BASE64")
+        if base64_key:
+            import base64
+            # Decode base64 dan tulis ke temporary file
+            SERVICE_ACCOUNT_PATH = "/tmp/serviceAccountKey.json"
+            with open(SERVICE_ACCOUNT_PATH, "w") as f:
+                f.write(base64.b64decode(base64_key).decode())
+            cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
+        else:
+            # Fallback ke file path biasa (local development)
+            cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
         firebase_admin.initialize_app(cred)
     return firestore.client()
 

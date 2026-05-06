@@ -37,7 +37,7 @@ app = Flask(__name__)
 CORS(app, origins=["*"])  # Allow requests from dashboard.html
 
 OPS_AI_TOKEN = os.environ.get("OPS_AI_TOKEN", "lunomi-ops-secret")
-PORT         = int(os.environ.get("OPS_AI_PORT", 5050))
+PORT         = int(os.environ.get("PORT", os.environ.get("OPS_AI_PORT", "8080")))
 
 
 # ══════════════════════════════════════════════════════════════════════════════
