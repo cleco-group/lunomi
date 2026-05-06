@@ -1,0 +1,13 @@
+.git
+.gitignore
+__pycache__/
+*.pyc
+.env
+node_modules/
+*.html
+*.md
+*.json
+!serviceAccountKey.json
+!package.json
+.vscode/
+.claude/

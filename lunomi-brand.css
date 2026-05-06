@@ -1,0 +1,93 @@
+/**
+ * lunomi-brand.css
+ * Brand token overrides — Dark Teal (#0D3B4A) + Gold (#C9A84C)
+ * Include AFTER tailwind and any page-level styles to enforce brand consistency.
+ */
+
+:root {
+    --brand-teal:     #0D3B4A;
+    --brand-gold:     #C9A84C;
+    --brand-gold-dim: rgba(201,168,76,0.15);
+    --brand-bg:       #061820;
+}
+
+/* ── Body & Background ── */
+body {
+    background: var(--brand-bg) !important;
+    background-image:
+        radial-gradient(ellipse 70% 50% at 10% 0%, rgba(13,59,74,0.65) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 90% 100%, rgba(201,168,76,0.07) 0%, transparent 60%) !important;
+}
+
+/* ── Navigation ── */
+.glass-nav {
+    background: rgba(13,59,74,0.88) !important;
+    border-bottom-color: rgba(201,168,76,0.2) !important;
+}
+
+/* ── Input Focus ── */
+.input-glass:focus {
+    border-color: var(--brand-gold) !important;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15) !important;
+    outline: none !important;
+}
+
+/* ── Primary Button ── */
+.btn-primary {
+    background: linear-gradient(135deg, var(--brand-gold), #a8863a) !important;
+    color: var(--brand-teal) !important;
+}
+.btn-primary:hover {
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Metric Cards ── */
+.metric-card {
+    background: rgba(13,59,74,0.4) !important;
+}
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* ── Row Hover ── */
+.row-item:hover {
+    background: rgba(201,168,76,0.04) !important;
+}
+
+/* ── Filter / Period / Tab Active States ── */
+.filter-btn.active,
+.period-btn.active,
+.tab-btn.active {
+    background: rgba(201,168,76,0.18) !important;
+    border-color: rgba(201,168,76,0.45) !important;
+    color: var(--brand-gold) !important;
+}
+
+/* ── Modal Box ── */
+.modal-box {
+    background: var(--brand-teal) !important;
+    border-color: rgba(201,168,76,0.25) !important;
+}
+
+/* ── Focus Visible (Accessibility) ── */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--brand-gold) !important;
+    outline-offset: 2px !important;
+}
+
+/* ── Nav Icon overrides ── */
+.nav-icon-indigo {
+    background: linear-gradient(135deg, var(--brand-gold), #a8863a) !important;
+    color: var(--brand-teal) !important;
+}
+
+/* ── Outlet label in nav ── */
+#outletLabel {
+    color: var(--brand-gold) !important;
+    opacity: 0.85;
+}
