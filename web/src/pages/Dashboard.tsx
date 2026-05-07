@@ -75,9 +75,6 @@ export default function Dashboard() {
         const data = doc.data();
         totalRevenue += data.totalAmount || 0;
       });
-        
-        // Count products (would need to query items subcollection for real data)
-      });
       
       // Get last 7 days data for chart
       const last7Days = [];
