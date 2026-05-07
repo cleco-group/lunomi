@@ -161,7 +161,7 @@ https://lunomi-pos.vercel.app/  (direct ke index.html)
 
 ## Environment Variables (Future)
 
-Jika integrate Supabase nanti, create `.env.local`:
+Jika integrate Firebase nanti, create `.env.local`:
 
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
@@ -257,7 +257,7 @@ Flow: Login → Dashboard → POS → Kitchen
 ## Next Steps (Development)
 
 1. **Backend Integration:**
-   - Setup Supabase database
+   - Setup Firebase database
    - Create auth tables
    - Integrate API calls
 

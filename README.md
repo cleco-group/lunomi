@@ -9,7 +9,7 @@ Lunomi adalah sistem POS (Point of Sale) terintegrasi untuk bisnis Food & Bevera
 **Stack:** 
 - Frontend: Pure HTML5 + Tailwind CSS + Vanilla JavaScript
 - Auth: localStorage (demo mode)
-- Data: Dummy/Sample data (siap integrasi Supabase)
+- Data: Dummy/Sample data (siap integrasi Firebase)
 - Deployment: Vercel / Static hosting
 
 ---
@@ -23,7 +23,7 @@ Lunomi adalah sistem POS (Point of Sale) terintegrasi untuk bisnis Food & Bevera
 ├── pos.html            # POS Terminal Kasir - Product grid, cart, diskon, riwayat transaksi
 ├── kitchen.html        # Kitchen Display System - Order queue real-time dengan timer
 ├── README.md           # Dokumentasi ini
-└── .env.example        # (Opsional) Environment variables untuk Supabase integrasi
+└── .env.example        # (Opsional) Environment variables untuk Firebase integrasi
 ```
 
 ---
@@ -147,14 +147,14 @@ http://localhost:8000
 ### Environment Variables (Opsional untuk Supabase integrasi)
 Create `.env.local`:
 ```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGc...
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-auth-domain
 VITE_ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 ### Current Auth Method:
 - **Demo mode:** localStorage + hardcoded accounts
-- **Production:** Integrate dengan Supabase Auth
+- **Production: Integrate dengan Firebase Authth
 
 ---
 
@@ -208,18 +208,18 @@ VITE_ANTHROPIC_API_KEY=sk-ant-...
 
 ## 🔌 Integration Points (Ready untuk development)
 
-### 1. **Supabase Backend**
+### 1. **Firebase Backend**
 ```javascript
-// Replace localStorage dengan Supabase Auth
-import { createClient } from '@supabase/supabase-js'
-const supabase = createClient(URL, ANON_KEY)
+// Replace localStorage dengan Firebase Auth
+import { initializeApp } from 'firebase/app'
+const firebaseConfig = { /* ... */ }; const app = initializeApp(firebaseConfig);
 ```
 
-### 2. **Real-time Data**
+### 2. **Real-time Data (Firebase Firestore/Realtime Database)**
 ```javascript
-// Subscribe to POS orders
-supabase
-  .from('transactions')
+// Subscribe to POS orders (Firestore)
+db
+  .collection('transactions')
   .on('INSERT', (payload) => updateCart(payload))
   .subscribe()
 ```
@@ -305,7 +305,7 @@ vercel --prod
 ## 📞 Support & Next Steps
 
 ### Untuk Development Lebih Lanjut:
-1. **Backend Integration:** Setup Supabase untuk persistent data
+1. **Backend Integration: Setup Firebase untuk persistent datata
 2. **Real-time Sync:** WebSocket untuk multi-user simultaneous editing
 3. **Payment Gateway:** Integrate Midtrans/Stripe untuk pembayaran
 4. **Inventory Management:** Connect ke master menu + stock tracking
