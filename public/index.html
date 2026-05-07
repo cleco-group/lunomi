@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi POS - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --brand-teal: #0D3B4A; --brand-gold: #C9A84C; }
@@ -328,6 +327,7 @@
                 btn.innerHTML = '<span class="spinner"></span>Membuka...';
                 setTimeout(() => { window.location.href = DASHBOARDS[role]; }, 600);
             }
+        }
 
         function selectOutlet(id, name) {
             if (!pendingSession) return;
