@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import POS from './pages/POS';
 import Kitchen from './pages/Kitchen';
+import AdminTools from './pages/AdminTools';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -51,6 +52,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Kitchen />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminTools />
               </ProtectedRoute>
             }
           />

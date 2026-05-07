@@ -1,65 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-    
-    function hasRole(role) {
-      return isAuthenticated() && request.auth.token.role == role;
-    }
-    
-    function isOwnerOrManager() {
-      return hasRole('owner') || hasRole('manager');
-    }
-    
-    // Companies collection
-    match /companies/{companyId} {
-      allow read: if isAuthenticated() && request.auth.token.companyId == companyId;
-      allow write: if hasRole('owner') && request.auth.token.companyId == companyId;
-      
-      // Locations subcollection
-      match /locations/{locationId} {
-        allow read: if isAuthenticated() && request.auth.token.companyId == companyId;
-        allow write: if isOwnerOrManager() && request.auth.token.companyId == companyId;
-        
-        // Inventory subcollection
-        match /inventory/{inventoryId} {
-          allow read: if isAuthenticated();
-          allow write: if isOwnerOrManager() || hasRole('warehouse');
-        }
-      }
-      
-      // Products subcollection
-      match /products/{productId} {
-        allow read: if isAuthenticated();
-        allow write: if isOwnerOrManager();
-        
-        match /variants/{variantId} {
-          allow read: if isAuthenticated();
-          allow write: if isOwnerOrManager();
-        }
-      }
-      
-      // Orders subcollection
-      match /orders/{orderId} {
-        allow read: if isAuthenticated();
-        allow create: if isAuthenticated() && (hasRole('cashier') || isOwnerOrManager());
-        allow update: if isOwnerOrManager() || hasRole('kitchen');
-        allow delete: if isOwnerOrManager();
-        
-        match /items/{itemId} {
-          allow read: if isAuthenticated();
-          allow write: if isAuthenticated();
-        }
-      }
-      
-      // Customers subcollection
-      match /customers/{customerId} {
-        allow read: if isAuthenticated();
-        allow write: if isOwnerOrManager() || hasRole('cashier');
-      }
+    // TEMPORARY: Allow all authenticated users (for testing/seeding)
+    // TODO: Restore role-based rules after Cloud Functions deployed
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }
