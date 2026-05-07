@@ -57,25 +57,24 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     try {
-      // Get today's orders
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
+      // Get ALL orders (not just today, since demo data is from last 7 days)
       const ordersRef = collection(db, 'companies/demo_company/orders');
-      const todayQuery = query(
+      const allOrdersQuery = query(
         ordersRef,
-        where('createdAt', '>=', Timestamp.fromDate(today)),
-        where('status', 'in', ['completed', 'ready', 'preparing'])
+        where('status', 'in', ['completed', 'ready', 'preparing']),
+        orderBy('createdAt', 'desc'),
+        limit(100)
       );
       
-      const todaySnapshot = await getDocs(todayQuery);
+      const allSnapshot = await getDocs(allOrdersQuery);
       
       let totalRevenue = 0;
       const productCounts: { [key: string]: number } = {};
       
-      todaySnapshot.forEach(doc => {
+      allSnapshot.forEach(doc => {
         const data = doc.data();
         totalRevenue += data.totalAmount || 0;
+      });
         
         // Count products (would need to query items subcollection for real data)
       });
@@ -113,8 +112,8 @@ export default function Dashboard() {
       
       setMetrics({
         totalRevenue,
-        totalOrders: todaySnapshot.size,
-        averageOrder: todaySnapshot.size > 0 ? totalRevenue / todaySnapshot.size : 0,
+        totalOrders: allSnapshot.size,
+        averageOrder: allSnapshot.size > 0 ? totalRevenue / allSnapshot.size : 0,
         newCustomers: customersSnapshot.size
       });
       
