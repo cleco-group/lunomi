@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Sidebar styles inline below -->
     <style>
@@ -263,9 +264,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="metric-card p-6 rounded-2xl min-h-[300px]">
                     <h3 class="font-bold mb-4">Grafik Penjualan</h3>
-                    <div class="flex items-center justify-center h-48 text-white/20">
-                        [ Area Grafik ]
-                    </div>
+                    <canvas id="salesChart" style="max-height: 200px;"></canvas>
                 </div>
                 <div class="metric-card p-6 rounded-2xl min-h-[300px]">
                     <h3 class="font-bold mb-4">Produk Terlaris</h3>
@@ -303,6 +302,51 @@
         function toggleMobileSidebar() {
             document.getElementById('sidebar').classList.toggle('mobile-open');
         }
+        
+        // Initialize Sales Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('salesChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                        datasets: [{
+                            label: 'Penjualan (Juta Rp)',
+                            data: [8.5, 10.2, 9.8, 12.4, 11.5, 15.2, 13.8],
+                            borderColor: '#C9A84C',
+                            backgroundColor: 'rgba(201, 168, 76, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#C9A84C',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: 'rgba(255,255,255,0.6)' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            x: {
+                                ticks: { color: 'rgba(255,255,255,0.6)' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            }
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
