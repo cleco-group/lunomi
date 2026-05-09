@@ -1,18 +1,71 @@
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import ProductGrid from '../components/pos/ProductGrid';
+import ShoppingCart from '../components/pos/ShoppingCart';
+import CheckoutModal from '../components/pos/CheckoutModal';
+import { useCartStore } from '../stores/cartStore';
+import toast from 'react-hot-toast';
+
 export default function POS() {
+  const { user, logout } = useAuth();
+  const { addItem } = useCartStore();
+  const [showCheckout, setShowCheckout] = useState(false);
+
+  const handleAddToCart = (product: any) => {
+    addItem(product);
+    toast.success(`${product.name} ditambahkan ke keranjang`);
+  };
+
+  const handleCheckout = () => {
+    setShowCheckout(true);
+  };
+
   return (
-    <div className="min-h-screen p-8" style={{ background: '#061820' }}>
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-4">POS Terminal</h1>
-        <div className="p-8 rounded-2xl text-center" 
-             style={{ background: 'rgba(13,59,74,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <p className="text-white/70 text-lg">
-            🚧 POS Terminal sedang dalam pengembangan
-          </p>
-          <p className="text-white/50 text-sm mt-2">
-            Fitur ini akan segera tersedia
+    <div className="min-h-screen flex flex-col" style={{ 
+      background: '#061820',
+      backgroundImage: 'radial-gradient(ellipse 70% 50% at 10% 0%, rgba(13,59,74,0.6) 0%, transparent 60%), radial-gradient(ellipse 60% 45% at 90% 100%, rgba(201,168,76,0.08) 0%, transparent 60%)'
+    }}>
+      {/* Header */}
+      <header className="px-6 py-4 flex items-center justify-between border-b"
+              style={{ 
+                background: 'rgba(2,6,23,0.7)', 
+                backdropFilter: 'blur(20px)',
+                borderColor: 'rgba(255,255,255,0.08)' 
+              }}>
+        <div>
+          <h1 className="text-2xl font-bold text-white">POS Terminal</h1>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            Cleco Pii - {user?.email}
           </p>
         </div>
+        <button
+          onClick={logout}
+          className="px-6 py-2 rounded-lg text-sm font-semibold transition-all"
+          style={{ 
+            background: 'rgba(239,68,68,0.2)', 
+            color: '#fca5a5', 
+            border: '1px solid rgba(239,68,68,0.3)' 
+          }}
+        >
+          Logout
+        </button>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        <ProductGrid onAddToCart={handleAddToCart} />
+        <ShoppingCart onCheckout={handleCheckout} />
       </div>
+
+      {/* Checkout Modal */}
+      {showCheckout && (
+        <CheckoutModal 
+          onClose={() => setShowCheckout(false)}
+          onSuccess={() => {
+            toast.success('Order berhasil dibuat!');
+          }}
+        />
+      )}
     </div>
   );
 }
