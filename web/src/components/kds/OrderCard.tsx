@@ -13,15 +13,15 @@ export default function OrderCard({ order, companyId }: OrderCardProps) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (order.createdAt?.seconds) {
+      if (order.created_at) {
         const now = Date.now();
-        const created = order.createdAt.seconds * 1000;
+        const created = new Date(order.created_at).getTime();
         setElapsed(Math.floor((now - created) / 1000));
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [order.createdAt]);
+  }, [order.created_at]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -61,11 +61,11 @@ export default function OrderCard({ order, companyId }: OrderCardProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-xl font-bold text-white">{order.orderNumber}</h3>
+          <h3 className="text-xl font-bold text-white">{order.order_number}</h3>
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
-            {order.orderType === 'dine_in' && '🍽️ Dine In'}
-            {order.orderType === 'takeaway' && '🥡 Takeaway'}
-            {order.orderType === 'delivery' && '🛵 Delivery'}
+            {order.order_type === 'dine_in' && '🍽️ Dine In'}
+            {order.order_type === 'takeaway' && '🥡 Takeaway'}
+            {order.order_type === 'delivery' && '🛵 Delivery'}
           </p>
         </div>
         <div className="text-right">
@@ -87,7 +87,7 @@ export default function OrderCard({ order, companyId }: OrderCardProps) {
         style={{ background: 'rgba(0,0,0,0.2)' }}
       >
         <p className="text-white text-sm">
-          Total: Rp {order.totalAmount?.toLocaleString('id-ID')}
+          Total: Rp {order.total_amount?.toLocaleString('id-ID')}
         </p>
         <p className="text-white/60 text-xs mt-1">
           {/* Items will be loaded from subcollection */}

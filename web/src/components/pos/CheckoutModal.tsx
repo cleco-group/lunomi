@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useCartStore } from '../../stores/cartStore';
 import { createOrder } from '../../lib/createOrder';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import toast from 'react-hot-toast';
 
 interface CheckoutModalProps {
@@ -10,7 +10,7 @@ interface CheckoutModalProps {
 }
 
 export default function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const { items, getSubtotal, getTax, getTotal, clearCart } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'qris'>('cash');
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>('dine_in');
@@ -29,8 +29,8 @@ export default function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps
     setLoading(true);
     try {
       const result = await createOrder({
-        companyId: 'demo_company',
-        locationId: 'outlet_cleco_pii',
+        companyId: '00000000-0000-0000-0000-000000000001',
+        locationId: '00000000-0000-0000-0000-000000000002',
         items: items.map(item => ({
           productVariantId: item.id,
           productName: item.name,
@@ -44,7 +44,7 @@ export default function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps
           method: paymentMethod,
           amount: total
         }],
-        createdBy: user?.uid || 'unknown'
+        createdBy: user?.id || 'unknown'
       });
 
       toast.success(`Order ${result.orderNumber} berhasil dibuat!`);

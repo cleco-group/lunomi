@@ -1,5 +1,4 @@
-import { collection, addDoc, serverTimestamp, writeBatch, doc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from './supabase';
 
 interface OrderItem {
   productVariantId: string;
@@ -37,54 +36,49 @@ export async function createOrder(input: CreateOrderInput) {
     throw new Error('Pembayaran tidak mencukupi');
   }
   
-  // Create order
-  const orderRef = await addDoc(collection(db, `companies/${companyId}/orders`), {
-    orderNumber: `ORD-${Date.now()}`,
-    locationId,
-    customerId: input.customerId || null,
-    status: 'pending',
-    orderType,
-    subtotal,
-    taxAmount,
-    discountAmount: 0,
-    totalAmount,
-    amountPaid,
-    paymentStatus: 'paid',
-    paymentMethods: payments.map(p => p.method),
-    createdAt: serverTimestamp(),
-    createdBy
-  });
+  // Create order in Supabase
+  const { data: order, error: orderError } = await supabase
+    .from('orders')
+    .insert({
+      company_id: companyId,
+      location_id: locationId,
+      customer_id: input.customerId || null,
+      order_number: `ORD-${Date.now()}`,
+      status: 'pending',
+      order_type: orderType,
+      subtotal,
+      tax_amount: taxAmount,
+      discount_amount: 0,
+      total_amount: totalAmount,
+      amount_paid: amountPaid,
+      payment_status: 'paid',
+      payment_methods: payments.map(p => p.method),
+      created_by: createdBy
+    })
+    .select()
+    .single();
   
-  // Create items and payments subcollections using batch
-  const batch = writeBatch(db);
+  if (orderError) throw orderError;
   
-  // Add items
-  items.forEach(item => {
-    const itemRef = doc(collection(db, `companies/${companyId}/orders/${orderRef.id}/items`));
-    batch.set(itemRef, {
-      productName: item.productName,
-      qty: item.qty,
-      price: item.price,
-      discount: item.discount,
-      subtotal: item.price * item.qty - item.discount
-    });
-  });
+  // Create order items
+  const orderItems = items.map(item => ({
+    order_id: order.id,
+    product_id: item.productVariantId,
+    product_name: item.productName,
+    qty: item.qty,
+    price: item.price,
+    discount: item.discount,
+    subtotal: item.price * item.qty - item.discount
+  }));
   
-  // Add payments
-  payments.forEach(payment => {
-    const paymentRef = doc(collection(db, `companies/${companyId}/orders/${orderRef.id}/payments`));
-    batch.set(paymentRef, {
-      method: payment.method,
-      amount: payment.amount,
-      paidAt: serverTimestamp(),
-      reference: null
-    });
-  });
+  const { error: itemsError } = await supabase
+    .from('order_items')
+    .insert(orderItems);
   
-  await batch.commit();
+  if (itemsError) throw itemsError;
   
   return {
-    orderId: orderRef.id,
-    orderNumber: `ORD-${Date.now()}`
+    orderId: order.id,
+    orderNumber: order.order_number
   };
 }

@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
-import { collection, query, where, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../lib/supabase';
 
 interface Order {
   id: string;
-  orderNumber: string;
+  order_number: string;
   status: string;
-  orderType: string;
-  totalAmount: number;
-  createdAt: Timestamp;
+  order_type: string;
+  total_amount: number;
+  created_at: string;
   items?: any[];
 }
 
@@ -18,36 +17,50 @@ export function useOrders(companyId: string, statuses: string[]) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const ordersRef = collection(db, `companies/${companyId}/orders`);
-    const q = query(
-      ordersRef,
-      where('status', 'in', statuses),
-      orderBy('createdAt', 'desc')
-    );
+    // Initial fetch
+    fetchOrders();
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const newOrders: Order[] = [];
-        snapshot.forEach(doc => {
-          newOrders.push({ 
-            id: doc.id, 
-            ...doc.data() 
-          } as Order);
-        });
-        
-        setOrders(newOrders);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Error listening to orders:', err);
-        setError(err as Error);
-        setLoading(false);
-      }
-    );
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('orders-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `company_id=eq.${companyId}`
+        },
+        () => {
+          fetchOrders();
+        }
+      )
+      .subscribe();
 
-    return () => unsubscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [companyId, statuses.join(',')]);
+
+  const fetchOrders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('company_id', companyId)
+        .in('status', statuses)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setOrders(data || []);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      setError(err as Error);
+      setLoading(false);
+    }
+  };
 
   return { orders, loading, error };
 }

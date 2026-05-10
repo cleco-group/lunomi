@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { supabase } from '../../lib/supabase';
 
 interface Product {
   id: string;
@@ -8,7 +7,7 @@ interface Product {
   category: string;
   price: number;
   type: string;
-  isActive: boolean;
+  is_active: boolean;
 }
 
 interface ProductGridProps {
@@ -27,25 +26,15 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
 
   const loadProducts = async () => {
     try {
-      const productsRef = collection(db, 'companies/demo_company/products');
-      const snapshot = await getDocs(productsRef);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('company_id', '00000000-0000-0000-0000-000000000001')
+        .eq('is_active', true);
       
-      const loadedProducts: Product[] = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        if (data.isActive) {
-          loadedProducts.push({
-            id: doc.id,
-            name: data.name,
-            category: data.category,
-            price: data.price,
-            type: data.type,
-            isActive: data.isActive
-          });
-        }
-      });
+      if (error) throw error;
       
-      setProducts(loadedProducts);
+      setProducts(data || []);
     } catch (error) {
       console.error('Error loading products:', error);
     } finally {

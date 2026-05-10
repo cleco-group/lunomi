@@ -1,5 +1,4 @@
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from './supabase';
 
 type OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
 
@@ -9,12 +8,16 @@ export async function updateOrderStatus(
   newStatus: OrderStatus
 ) {
   try {
-    const orderRef = doc(db, `companies/${companyId}/orders/${orderId}`);
+    const { error } = await supabase
+      .from('orders')
+      .update({ 
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+      .eq('company_id', companyId);
     
-    await updateDoc(orderRef, {
-      status: newStatus,
-      updatedAt: serverTimestamp()
-    });
+    if (error) throw error;
     
     return { success: true };
   } catch (error) {

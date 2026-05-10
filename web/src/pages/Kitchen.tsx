@@ -4,9 +4,9 @@ import OrderCard from '../components/kds/OrderCard';
 
 export default function Kitchen() {
   const { user, signOut } = useSupabaseAuth();
-  const { orders: pendingOrders, loading: loadingPending } = useOrders('demo_company', ['pending']);
-  const { orders: preparingOrders, loading: loadingPreparing } = useOrders('demo_company', ['preparing']);
-  const { orders: readyOrders, loading: loadingReady } = useOrders('demo_company', ['ready']);
+  const { orders: pendingOrders, loading: loadingPending } = useOrders('00000000-0000-0000-0000-000000000001', ['pending']);
+  const { orders: preparingOrders, loading: loadingPreparing } = useOrders('00000000-0000-0000-0000-000000000001', ['preparing']);
+  const { orders: readyOrders, loading: loadingReady } = useOrders('00000000-0000-0000-0000-000000000001', ['ready']);
 
   const loading = loadingPending || loadingPreparing || loadingReady;
 
@@ -86,7 +86,7 @@ export default function Kitchen() {
                   </div>
                 ) : (
                   pendingOrders.map(order => (
-                    <OrderCard key={order.id} order={order} companyId="demo_company" />
+                    <OrderCard key={order.id} order={order} companyId="00000000-0000-0000-0000-000000000001" />
                   ))
                 )}
               </div>
@@ -105,7 +105,7 @@ export default function Kitchen() {
                   </div>
                 ) : (
                   preparingOrders.map(order => (
-                    <OrderCard key={order.id} order={order} companyId="demo_company" />
+                    <OrderCard key={order.id} order={order} companyId="00000000-0000-0000-0000-000000000001" />
                   ))
                 )}
               </div>
@@ -124,7 +124,7 @@ export default function Kitchen() {
                   </div>
                 ) : (
                   readyOrders.map(order => (
-                    <OrderCard key={order.id} order={order} companyId="demo_company" />
+                    <OrderCard key={order.id} order={order} companyId="00000000-0000-0000-0000-000000000001" />
                   ))
                 )}
               </div>
