@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import toast from 'react-hot-toast';
 
 const DEMO_ACCOUNTS = {
@@ -16,7 +16,7 @@ export default function Login() {
   const [selectedRole, setSelectedRole] = useState<keyof typeof DEMO_ACCOUNTS>('owner');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const { signIn } = useSupabaseAuth();
   const navigate = useNavigate();
 
   const handleRoleChange = (role: keyof typeof DEMO_ACCOUNTS) => {
@@ -34,12 +34,12 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await login(email, password);
+      await signIn(email, password);
       toast.success('Login berhasil!');
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
-      toast.error('Login gagal. Gunakan akun demo yang tersedia.');
+      toast.error('Login gagal. Pastikan akun sudah dibuat di Supabase.');
     } finally {
       setLoading(false);
     }

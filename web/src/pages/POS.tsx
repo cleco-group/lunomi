@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import ProductGrid from '../components/pos/ProductGrid';
 import ShoppingCart from '../components/pos/ShoppingCart';
 import CheckoutModal from '../components/pos/CheckoutModal';
@@ -7,7 +7,7 @@ import { useCartStore } from '../stores/cartStore';
 import toast from 'react-hot-toast';
 
 export default function POS() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useSupabaseAuth();
   const { addItem } = useCartStore();
   const [showCheckout, setShowCheckout] = useState(false);
 
@@ -39,7 +39,7 @@ export default function POS() {
           </p>
         </div>
         <button
-          onClick={logout}
+          onClick={signOut}
           className="px-6 py-2 rounded-lg text-sm font-semibold transition-all"
           style={{ 
             background: 'rgba(239,68,68,0.2)', 

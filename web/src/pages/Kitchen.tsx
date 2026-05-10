@@ -1,9 +1,9 @@
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { useOrders } from '../hooks/useOrders';
 import OrderCard from '../components/kds/OrderCard';
 
 export default function Kitchen() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useSupabaseAuth();
   const { orders: pendingOrders, loading: loadingPending } = useOrders('demo_company', ['pending']);
   const { orders: preparingOrders, loading: loadingPreparing } = useOrders('demo_company', ['preparing']);
   const { orders: readyOrders, loading: loadingReady } = useOrders('demo_company', ['ready']);
@@ -36,7 +36,7 @@ export default function Kitchen() {
             </p>
           </div>
           <button
-            onClick={logout}
+            onClick={signOut}
             className="px-6 py-2 rounded-lg text-sm font-semibold transition-all"
             style={{ 
               background: 'rgba(239,68,68,0.2)', 

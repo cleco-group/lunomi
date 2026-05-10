@@ -1,9 +1,8 @@
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import Sidebar from '../components/Sidebar';
 import { Line } from 'react-chartjs-2';
 import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs, orderBy, limit, Timestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../lib/supabase';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -40,7 +39,7 @@ interface TopProduct {
 }
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useSupabaseAuth();
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     totalRevenue: 0,
     totalOrders: 0,
@@ -57,27 +56,24 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     try {
-      // Get ALL orders (not just today, since demo data is from last 7 days)
-      const ordersRef = collection(db, 'companies/demo_company/orders');
-      const allOrdersQuery = query(
-        ordersRef,
-        where('status', 'in', ['completed', 'ready', 'preparing']),
-        orderBy('createdAt', 'desc'),
-        limit(100)
-      );
+      // Get ALL orders from Supabase
+      const { data: orders, error: ordersError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('company_id', '00000000-0000-0000-0000-000000000001')
+        .in('status', ['completed', 'ready', 'preparing'])
+        .order('created_at', { ascending: false })
+        .limit(100);
       
-      const allSnapshot = await getDocs(allOrdersQuery);
+      if (ordersError) throw ordersError;
       
       let totalRevenue = 0;
-      const productCounts: { [key: string]: number } = {};
       
-      allSnapshot.forEach(doc => {
-        const data = doc.data();
-        totalRevenue += data.totalAmount || 0;
+      orders?.forEach(order => {
+        totalRevenue += order.total_amount || 0;
       });
       
       // Get last 7 days data for chart
-      const last7Days = [];
       const salesByDay: number[] = [];
       
       for (let i = 6; i >= 0; i--) {
@@ -87,31 +83,33 @@ export default function Dashboard() {
         const nextDay = new Date(date);
         nextDay.setDate(nextDay.getDate() + 1);
         
-        const dayQuery = query(
-          ordersRef,
-          where('createdAt', '>=', Timestamp.fromDate(date)),
-          where('createdAt', '<', Timestamp.fromDate(nextDay)),
-          where('status', 'in', ['completed', 'ready'])
-        );
+        const { data: dayOrders } = await supabase
+          .from('orders')
+          .select('total_amount')
+          .eq('company_id', '00000000-0000-0000-0000-000000000001')
+          .gte('created_at', date.toISOString())
+          .lt('created_at', nextDay.toISOString())
+          .in('status', ['completed', 'ready']);
         
-        const daySnapshot = await getDocs(dayQuery);
         let dayRevenue = 0;
-        daySnapshot.forEach(doc => {
-          dayRevenue += doc.data().totalAmount || 0;
+        dayOrders?.forEach(order => {
+          dayRevenue += order.total_amount || 0;
         });
         
         salesByDay.push(dayRevenue / 1000000); // Convert to millions
       }
       
-      // Get customers count (simplified)
-      const customersRef = collection(db, 'companies/demo_company/customers');
-      const customersSnapshot = await getDocs(customersRef);
+      // Get customers count
+      const { data: customers } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('company_id', '00000000-0000-0000-0000-000000000001');
       
       setMetrics({
         totalRevenue,
-        totalOrders: allSnapshot.size,
-        averageOrder: allSnapshot.size > 0 ? totalRevenue / allSnapshot.size : 0,
-        newCustomers: customersSnapshot.size
+        totalOrders: orders?.length || 0,
+        averageOrder: orders && orders.length > 0 ? totalRevenue / orders.length : 0,
+        newCustomers: customers?.length || 0
       });
       
       setSalesData(salesByDay);

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SupabaseAuthProvider, useSupabaseAuth } from './contexts/SupabaseAuthContext';
 import { IndustryProvider } from './contexts/IndustryContext';
 import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
@@ -9,7 +9,7 @@ import Kitchen from './pages/Kitchen';
 import AdminTools from './pages/AdminTools';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useSupabaseAuth();
 
   if (loading) {
     return (
@@ -28,7 +28,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <AuthProvider>
+    <SupabaseAuthProvider>
       <IndustryProvider>
         <BrowserRouter>
           <Routes>
@@ -70,7 +70,7 @@ function App() {
         </BrowserRouter>
         <Toaster position="top-right" />
       </IndustryProvider>
-    </AuthProvider>
+    </SupabaseAuthProvider>
   );
 }
 
