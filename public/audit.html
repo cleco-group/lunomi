@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunomi — Audit Trail</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(239,68,68,.15) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(99,102,241,.15) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(239,68,68,.6);box-shadow:0 0 0 3px rgba(239,68,68,.1);}
+        .filter-btn{padding:.4rem .9rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);}
+        .filter-btn.active{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#fca5a5;}
+        .log-item{border-bottom:1px solid rgba(255,255,255,.05);transition:background .15s;}
+        .log-item:hover{background:rgba(255,255,255,.02);}
+        .badge{padding:.2rem .6rem;border-radius:999px;font-size:.7rem;font-weight:700;}
+        .badge-transaction{background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3);}
+        .badge-customer{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.3);}
+        .badge-loyalty{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
+        .badge-invoice{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.3);}
+        .badge-other{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12);}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+        @media(max-width:768px){input,select{font-size:16px!important;}}
+    </style>
+</head>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="history.back()" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base" style="background:linear-gradient(135deg,#ef4444,#dc2626)">🔍</div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Audit Trail</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)" id="outletLabel">—</div>
+            </div>
+        </div>
+        <button onclick="clearLog()" class="text-xs px-3 py-1.5 rounded-xl font-semibold" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#fca5a5;">🗑️ Clear Log</button>
+    </div>
+</nav>
+
+<div class="max-w-5xl mx-auto px-4 py-6">
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4 text-center">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Log</div>
+            <div class="text-2xl font-extrabold text-white" id="statTotal">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+            <div class="text-xs mb-1 text-indigo-400">Transaksi</div>
+            <div class="text-2xl font-extrabold text-indigo-400" id="statTrx">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+            <div class="text-xs mb-1 text-green-400">Customer</div>
+            <div class="text-2xl font-extrabold text-green-400" id="statCust">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+            <div class="text-xs mb-1 text-amber-400">Loyalty</div>
+            <div class="text-2xl font-extrabold text-amber-400" id="statLoyalty">0</div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
+        <input id="searchInput" type="text" placeholder="🔍 Cari aktivitas, user, detail..." class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[180px]" oninput="renderLog()">
+        <div class="flex gap-2 flex-wrap">
+            <button class="filter-btn active" onclick="setCategory('all',this)">Semua</button>
+            <button class="filter-btn" onclick="setCategory('transaction',this)">💳 Transaksi</button>
+            <button class="filter-btn" onclick="setCategory('customer',this)">👥 Customer</button>
+            <button class="filter-btn" onclick="setCategory('loyalty',this)">⭐ Loyalty</button>
+            <button class="filter-btn" onclick="setCategory('invoice',this)">🧾 Invoice</button>
+        </div>
+    </div>
+
+    <!-- Log List -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div id="logBody"></div>
+        <div id="emptyState" class="hidden py-20 text-center">
+            <div class="text-5xl mb-3">📋</div>
+            <div class="text-sm font-semibold" style="color:rgba(255,255,255,.4)">Log masih kosong</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.25)">Aktivitas sistem akan muncul di sini secara otomatis</div>
+        </div>
+        <div id="showMoreWrap" class="hidden text-center py-4">
+            <button onclick="showMore()" class="text-xs px-4 py-2 rounded-xl font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)">Tampilkan lebih banyak</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast toast-ok"></div>
+
+<script>
+let activeCategory = 'all';
+let showCount = 50;
+
+const actionMap = {
+    'transaction':      { label:'Transaksi',        cls:'badge-transaction', emoji:'💳' },
+    'customer_add':     { label:'Tambah Customer',  cls:'badge-customer',    emoji:'👥' },
+    'customer_edit':    { label:'Edit Customer',    cls:'badge-customer',    emoji:'✏️' },
+    'customer_delete':  { label:'Hapus Customer',   cls:'badge-customer',    emoji:'🗑️' },
+    'loyalty_redeem':   { label:'Redeem Poin',      cls:'badge-loyalty',     emoji:'🎁' },
+    'invoice':          { label:'Invoice',          cls:'badge-invoice',     emoji:'🧾' },
+    'invoice_paid':     { label:'Invoice Lunas',    cls:'badge-invoice',     emoji:'✅' },
+};
+
+function getBadge(action){
+    const cat = action.split('_')[0];
+    if(actionMap[action]) return actionMap[action];
+    if(cat==='customer') return {label:'Customer',cls:'badge-customer',emoji:'👥'};
+    if(cat==='loyalty')  return {label:'Loyalty', cls:'badge-loyalty', emoji:'⭐'};
+    if(cat==='invoice')  return {label:'Invoice', cls:'badge-invoice', emoji:'🧾'};
+    return {label:action, cls:'badge-other', emoji:'📌'};
+}
+
+function isCategory(action, cat){
+    if(cat==='all') return true;
+    if(cat==='transaction') return action==='transaction';
+    if(cat==='customer') return action.startsWith('customer');
+    if(cat==='loyalty') return action.startsWith('loyalty');
+    if(cat==='invoice') return action.startsWith('invoice');
+    return true;
+}
+
+function renderStats(){
+    const logs = AuditLog.get();
+    document.getElementById('statTotal').textContent = logs.length;
+    document.getElementById('statTrx').textContent = logs.filter(l=>l.action==='transaction').length;
+    document.getElementById('statCust').textContent = logs.filter(l=>l.action.startsWith('customer')).length;
+    document.getElementById('statLoyalty').textContent = logs.filter(l=>l.action.startsWith('loyalty')).length;
+}
+
+function setCategory(cat, btn){
+    activeCategory = cat;
+    showCount = 50;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderLog();
+}
+
+function renderLog(){
+    const q = (document.getElementById('searchInput').value||'').toLowerCase();
+    const all = AuditLog.get().filter(l => {
+        const matchCat = isCategory(l.action, activeCategory);
+        const matchQ = !q || (l.detail||'').toLowerCase().includes(q) || (l.user||'').toLowerCase().includes(q) || (l.action||'').toLowerCase().includes(q);
+        return matchCat && matchQ;
+    });
+
+    const body = document.getElementById('logBody');
+    const empty = document.getElementById('emptyState');
+    const moreWrap = document.getElementById('showMoreWrap');
+
+    if(!all.length){ body.innerHTML=''; empty.classList.remove('hidden'); moreWrap.classList.add('hidden'); return; }
+    empty.classList.add('hidden');
+
+    const slice = all.slice(0, showCount);
+    body.innerHTML = slice.map((l,i) => {
+        const b = getBadge(l.action);
+        const dt = new Date(l.at);
+        const timeStr = dt.toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        return `<div class="log-item px-5 py-3.5 flex items-start gap-4">
+            <div class="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-sm mt-0.5" style="background:rgba(255,255,255,.06)">${b.emoji}</div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="badge ${b.cls}">${b.label}</span>
+                    <span class="text-sm text-white font-medium truncate">${l.detail||'—'}</span>
+                </div>
+                <div class="text-xs mt-1 flex gap-3" style="color:rgba(255,255,255,.35)">
+                    <span>👤 ${l.user||'System'}</span>
+                    <span>🕐 ${timeStr}</span>
+                    <span class="font-mono text-xs" style="color:rgba(255,255,255,.2)">${l.id}</span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    moreWrap.classList.toggle('hidden', all.length <= showCount);
+}
+
+function showMore(){
+    showCount += 50;
+    renderLog();
+}
+
+function clearLog(){
+    const logs = AuditLog.get();
+    if(!logs.length){ showToast('Log sudah kosong'); return; }
+    if(!confirm(`Hapus ${logs.length} log aktivitas? Tindakan ini tidak bisa dibatalkan.`)) return;
+    SessionManager.set('audit_log', []);
+    renderStats(); renderLog();
+    showToast('Audit log berhasil dibersihkan');
+}
+
+function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    const s=SessionManager.get('session');
+    if(!s){window.location.href='index.html';return;}
+    const outlet=SessionManager.get('outlet');
+    if(outlet) document.getElementById('outletLabel').textContent=outlet.name;
+    renderStats(); renderLog();
+});
+</script>
+</body>
+</html>

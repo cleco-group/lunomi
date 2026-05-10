@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi POS - Kasir Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
@@ -152,6 +152,14 @@
     <div class="flex pos-layout" style="height:calc(100vh - 61px)">
         <!-- Products -->
         <div id="productArea" class="flex-1 p-4 overflow-y-auto min-w-0">
+            <!-- Barcode Scanner Input -->
+            <div class="flex gap-2 mb-3">
+                <div class="flex-1 flex items-center gap-2 rounded-xl px-3 py-2" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)">
+                    <span class="text-base">📷</span>
+                    <input id="barcodeInput" type="text" placeholder="Scan barcode atau ketik kode produk, Enter..." class="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-white/30" onkeydown="handleBarcodeInput(event)">
+                    <span id="barcodeScanStatus" class="text-xs font-semibold hidden" style="color:#4ade80">✓</span>
+                </div>
+            </div>
             <div class="flex gap-2 mb-4 pb-3 overflow-x-auto" style="border-bottom:1px solid rgba(255,255,255,0.06)">
                 <button class="cat-btn active" onclick="filterCat('all',this)">Semua</button>
                 <button class="cat-btn" onclick="filterCat('makanan',this)">Makanan</button>
@@ -165,6 +173,19 @@
             <div class="px-5 py-4" style="border-bottom:1px solid rgba(255,255,255,0.06)">
                 <h2 class="font-bold text-white">Pesanan Aktif</h2>
                 <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.3)">ID: <span id="trxId" class="font-mono">—</span></p>
+                <!-- Customer Selector -->
+                <div class="mt-3 relative">
+                    <input id="custSearchInput" type="text" placeholder="👤 Pilih customer (opsional)..." class="w-full text-xs rounded-lg px-3 py-2 outline-none" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:white;" oninput="searchCustomerInPOS()" onfocus="showCustDropdown()" onblur="setTimeout(hideCustDropdown,200)">
+                    <div id="custDropdown" class="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden z-50 hidden" style="background:#0f172a;border:1px solid rgba(255,255,255,.12);max-height:180px;overflow-y:auto">
+                        <div id="custDropdownList"></div>
+                        <div id="custDropdownEmpty" class="hidden text-xs px-3 py-2" style="color:rgba(255,255,255,.3)">Customer tidak ditemukan</div>
+                    </div>
+                    <div id="selectedCustTag" class="hidden mt-2 flex items-center gap-2 text-xs px-2 py-1 rounded-lg" style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3)">
+                        <span class="text-indigo-300 font-semibold" id="selectedCustName"></span>
+                        <span class="text-amber-400" id="selectedCustPoints"></span>
+                        <button onclick="clearSelectedCustomer()" class="ml-auto text-white/40 hover:text-white">×</button>
+                    </div>
+                </div>
             </div>
             <div id="cartList" class="flex-1 overflow-y-auto px-5 py-3">
                 <p class="text-center text-sm py-10" style="color:rgba(255,255,255,0.25)">Belum ada item</p>
@@ -269,18 +290,18 @@
     </div>
     <script>
         const PROD = [
-            {id:1, n:'Nasi Goreng', c:'makanan',  p:22000, e:'🍜'},
-            {id:2, n:'Mie Ayam',    c:'makanan',  p:18000, e:'🍜'},
-            {id:3, n:'Soto Ayam',   c:'makanan',  p:20000, e:'🥣'},
-            {id:4, n:'Ikan Bakar',  c:'makanan',  p:35000, e:'🐟'},
-            {id:5, n:'Es Teh',      c:'minuman',  p:8000,  e:'🥤'},
-            {id:6, n:'Kopi',        c:'minuman',  p:12000, e:'☕'},
-            {id:7, n:'Jus',         c:'minuman',  p:15000, e:'🧃'},
-            {id:8, n:'Smoothie',    c:'minuman',  p:18000, e:'🥤'},
-            {id:9, n:'Roti Goreng', c:'snack',    p:10000, e:'🥐'},
-            {id:10,n:'Lumpia',      c:'snack',    p:12000, e:'🥟'},
-            {id:11,n:'Kue Lapis',   c:'dessert',  p:25000, e:'🍰'},
-            {id:12,n:'Bika Ambon',  c:'dessert',  p:20000, e:'🍮'}
+            {id:1, n:'Nasi Goreng', c:'makanan',  p:22000, e:'🍜', sku:'SKU001'},
+            {id:2, n:'Mie Ayam',    c:'makanan',  p:18000, e:'🍜', sku:'SKU002'},
+            {id:3, n:'Soto Ayam',   c:'makanan',  p:20000, e:'🥣', sku:'SKU003'},
+            {id:4, n:'Ikan Bakar',  c:'makanan',  p:35000, e:'🐟', sku:'SKU004'},
+            {id:5, n:'Es Teh',      c:'minuman',  p:8000,  e:'🥤', sku:'SKU005'},
+            {id:6, n:'Kopi',        c:'minuman',  p:12000, e:'☕', sku:'SKU006'},
+            {id:7, n:'Jus',         c:'minuman',  p:15000, e:'🧃', sku:'SKU007'},
+            {id:8, n:'Smoothie',    c:'minuman',  p:18000, e:'🥤', sku:'SKU008'},
+            {id:9, n:'Roti Goreng', c:'snack',    p:10000, e:'🥐', sku:'SKU009'},
+            {id:10,n:'Lumpia',      c:'snack',    p:12000, e:'🥟', sku:'SKU010'},
+            {id:11,n:'Kue Lapis',   c:'dessert',  p:25000, e:'🍰', sku:'SKU011'},
+            {id:12,n:'Bika Ambon',  c:'dessert',  p:20000, e:'🍮', sku:'SKU012'}
         ];
         const HIST = [
             {id:'TRX-001',t:'09:30',tot:75000, st:'paid',   itm:3,m:'cash'},
@@ -334,27 +355,83 @@
             }).join('');
         }
 
-        // Barcode Scanner Support
-        let barcodeBuffer = '';
-        let lastKeyTime = Date.now();
-        document.addEventListener('keydown', (e) => {
-            const now = Date.now();
-            if (now - lastKeyTime > 100) barcodeBuffer = ''; // Reset if slow typing
-            lastKeyTime = now;
-
-            if (e.key === 'Enter') {
-                if (barcodeBuffer.length > 0) {
-                    const product = PROD.find(i => i.sku === barcodeBuffer);
-                    if (product) {
-                        add(product.id);
-                        showToast(`Barcode: ${product.n} ditambahkan`, 'success');
-                    }
-                    barcodeBuffer = '';
-                }
-            } else if (e.key.length === 1) {
-                barcodeBuffer += e.key;
+        /* ── Barcode Scanner ──────────────────────── */
+        function handleBarcodeInput(e) {
+            if (e.key !== 'Enter') return;
+            const raw = document.getElementById('barcodeInput').value.trim().toUpperCase();
+            if (!raw) return;
+            const prod = PROD.find(p => (p.sku||'').toUpperCase() === raw || String(p.id) === raw);
+            if (prod) {
+                add(prod.id);
+                document.getElementById('barcodeScanStatus').classList.remove('hidden');
+                setTimeout(() => document.getElementById('barcodeScanStatus').classList.add('hidden'), 1000);
+                showToast(`📷 ${prod.n} ditambahkan`, 'success');
+            } else {
+                showToast(`Produk "${raw}" tidak ditemukan`, 'error');
             }
+            document.getElementById('barcodeInput').value = '';
+        }
+
+        /* ── Physical barcode scanner (sends chars fast then Enter) ── */
+        let _bcBuf = '', _bcTime = 0;
+        document.addEventListener('keydown', (e) => {
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+            const now = Date.now();
+            if (now - _bcTime > 80) _bcBuf = '';
+            _bcTime = now;
+            if (e.key === 'Enter' && _bcBuf.length >= 3) {
+                const prod = PROD.find(p => (p.sku||'').toUpperCase() === _bcBuf.toUpperCase() || String(p.id) === _bcBuf);
+                if (prod) { add(prod.id); showToast('📷 ' + prod.n + ' ditambahkan', 'success'); }
+                _bcBuf = '';
+            } else if (e.key.length === 1) { _bcBuf += e.key; }
         });
+
+        /* ── Customer Selector in Cart ─────────────── */
+        let selectedCustomerId = null;
+        function searchCustomerInPOS() {
+            const q = (document.getElementById('custSearchInput').value||'').toLowerCase();
+            if (!q) { hideCustDropdown(); return; }
+            const matches = (typeof LunomiDB !== 'undefined' ? LunomiDB.getCustomers() : [])
+                .filter(c => (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q))
+                .slice(0, 6);
+            renderCustDropdown(matches);
+        }
+        function showCustDropdown() {
+            if (selectedCustomerId) return;
+            renderCustDropdown((typeof LunomiDB !== 'undefined' ? LunomiDB.getCustomers() : []).slice(0,6));
+        }
+        function hideCustDropdown() { document.getElementById('custDropdown').classList.add('hidden'); }
+        function renderCustDropdown(list) {
+            const drop = document.getElementById('custDropdown');
+            const ddl = document.getElementById('custDropdownList');
+            const emp = document.getElementById('custDropdownEmpty');
+            if (!list.length) { ddl.innerHTML=''; emp.classList.remove('hidden'); drop.classList.remove('hidden'); return; }
+            emp.classList.add('hidden');
+            ddl.innerHTML = list.map(c => `<div onmousedown="selectCustomerInPOS('${c.id}')" class="px-3 py-2.5 cursor-pointer text-xs" style="border-bottom:1px solid rgba(255,255,255,.06)" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background=''">
+                <span class="font-semibold text-white">${c.name}</span>
+                <span class="ml-2 text-xs" style="color:rgba(255,255,255,.4)">${c.phone}</span>
+                <span class="ml-1 text-amber-400">${(c.points||0)} poin</span>
+            </div>`).join('');
+            drop.classList.remove('hidden');
+        }
+        function selectCustomerInPOS(id) {
+            if (typeof LunomiDB === 'undefined') return;
+            const c = LunomiDB.findCustomer(id);
+            if (!c) return;
+            selectedCustomerId = id;
+            document.getElementById('custSearchInput').value = '';
+            document.getElementById('custSearchInput').placeholder = c.name;
+            document.getElementById('custDropdown').classList.add('hidden');
+            document.getElementById('selectedCustName').textContent = '👤 ' + c.name;
+            document.getElementById('selectedCustPoints').textContent = (c.points||0) + ' poin';
+            document.getElementById('selectedCustTag').classList.remove('hidden');
+        }
+        function clearSelectedCustomer() {
+            selectedCustomerId = null;
+            document.getElementById('custSearchInput').value = '';
+            document.getElementById('custSearchInput').placeholder = '👤 Pilih customer (opsional)...';
+            document.getElementById('selectedCustTag').classList.add('hidden');
+        }
 
         function filterCat(c,btn){
             cat=c;
@@ -474,11 +551,27 @@
             });
             saveMenuStock(stk);
             
-            // Save transaction to localStorage
+            // Save transaction to LunomiDB (shared data layer)
             const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-            const trxs=JSON.parse(localStorage.getItem('lunomi_transactions')||'[]');
-            trxs.unshift({id:trxId,date:new Date().toISOString(),time:new Date().toTimeString().slice(0,5),total:currentTotal,method:m,items:cart.map(i=>({id:i.id,name:i.n,qty:i.q,price:i.p})),outlet_id:outlet?outlet.id:''});
-            localStorage.setItem('lunomi_transactions',JSON.stringify(trxs));
+            const trxData={
+                id:trxId,
+                createdAt:new Date().toISOString(),
+                total:currentTotal,
+                subtotal:cart.reduce((s,i)=>s+i.p*i.q,0),
+                discount:disco,
+                payMethod:mMap[m],
+                items:cart.map(i=>({id:i.id,name:i.n,qty:i.q,price:i.p})),
+                outletId:outlet?outlet.id:'',
+                customerId:selectedCustomerId||null
+            };
+            if(typeof LunomiDB!=='undefined'){
+                LunomiDB.addTransaction(trxData);
+            } else {
+                const trxs=JSON.parse(localStorage.getItem('lunomi_transactions')||'[]');
+                trxs.unshift(trxData);
+                localStorage.setItem('lunomi_transactions',JSON.stringify(trxs));
+            }
+            clearSelectedCustomer();
             closePayment();
             
             // Show Success Dialog instead of just toast
