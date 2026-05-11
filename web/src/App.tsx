@@ -29,6 +29,9 @@ import HR from './pages/HR';
 import Stockopname from './pages/Stockopname';
 import Recipe from './pages/Recipe';
 import Tax from './pages/Tax';
+import TaxReport from './pages/TaxReport';
+import WhatsApp from './pages/WhatsApp';
+import Online from './pages/Online';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useSupabaseAuth();
@@ -74,6 +77,9 @@ function App() {
             <Route path="/stockopname" element={<ProtectedRoute><Stockopname /></ProtectedRoute>} />
             <Route path="/recipe" element={<ProtectedRoute><Recipe /></ProtectedRoute>} />
             <Route path="/tax" element={<ProtectedRoute><Tax /></ProtectedRoute>} />
+            <Route path="/tax-report" element={<ProtectedRoute><TaxReport /></ProtectedRoute>} />
+            <Route path="/whatsapp" element={<ProtectedRoute><WhatsApp /></ProtectedRoute>} />
+            <Route path="/online" element={<ProtectedRoute><Online /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminTools /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

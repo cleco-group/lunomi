@@ -60,13 +60,23 @@ const NAV: NavGroup[] = [
       { path: '/analytics', label: 'Analytics' },
       { path: '/expense', label: 'Pengeluaran Operasional' },
       { path: '/refund', label: 'Proses Retur' },
+      { path: '/online', label: 'Pemesanan Online' },
+    ],
+  },
+  {
+    label: 'Konfigurasi',
+    key: 'config',
+    items: [
+      { path: '/tax', label: 'Pengaturan Pajak' },
+      { path: '/tax-report', label: 'Laporan Pajak' },
+      { path: '/whatsapp', label: 'Integrasi WhatsApp' },
     ],
   },
 ];
 
 export default function Sidebar({ onLogout }: SidebarProps) {
   const location = useLocation();
-  const [openMenus, setOpenMenus] = useState<string[]>(['ops', 'inventory', 'sdm', 'customer']);
+  const [openMenus, setOpenMenus] = useState<string[]>(['ops', 'inventory', 'sdm', 'customer', 'config']);
 
   const toggleMenu = (key: string) => {
     setOpenMenus(prev =>
