@@ -23,6 +23,7 @@ const NAV: NavGroup[] = [
     items: [
       { path: '/pos', label: 'POS Kasir' },
       { path: '/kitchen', label: 'Kitchen Display' },
+      { path: '/booking', label: 'Manajemen Booking' },
     ],
   },
   {
@@ -37,6 +38,7 @@ const NAV: NavGroup[] = [
     key: 'customer',
     items: [
       { path: '/customer', label: 'Manajemen Customer' },
+      { path: '/invoice', label: 'Invoice & Nota' },
       { path: '/analytics', label: 'Analytics' },
     ],
   },
