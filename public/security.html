@@ -218,12 +218,12 @@
         }
         const recent = [...logs].reverse().slice(0, 20);
         container.innerHTML = recent.map(l => {
-            const dt = l.ts ? new Date(l.ts).toLocaleString('id-ID', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '-';
+            const dt = (l.at || l.ts) ? new Date(l.at || l.ts).toLocaleString('id-ID', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '-';
             return `
                 <div class="px-6 py-3 flex justify-between items-start gap-4">
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold truncate">${l.desc || l.type || '-'}</p>
-                        <p class="text-xs text-white/30 font-mono">${l.type || ''}</p>
+                        <p class="text-sm font-semibold truncate">${l.detail || l.desc || '-'}</p>
+                        <p class="text-xs text-white/30 font-mono">${l.action || l.type || ''}</p>
                     </div>
                     <span class="text-xs text-white/30 shrink-0">${dt}</span>
                 </div>
