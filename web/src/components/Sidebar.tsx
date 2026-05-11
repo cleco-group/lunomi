@@ -69,7 +69,10 @@ const NAV: NavGroup[] = [
     items: [
       { path: '/tax', label: 'Pengaturan Pajak' },
       { path: '/tax-report', label: 'Laporan Pajak' },
+      { path: '/keuangan', label: 'Laporan Keuangan' },
       { path: '/whatsapp', label: 'Integrasi WhatsApp' },
+      { path: '/printer', label: 'Konfigurasi Printer' },
+      { path: '/security', label: 'Keamanan' },
     ],
   },
 ];
