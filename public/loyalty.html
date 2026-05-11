@@ -3,184 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loyalty & CRM - Lunomi</title>
+    <title>Lunomi — Loyalty Program</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #020617; color: white; min-height: 100vh; }
-        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
-        .tier-silver { background: linear-gradient(135deg, #94a3b8, #475569); }
-        .tier-gold { background: linear-gradient(135deg, #fbbf24, #b45309); }
-        .tier-diamond { background: linear-gradient(135deg, #60a5fa, #1e40af); }
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(245,158,11,.2) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(139,92,246,.2) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{outline:none;border-color:rgba(245,158,11,.6);box-shadow:0 0 0 3px rgba(245,158,11,.15);}
+        .btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+        .btn-gold:hover{transform:translateY(-1px);}
+        .tier-platinum{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);}
+        .tier-gold{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
+        .tier-silver{background:rgba(148,163,184,.15);color:#cbd5e1;border:1px solid rgba(148,163,184,.3);}
+        .tier-bronze{background:rgba(217,119,6,.15);color:#fbbf24;border:1px solid rgba(217,119,6,.3);}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.06);transition:background .15s;}
+        .row-item:hover{background:rgba(255,255,255,.03);}
+        .modal-bg{background:rgba(0,0,0,.75);backdrop-filter:blur(4px);}
+        .tab-btn{padding:.5rem 1.2rem;border-radius:999px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);}
+        .tab-btn.active{background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.5);color:#fcd34d;}
+        .progress-bar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);}
+        .progress-fill{height:6px;border-radius:999px;transition:width .5s ease;}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+        .toast-err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+        @media(max-width:768px){input,select{font-size:16px!important;}}
     </style>
 </head>
-<body class="p-4 sm:p-8">
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="history.back()" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#f59e0b,#d97706)">⭐</div>
             <div>
-                <h1 class="text-2xl font-extrabold">Loyalty & CRM</h1>
-                <p class="text-sm text-white/50">Kelola program keanggotaan dan referral pelanggan</p>
-            </div>
-            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
-        </div>
-
-        <!-- Tabs -->
-        <div class="flex gap-4 mb-8 border-b border-white/10 pb-px">
-            <button onclick="switchTab('membership')" id="tab-membership" class="px-4 py-2 text-sm font-bold border-b-2 border-indigo-500 text-white">Membership</button>
-            <button onclick="switchTab('referral')" id="tab-referral" class="px-4 py-2 text-sm font-bold border-b-2 border-transparent text-white/40 hover:text-white">Referral Program</button>
-            <button onclick="switchTab('rewards')" id="tab-rewards" class="px-4 py-2 text-sm font-bold border-b-2 border-transparent text-white/40 hover:text-white">Daily Rewards</button>
-        </div>
-
-        <!-- Membership Tab -->
-        <div id="content-membership" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="tier-silver p-6 rounded-3xl shadow-xl">
-                    <h4 class="text-white/70 text-xs font-bold uppercase mb-1">Tier Silver</h4>
-                    <h3 class="text-2xl font-black mb-4">Silver Member</h3>
-                    <p class="text-xs text-white/80 mb-4">Diskon 2% untuk semua menu. Minimal belanja Rp 0.</p>
-                    <div class="text-sm font-bold">1,240 Members</div>
-                </div>
-                <div class="tier-gold p-6 rounded-3xl shadow-xl">
-                    <h4 class="text-white/70 text-xs font-bold uppercase mb-1">Tier Gold</h4>
-                    <h3 class="text-2xl font-black mb-4">Gold Member</h3>
-                    <p class="text-xs text-white/80 mb-4">Diskon 5% + Free Dessert. Minimal belanja Rp 5jt/bulan.</p>
-                    <div class="text-sm font-bold">450 Members</div>
-                </div>
-                <div class="tier-diamond p-6 rounded-3xl shadow-xl">
-                    <h4 class="text-white/70 text-xs font-bold uppercase mb-1">Tier Diamond</h4>
-                    <h3 class="text-2xl font-black mb-4">Diamond Member</h3>
-                    <p class="text-xs text-white/80 mb-4">Diskon 10% + Priority Table. Minimal belanja Rp 15jt/bulan.</p>
-                    <div class="text-sm font-bold">82 Members</div>
-                </div>
-            </div>
-
-            <div class="glass-card rounded-2xl overflow-hidden">
-                <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                    <h4 class="font-bold">Daftar Member Aktif</h4>
-                    <button class="text-xs text-indigo-400 font-bold">+ Tambah Member</button>
-                </div>
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/40">
-                            <th class="px-6 py-4">Nama Pelanggan</th>
-                            <th class="px-6 py-4">Tier</th>
-                            <th class="px-6 py-4">Total Poin</th>
-                            <th class="px-6 py-4 text-right">Total Belanja</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/5">
-                        <tr class="hover:bg-white/5 transition">
-                            <td class="px-6 py-4">
-                                <div class="font-bold text-sm">Andi Wijaya</div>
-                                <div class="text-[10px] text-white/40">ID: LNM-00124</div>
-                            </td>
-                            <td class="px-6 py-4"><span class="px-2 py-1 rounded-md bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase">Diamond</span></td>
-                            <td class="px-6 py-4 text-sm font-mono">12,450 pts</td>
-                            <td class="px-6 py-4 text-right text-sm font-mono">Rp 18,450,000</td>
-                        </tr>
-                        <tr class="hover:bg-white/5 transition">
-                            <td class="px-6 py-4">
-                                <div class="font-bold text-sm">Siska Putri</div>
-                                <div class="text-[10px] text-white/40">ID: LNM-00156</div>
-                            </td>
-                            <td class="px-6 py-4"><span class="px-2 py-1 rounded-md bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase">Gold</span></td>
-                            <td class="px-6 py-4 text-sm font-mono">4,200 pts</td>
-                            <td class="px-6 py-4 text-right text-sm font-mono">Rp 6,200,000</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="font-extrabold text-white text-sm">Loyalty Program</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)" id="outletLabel">—</div>
             </div>
         </div>
+        <button onclick="openRedeem()" class="btn-gold px-4 py-2 rounded-xl text-xs">🎁 Redeem Poin</button>
+    </div>
+</nav>
 
-        <!-- Referral Tab -->
-        <div id="content-referral" class="hidden space-y-6">
-            <div class="glass-card p-8 rounded-3xl text-center max-w-2xl mx-auto">
-                <div class="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <span class="material-symbols-outlined text-4xl">share</span>
-                </div>
-                <h3 class="text-2xl font-extrabold mb-2">Program Referral Aktif</h3>
-                <p class="text-white/50 text-sm mb-8">Ajak teman bergabung dan dapatkan voucher Rp 25.000 untuk setiap teman yang melakukan transaksi pertama.</p>
-                
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="bg-white/5 p-4 rounded-2xl">
-                        <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Referral</p>
-                        <p class="text-2xl font-black">156</p>
-                    </div>
-                    <div class="bg-white/5 p-4 rounded-2xl">
-                        <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Voucher Diklaim</p>
-                        <p class="text-2xl font-black">Rp 3.9M</p>
-                    </div>
-                </div>
-                
-                <button class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-2xl font-bold transition">Atur Syarat & Ketentuan</button>
-            </div>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Tier Info -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4"><div class="text-2xl mb-1">🥉</div><div class="font-bold text-amber-400">Bronze</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.4)">0 – Rp 999K</div><div class="text-xs mt-1 text-amber-400">1 poin / Rp 10K</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-2xl mb-1">🥈</div><div class="font-bold text-slate-300">Silver</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.4)">Rp 1Jt – 4.9Jt</div><div class="text-xs mt-1 text-slate-300">1.5 poin / Rp 10K</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-2xl mb-1">🥇</div><div class="font-bold text-amber-400">Gold</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.4)">Rp 5Jt – 9.9Jt</div><div class="text-xs mt-1 text-amber-400">2 poin / Rp 10K</div></div>
+        <div class="glass-card rounded-2xl p-4"><div class="text-2xl mb-1">💎</div><div class="font-bold text-purple-400">Platinum</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.4)">Rp 10Jt+</div><div class="text-xs mt-1 text-purple-400">3 poin / Rp 10K</div></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4 text-center"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Poin Beredar</div><div class="text-2xl font-extrabold text-amber-400" id="statTotalPts">0</div></div>
+        <div class="glass-card rounded-2xl p-4 text-center"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Poin Diredeem</div><div class="text-2xl font-extrabold text-red-400" id="statRedeemed">0</div></div>
+        <div class="glass-card rounded-2xl p-4 text-center"><div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Member Aktif</div><div class="text-2xl font-extrabold text-green-400" id="statMembers">0</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-4">
+        <button class="tab-btn active" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</button>
+        <button class="tab-btn" onclick="switchTab('ledger',this)">📋 Riwayat Poin</button>
+    </div>
+
+    <!-- Leaderboard -->
+    <div id="tab-leaderboard">
+        <div class="glass-card rounded-2xl p-3 mb-3">
+            <input id="searchLB" type="text" placeholder="🔍 Cari nama customer..." class="input-glass w-full px-4 py-2 rounded-xl text-sm" oninput="renderLeaderboard()">
         </div>
-
-        <!-- Daily Rewards Tab -->
-        <div id="content-rewards" class="hidden space-y-6">
-            <div class="grid grid-cols-7 gap-4">
-                <!-- 7 Days Calendar -->
-                <div class="glass-card p-4 rounded-2xl text-center border-indigo-500/50 border-2">
-                    <p class="text-[10px] font-bold text-indigo-400 uppercase mb-2">Day 1</p>
-                    <span class="material-symbols-outlined text-indigo-400 mb-2">check_circle</span>
-                    <p class="text-xs font-bold">10 Pts</p>
-                </div>
-                <div class="glass-card p-4 rounded-2xl text-center border-indigo-500/50 border-2">
-                    <p class="text-[10px] font-bold text-indigo-400 uppercase mb-2">Day 2</p>
-                    <span class="material-symbols-outlined text-indigo-400 mb-2">check_circle</span>
-                    <p class="text-xs font-bold">15 Pts</p>
-                </div>
-                <div class="glass-card p-4 rounded-2xl text-center">
-                    <p class="text-[10px] font-bold text-white/30 uppercase mb-2">Day 3</p>
-                    <span class="material-symbols-outlined text-white/20 mb-2">lock</span>
-                    <p class="text-xs font-bold text-white/30">20 Pts</p>
-                </div>
-                <!-- ... and so on -->
-            </div>
-            <div class="glass-card p-6 rounded-2xl">
-                <h4 class="font-bold mb-4">Pengaturan Hadiah Harian</h4>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
-                        <div>
-                            <p class="text-sm font-bold">Bonus Login Harian</p>
-                            <p class="text-xs text-white/40">Berikan poin setiap kali pelanggan membuka aplikasi</p>
-                        </div>
-                        <div class="w-12 h-6 bg-indigo-600 rounded-full relative">
-                            <div class="w-4 h-4 bg-white rounded-full absolute right-1 top-1"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <table class="w-full text-sm">
+                <thead><tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+                    <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">#</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Customer</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider hidden sm:table-cell" style="color:rgba(255,255,255,.4)">Tier</th>
+                    <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Poin</th>
+                    <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider hidden md:table-cell" style="color:rgba(255,255,255,.4)">Total Belanja</th>
+                    <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider" style="color:rgba(255,255,255,.4)">Progress Tier</th>
+                </tr></thead>
+                <tbody id="lbBody"></tbody>
+            </table>
+            <div id="lbEmpty" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Belum ada data customer.</div>
         </div>
     </div>
 
-    <script>
-        function switchTab(tab) {
-            // Hide all
-            document.getElementById('content-membership').classList.add('hidden');
-            document.getElementById('content-referral').classList.add('hidden');
-            document.getElementById('content-rewards').classList.add('hidden');
-            
-            // Reset tabs
-            ['membership', 'referral', 'rewards'].forEach(t => {
-                const el = document.getElementById('tab-' + t);
-                el.classList.remove('border-indigo-500');
-                el.classList.add('border-transparent');
-                el.classList.remove('text-white');
-                el.classList.add('text-white/40');
-            });
+    <!-- Ledger -->
+    <div id="tab-ledger" class="hidden">
+        <div class="glass-card rounded-2xl p-3 mb-3">
+            <input id="searchLedger" type="text" placeholder="🔍 Cari nama customer..." class="input-glass w-full px-4 py-2 rounded-xl text-sm" oninput="renderLedger()">
+        </div>
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <div id="ledgerBody"></div>
+            <div id="ledgerEmpty" class="hidden py-12 text-center text-sm" style="color:rgba(255,255,255,.3)">Belum ada riwayat poin.</div>
+        </div>
+    </div>
+</div>
 
-            // Show active
-            document.getElementById('content-' + tab).classList.remove('hidden');
-            const activeTab = document.getElementById('tab-' + tab);
-            activeTab.classList.add('border-indigo-500');
-            activeTab.classList.remove('border-transparent');
-            activeTab.classList.add('text-white');
-            activeTab.classList.remove('text-white/40');
-        }
-    </script>
+<!-- Redeem Modal -->
+<div id="redeemModal" class="modal-bg hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-2xl">
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="font-bold text-white">🎁 Redeem Poin</h2>
+            <button onclick="closeRedeem()" style="color:rgba(255,255,255,.4)" class="hover:text-white text-xl">×</button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Cari Customer</label>
+                <input id="redeemSearch" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="Nama atau nomor HP" oninput="searchRedeemCustomer()">
+                <div id="redeemSuggestions" class="mt-1 rounded-xl overflow-hidden hidden" style="background:rgba(15,23,42,.95);border:1px solid rgba(255,255,255,.12)"></div>
+            </div>
+            <div id="redeemCustomerInfo" class="hidden glass-card rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white" id="rcAvatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)"></div>
+                    <div><div class="font-bold text-white text-sm" id="rcName"></div><div class="text-xs text-amber-400" id="rcPoints"></div></div>
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Jumlah Poin Diredeem</label>
+                <input id="redeemPts" type="number" min="1" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="Contoh: 100">
+                <div class="text-xs mt-1" style="color:rgba(255,255,255,.35)">100 poin = diskon Rp 10.000</div>
+            </div>
+            <div>
+                <label class="text-xs font-semibold mb-1 block" style="color:rgba(255,255,255,.5)">Keterangan</label>
+                <input id="redeemReason" type="text" class="input-glass w-full px-4 py-2.5 rounded-xl text-sm" placeholder="Diskon ulang tahun, promo, dll.">
+            </div>
+        </div>
+        <div id="redeemErr" class="hidden mt-3 px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;"></div>
+        <div class="flex gap-3 mt-5">
+            <button onclick="closeRedeem()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="doRedeem()" class="btn-gold flex-1 py-2.5 rounded-xl text-sm">Redeem</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast toast-ok"></div>
+<script>
+let selectedRedeemId = null;
+
+function rp(n){ return 'Rp '+Number(n||0).toLocaleString('id-ID'); }
+function tierCls(t){ return {Platinum:'tier-platinum',Gold:'tier-gold',Silver:'tier-silver',Bronze:'tier-bronze'}[t]||'tier-bronze'; }
+function tierEmoji(t){ return {Platinum:'💎',Gold:'🥇',Silver:'🥈',Bronze:'🥉'}[t]||'🥉'; }
+function fmtTime(iso){ return new Date(iso).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); }
+
+function renderStats(){
+    const ledger=LoyaltyEngine.getLedger();
+    const earned=ledger.filter(l=>l.type==='earn').reduce((s,l)=>s+l.pts,0);
+    const redeemed=Math.abs(ledger.filter(l=>l.type==='redeem').reduce((s,l)=>s+l.pts,0));
+    document.getElementById('statTotalPts').textContent=(earned-redeemed).toLocaleString();
+    document.getElementById('statRedeemed').textContent=redeemed.toLocaleString();
+    document.getElementById('statMembers').textContent=LunomiDB.getCustomers().length;
+}
+
+function switchTab(tab,btn){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-leaderboard').classList.toggle('hidden',tab!=='leaderboard');
+    document.getElementById('tab-ledger').classList.toggle('hidden',tab!=='ledger');
+    if(tab==='leaderboard') renderLeaderboard(); else renderLedger();
+}
+
+function renderLeaderboard(){
+    const q=(document.getElementById('searchLB').value||'').toLowerCase();
+    const list=LunomiDB.getCustomers().filter(c=>!q||(c.name||'').toLowerCase().includes(q)).sort((a,b)=>(b.points||0)-(a.points||0));
+    const tbody=document.getElementById('lbBody');
+    const empty=document.getElementById('lbEmpty');
+    if(!list.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}
+    empty.classList.add('hidden');
+    const prevTargets={Bronze:0,Silver:1000000,Gold:5000000,Platinum:10000000};
+    const nextTargets={Bronze:1000000,Silver:5000000,Gold:10000000,Platinum:null};
+    const tierColors={Platinum:'#c4b5fd',Gold:'#fcd34d',Silver:'#cbd5e1',Bronze:'#fbbf24'};
+    tbody.innerHTML=list.map((c,i)=>{
+        const spend=c.totalSpend||0;
+        const prev=prevTargets[c.tier]||0;
+        const next=nextTargets[c.tier];
+        const pct=next?Math.min(100,Math.round(((spend-prev)/(next-prev))*100)):100;
+        return `<tr class="row-item">
+            <td class="px-4 py-3.5 font-bold text-sm" style="color:${i<3?['#fcd34d','#cbd5e1','#fbbf24'][i]:'rgba(255,255,255,.4)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</td>
+            <td class="px-4 py-3.5"><div class="font-semibold text-white">${c.name}</div><div class="text-xs mt-0.5" style="color:rgba(255,255,255,.35)">${c.phone}</div></td>
+            <td class="px-4 py-3.5 hidden sm:table-cell"><span class="px-2 py-0.5 rounded-full text-xs font-bold ${tierCls(c.tier)}">${tierEmoji(c.tier)} ${c.tier}</span></td>
+            <td class="px-4 py-3.5 text-right font-bold text-amber-400">${(c.points||0).toLocaleString()}</td>
+            <td class="px-4 py-3.5 text-right text-white hidden md:table-cell">${rp(spend)}</td>
+            <td class="px-4 py-3.5" style="min-width:130px">
+                <div class="flex items-center gap-2"><div class="progress-bar flex-1"><div class="progress-fill" style="width:${pct}%;background:${tierColors[c.tier]}"></div></div><span class="text-xs" style="color:rgba(255,255,255,.4)">${pct}%</span></div>
+                ${next?`<div class="text-xs mt-0.5" style="color:rgba(255,255,255,.25)">next: ${rp(next)}</div>`:'<div class="text-xs mt-0.5 text-purple-400">Max tier ✓</div>'}
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function renderLedger(){
+    const q=(document.getElementById('searchLedger').value||'').toLowerCase();
+    const customers=LunomiDB.getCustomers();
+    const ledger=LoyaltyEngine.getLedger().filter(l=>{
+        if(!q)return true;
+        const c=customers.find(x=>x.id===l.customerId);
+        return c&&(c.name||'').toLowerCase().includes(q);
+    });
+    const body=document.getElementById('ledgerBody');
+    const empty=document.getElementById('ledgerEmpty');
+    if(!ledger.length){body.innerHTML='';empty.classList.remove('hidden');return;}
+    empty.classList.add('hidden');
+    body.innerHTML=ledger.slice(0,100).map(l=>{
+        const c=customers.find(x=>x.id===l.customerId);
+        const earn=l.type==='earn';
+        return `<div class="px-5 py-3.5 flex justify-between items-center" style="border-bottom:1px solid rgba(255,255,255,.06)">
+            <div><div class="font-semibold text-white text-sm">${c?c.name:'Unknown'}</div><div class="text-xs mt-0.5" style="color:rgba(255,255,255,.4)">${l.reason||'—'} · ${fmtTime(l.at)}</div></div>
+            <div class="font-bold text-base ${earn?'text-green-400':'text-red-400'}">${earn?'+':''}${l.pts} poin</div>
+        </div>`;
+    }).join('');
+}
+
+function openRedeem(){
+    selectedRedeemId=null;
+    ['redeemSearch','redeemPts','redeemReason'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('redeemCustomerInfo').classList.add('hidden');
+    document.getElementById('redeemSuggestions').classList.add('hidden');
+    document.getElementById('redeemErr').classList.add('hidden');
+    document.getElementById('redeemModal').classList.remove('hidden');
+}
+function closeRedeem(){document.getElementById('redeemModal').classList.add('hidden');}
+
+function searchRedeemCustomer(){
+    const q=document.getElementById('redeemSearch').value.toLowerCase();
+    const sug=document.getElementById('redeemSuggestions');
+    if(!q){sug.classList.add('hidden');return;}
+    const matches=LunomiDB.getCustomers().filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q)).slice(0,5);
+    if(!matches.length){sug.classList.add('hidden');return;}
+    sug.innerHTML=matches.map(c=>`<div onclick="selectRedeemCustomer('${c.id}')" class="px-4 py-3 cursor-pointer text-sm" style="border-bottom:1px solid rgba(255,255,255,.06)" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background=''"><span class="font-semibold text-white">${c.name}</span><span class="ml-2 text-xs text-amber-400">${(c.points||0)} poin</span></div>`).join('');
+    sug.classList.remove('hidden');
+}
+function selectRedeemCustomer(id){
+    const c=LunomiDB.findCustomer(id);
+    if(!c)return;
+    selectedRedeemId=id;
+    document.getElementById('redeemSearch').value=c.name;
+    document.getElementById('redeemSuggestions').classList.add('hidden');
+    document.getElementById('rcAvatar').textContent=c.name.charAt(0).toUpperCase();
+    document.getElementById('rcName').textContent=c.name;
+    document.getElementById('rcPoints').textContent=(c.points||0).toLocaleString()+' poin tersedia';
+    document.getElementById('redeemCustomerInfo').classList.remove('hidden');
+}
+function doRedeem(){
+    const err=document.getElementById('redeemErr');
+    if(!selectedRedeemId){err.textContent='Pilih customer terlebih dahulu.';err.classList.remove('hidden');return;}
+    const pts=parseInt(document.getElementById('redeemPts').value);
+    if(!pts||pts<1){err.textContent='Jumlah poin tidak valid.';err.classList.remove('hidden');return;}
+    const reason=document.getElementById('redeemReason').value.trim()||'Redeem poin';
+    if(!LoyaltyEngine.redeemPoints(selectedRedeemId,pts,reason)){err.textContent='Poin tidak mencukupi.';err.classList.remove('hidden');return;}
+    closeRedeem(); renderStats(); renderLeaderboard();
+    showToast('✅ '+pts+' poin diredeem = diskon Rp '+(pts*100).toLocaleString('id-ID'));
+}
+
+function showToast(msg,type){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.className='toast '+(type==='err'?'toast-err':'toast-ok');
+    t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    const s=SessionManager.get('session');
+    if(!s){window.location.href='index.html';return;}
+    const outlet=SessionManager.get('outlet');
+    if(outlet)document.getElementById('outletLabel').textContent=outlet.name;
+    renderStats(); renderLeaderboard();
+});
+</script>
 </body>
 </html>

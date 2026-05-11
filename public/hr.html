@@ -5,34 +5,356 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Kelola Karyawan</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>*{font-family:'Plus Jakarta Sans',sans-serif;}body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}.glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}.glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}</style>
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(16,185,129,.15) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;outline:none;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{border-color:rgba(99,102,241,.6);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(8px);}
+        .modal-box{background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:1.25rem;}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.05);transition:background .15s;}
+        .row-item:hover{background:rgba(255,255,255,.02);}
+        .filter-btn{padding:.35rem .9rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);transition:all .2s;}
+        .filter-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.5);color:white;}
+        .role-badge{display:inline-block;padding:.15rem .55rem;border-radius:999px;font-size:.68rem;font-weight:700;}
+        .status-active{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.25);}
+        .status-inactive{background:rgba(255,255,255,.07);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1);}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+        .toast-err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
 </head>
 <body>
+
 <nav class="glass-nav sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">👨‍💼</div>
-        <div><div class="font-extrabold text-white text-sm">Kelola Karyawan</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="history.back()" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">👥</div>
+            <div>
+                <div class="font-extrabold text-white text-sm">Kelola Karyawan</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)" id="outletLabel">—</div>
+            </div>
+        </div>
+        <button onclick="openModal()" class="btn-primary px-4 py-2 rounded-xl text-xs">+ Tambah Karyawan</button>
     </div>
 </nav>
-<div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <div class="text-6xl mb-6">👨‍💼</div>
-    <h1 class="text-2xl font-extrabold text-white mb-2">Kelola Karyawan</h1>
-    <p class="mb-8 max-w-md mx-auto" style="color:rgba(255,255,255,.5)">Manajemen SDM, absensi, dan penggajian karyawan outlet.</p>
-    <div class="glass-card rounded-2xl p-6 max-w-sm mx-auto text-left">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(255,255,255,.35)">Fitur yang akan hadir</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.6)"><li>✦ Daftar karyawan & jabatan</li><li>✦ Manajemen shift kerja</li><li>✦ Rekap absensi harian</li><li>✦ Penggajian otomatis</li><li>✦ Performa karyawan</li></ul>
+
+<div class="max-w-5xl mx-auto px-4 py-6">
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Karyawan</div>
+            <div class="text-2xl font-extrabold text-white" id="statTotal">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1 text-green-400">Aktif</div>
+            <div class="text-2xl font-extrabold text-green-400" id="statActive">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1 text-indigo-400">Total Gaji / Bulan</div>
+            <div class="text-lg font-extrabold text-indigo-400" id="statSalary">Rp 0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1 text-amber-400">Non-Aktif</div>
+            <div class="text-2xl font-extrabold text-amber-400" id="statInactive">0</div>
+        </div>
     </div>
-    <button onclick="window.location.href='dashboard.html'" class="mt-8 px-6 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">← Kembali ke Dashboard</button>
+
+    <!-- Filter + Search -->
+    <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
+        <input id="searchInput" type="text" placeholder="🔍 Cari nama, jabatan, telepon..." oninput="renderList()"
+            class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[180px]">
+        <div class="flex gap-2 flex-wrap">
+            <button class="filter-btn active" onclick="setFilter('all',this)">Semua</button>
+            <button class="filter-btn" onclick="setFilter('active',this)">Aktif</button>
+            <button class="filter-btn" onclick="setFilter('inactive',this)">Non-Aktif</button>
+        </div>
+    </div>
+
+    <!-- Role Filter -->
+    <div class="flex gap-2 flex-wrap mb-4" id="roleFilters">
+        <!-- generated by JS -->
+    </div>
+
+    <!-- List -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div id="staffList"></div>
+        <div id="emptyState" class="hidden py-16 text-center">
+            <div class="text-5xl mb-3">👥</div>
+            <div class="text-sm font-semibold" style="color:rgba(255,255,255,.4)">Belum ada karyawan</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.25)">Tambahkan karyawan pertama outlet Anda</div>
+        </div>
+    </div>
 </div>
+
+<!-- Add/Edit Modal -->
+<div id="staffModal" class="modal-overlay hidden fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4">
+    <div class="modal-box w-full max-w-md shadow-2xl">
+        <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <h2 class="font-bold text-white" id="modalTitle">Tambah Karyawan</h2>
+            <button onclick="closeModal()" class="text-xl font-bold hover:text-white" style="color:rgba(255,255,255,.4)">×</button>
+        </div>
+        <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="col-span-2">
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Nama Lengkap *</label>
+                    <input id="fName" type="text" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="Nama karyawan">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Jabatan *</label>
+                    <select id="fRole" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
+                        <option>Kasir</option>
+                        <option>Manager</option>
+                        <option>Chef / Koki</option>
+                        <option>Pelayan</option>
+                        <option>Barista</option>
+                        <option>Kurir</option>
+                        <option>Admin</option>
+                        <option>Owner</option>
+                        <option>Staff Umum</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Status</label>
+                    <select id="fStatus" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
+                        <option value="active">Aktif</option>
+                        <option value="inactive">Non-Aktif</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">No. Telepon</label>
+                    <input id="fPhone" type="tel" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="08xxx">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Tanggal Masuk</label>
+                    <input id="fStartDate" type="date" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Gaji Pokok (Rp / bulan)</label>
+                    <input id="fSalary" type="number" min="0" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="0">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Email</label>
+                    <input id="fEmail" type="email" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="email@contoh.com">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Alamat</label>
+                    <textarea id="fAddress" rows="2" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm resize-none" placeholder="Alamat lengkap..."></textarea>
+                </div>
+                <div class="col-span-2">
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Catatan</label>
+                    <textarea id="fNotes" rows="2" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm resize-none" placeholder="Opsional..."></textarea>
+                </div>
+            </div>
+            <div id="formError" class="hidden px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;"></div>
+        </div>
+        <div class="px-6 pb-5 flex gap-3">
+            <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="saveStaff()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm" id="saveBtn">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast toast-ok"></div>
+
 <script>
+const ROLES = ['Kasir','Manager','Chef / Koki','Pelayan','Barista','Kurir','Admin','Owner','Staff Umum'];
+const ROLE_COLORS = {
+    'Owner':      {bg:'rgba(245,158,11,.15)',color:'#fcd34d'},
+    'Manager':    {bg:'rgba(99,102,241,.15)', color:'#a5b4fc'},
+    'Kasir':      {bg:'rgba(59,130,246,.15)', color:'#93c5fd'},
+    'Chef / Koki':{bg:'rgba(249,115,22,.15)',color:'#fdba74'},
+    'Barista':    {bg:'rgba(236,72,153,.15)', color:'#f9a8d4'},
+    'Pelayan':    {bg:'rgba(16,185,129,.15)', color:'#6ee7b7'},
+    'Kurir':      {bg:'rgba(139,92,246,.15)', color:'#c4b5fd'},
+    'Admin':      {bg:'rgba(20,184,166,.15)', color:'#5eead4'},
+    'Staff Umum': {bg:'rgba(255,255,255,.08)',color:'rgba(255,255,255,.5)'},
+};
+
+let editingId = null;
+let activeStatus = 'all';
+let activeRole = 'all';
+
+function rp(n){ return 'Rp '+Number(n||0).toLocaleString('id-ID'); }
+
+function getStaff(){ return JSON.parse(localStorage.getItem('lunomi_staff')||'[]'); }
+function saveStaffData(arr){ localStorage.setItem('lunomi_staff', JSON.stringify(arr)); }
+
+function buildRoleFilters(){
+    const el = document.getElementById('roleFilters');
+    const all = [['all','Semua Jabatan'], ...ROLES.map(r=>[r,r])];
+    el.innerHTML = all.map(([val,label])=>`
+        <button class="filter-btn text-xs${val==='all'?' active':''}" onclick="setRoleFilter('${val}',this)">${label}</button>
+    `).join('');
+}
+
+function setFilter(status, btn){
+    activeStatus = status;
+    document.querySelectorAll('.filter-btn').forEach(b=>{ if(b.textContent==='Semua'||b.textContent==='Aktif'||b.textContent==='Non-Aktif') b.classList.remove('active'); });
+    btn.classList.add('active');
+    renderList();
+}
+
+function setRoleFilter(role, btn){
+    activeRole = role;
+    document.getElementById('roleFilters').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderList();
+}
+
+function renderList(){
+    const q = (document.getElementById('searchInput').value||'').toLowerCase();
+    let staff = getStaff().filter(s=>{
+        const matchStatus = activeStatus==='all' || s.status===activeStatus;
+        const matchRole = activeRole==='all' || s.role===activeRole;
+        const matchQ = !q || s.name.toLowerCase().includes(q) || (s.role||'').toLowerCase().includes(q) || (s.phone||'').includes(q);
+        return matchStatus && matchRole && matchQ;
+    });
+
+    const el = document.getElementById('staffList');
+    const empty = document.getElementById('emptyState');
+
+    if(!staff.length){ el.innerHTML=''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+
+    el.innerHTML = staff.map(s=>{
+        const rc = ROLE_COLORS[s.role]||ROLE_COLORS['Staff Umum'];
+        const initials = s.name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+        const since = s.startDate ? new Date(s.startDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+        return `<div class="row-item px-5 py-4 flex items-center gap-4">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-extrabold" style="background:${rc.bg};color:${rc.color}">${initials||'?'}</div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold text-white text-sm">${s.name}</span>
+                    <span class="role-badge" style="background:${rc.bg};color:${rc.color}">${s.role}</span>
+                    <span class="role-badge ${s.status==='active'?'status-active':'status-inactive'}">${s.status==='active'?'Aktif':'Non-Aktif'}</span>
+                </div>
+                <div class="text-xs mt-0.5 flex gap-3 flex-wrap" style="color:rgba(255,255,255,.35)">
+                    ${s.phone?`<span>📞 ${s.phone}</span>`:''}
+                    <span>📅 Masuk: ${since}</span>
+                    ${s.salary?`<span>💰 ${rp(s.salary)}/bln</span>`:''}
+                </div>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                <button onclick="openModal('${s.id}')" class="text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)">Edit</button>
+                <button onclick="deleteStaff('${s.id}')" class="text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:rgba(239,68,68,.1);color:#f87171">Hapus</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function updateStats(){
+    const staff = getStaff();
+    const active = staff.filter(s=>s.status==='active');
+    const inactive = staff.filter(s=>s.status==='inactive');
+    const totalSalary = active.reduce((s,e)=>s+(e.salary||0),0);
+    document.getElementById('statTotal').textContent = staff.length;
+    document.getElementById('statActive').textContent = active.length;
+    document.getElementById('statInactive').textContent = inactive.length;
+    document.getElementById('statSalary').textContent = rp(totalSalary);
+}
+
+function openModal(id){
+    editingId = id||null;
+    const fields = ['fName','fRole','fStatus','fPhone','fStartDate','fSalary','fEmail','fAddress','fNotes'];
+    fields.forEach(f=>{ const el=document.getElementById(f); if(el) el.value=el.tagName==='SELECT'?el.options[0].value:''; });
+    document.getElementById('fStartDate').value = new Date().toISOString().slice(0,10);
+    document.getElementById('fStatus').value = 'active';
+    document.getElementById('formError').classList.add('hidden');
+
+    if(id){
+        const s = getStaff().find(x=>x.id===id);
+        if(s){
+            document.getElementById('modalTitle').textContent = 'Edit Karyawan';
+            document.getElementById('fName').value = s.name||'';
+            document.getElementById('fRole').value = s.role||'Kasir';
+            document.getElementById('fStatus').value = s.status||'active';
+            document.getElementById('fPhone').value = s.phone||'';
+            document.getElementById('fStartDate').value = s.startDate||'';
+            document.getElementById('fSalary').value = s.salary||'';
+            document.getElementById('fEmail').value = s.email||'';
+            document.getElementById('fAddress').value = s.address||'';
+            document.getElementById('fNotes').value = s.notes||'';
+        }
+    } else {
+        document.getElementById('modalTitle').textContent = 'Tambah Karyawan';
+    }
+    document.getElementById('staffModal').classList.remove('hidden');
+    document.getElementById('fName').focus();
+}
+
+function closeModal(){ document.getElementById('staffModal').classList.add('hidden'); }
+
+function saveStaff(){
+    const name = document.getElementById('fName').value.trim();
+    const role = document.getElementById('fRole').value;
+    const status = document.getElementById('fStatus').value;
+    const phone = document.getElementById('fPhone').value.trim();
+    const startDate = document.getElementById('fStartDate').value;
+    const salary = parseFloat(document.getElementById('fSalary').value)||0;
+    const email = document.getElementById('fEmail').value.trim();
+    const address = document.getElementById('fAddress').value.trim();
+    const notes = document.getElementById('fNotes').value.trim();
+    const err = document.getElementById('formError');
+
+    if(!name){ err.textContent='Nama harus diisi.'; err.classList.remove('hidden'); return; }
+    if(!role){ err.textContent='Jabatan harus dipilih.'; err.classList.remove('hidden'); return; }
+    err.classList.add('hidden');
+
+    const staff = getStaff();
+    if(editingId){
+        const idx = staff.findIndex(x=>x.id===editingId);
+        if(idx>=0) staff[idx] = {...staff[idx], name, role, status, phone, startDate, salary, email, address, notes};
+        AuditLog.add('staff_edit', `Edit karyawan: ${name} (${role})`);
+    } else {
+        staff.unshift({ id:'STF-'+Date.now(), name, role, status, phone, startDate, salary, email, address, notes, createdAt: new Date().toISOString() });
+        AuditLog.add('staff_add', `Tambah karyawan: ${name} (${role})`);
+    }
+    saveStaffData(staff);
+    closeModal();
+    updateStats();
+    renderList();
+    showToast(editingId ? '✏️ Data karyawan diperbarui' : '✅ Karyawan berhasil ditambahkan');
+}
+
+function deleteStaff(id){
+    const s = getStaff().find(x=>x.id===id);
+    if(!s) return;
+    if(!confirm(`Hapus karyawan "${s.name}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+    const staff = getStaff().filter(x=>x.id!==id);
+    saveStaffData(staff);
+    AuditLog.add('staff_delete', `Hapus karyawan: ${s.name} (${s.role})`);
+    updateStats();
+    renderList();
+    showToast('🗑️ Karyawan dihapus', true);
+}
+
+function showToast(msg, isErr=false){
+    const t=document.getElementById('toast');
+    t.className='toast '+(isErr?'toast-err':'toast-ok');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3000);
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
-    try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
-    const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-    if(o)document.getElementById('outletLabel').textContent=o.name;}
-    catch(e){window.location.href='index.html';}
+    const s=SessionManager.get('session');
+    if(!s){window.location.href='index.html';return;}
+    const outlet=SessionManager.get('outlet');
+    if(outlet) document.getElementById('outletLabel').textContent=outlet.name;
+    buildRoleFilters();
+    updateStats();
+    renderList();
 });
 </script>
 </body>

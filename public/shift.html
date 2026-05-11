@@ -3,117 +3,382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekonsiliasi Shift - Lunomi</title>
+    <title>Lunomi — Tutup Shift</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #020617; color: white; min-height: 100vh; }
-        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
-        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.2) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(16,185,129,.15) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .glass-input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;outline:none;}
+        .glass-input:focus{border-color:rgba(99,102,241,.6);}
+        .glass-input::placeholder{color:rgba(255,255,255,.3);}
+        .denom-row{border-bottom:1px solid rgba(255,255,255,.05);}
+        .denom-row:last-child{border-bottom:none;}
+        .denom-input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:white;outline:none;width:80px;text-align:center;border-radius:.5rem;padding:.35rem .5rem;font-weight:700;}
+        .denom-input:focus{border-color:rgba(99,102,241,.5);}
+        .denom-input::-webkit-inner-spin-button{opacity:1;}
+        .tab-btn{padding:.4rem 1rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);transition:all .2s;}
+        .tab-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.5);color:white;}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+        .toast-err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+        @media(max-width:640px){.denom-input{width:64px;}}
     </style>
 </head>
-<body class="p-4 sm:p-8">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
+<body>
+
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="history.back()" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">🔐</div>
             <div>
-                <h1 class="text-2xl font-extrabold">Tutup Shift & Rekonsiliasi</h1>
-                <p class="text-sm text-white/50">Cocokkan uang tunai fisik dengan data sistem</p>
-            </div>
-            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass-card p-6 rounded-2xl">
-                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Penjualan (Sistem)</p>
-                <h3 id="sysSales" class="text-xl font-extrabold">Rp 0</h3>
-            </div>
-            <div class="glass-card p-6 rounded-2xl">
-                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Uang Tunai (Sistem)</p>
-                <h3 id="sysCash" class="text-xl font-extrabold">Rp 0</h3>
-            </div>
-            <div class="glass-card p-6 rounded-2xl">
-                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Modal Awal</p>
-                <h3 class="text-xl font-extrabold">Rp 500,000</h3>
+                <div class="font-extrabold text-white text-sm">Tutup Shift</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)" id="outletLabel">—</div>
             </div>
         </div>
+        <div class="flex gap-2">
+            <button class="tab-btn active" onclick="setTab('close',this)">Tutup Shift</button>
+            <button class="tab-btn" onclick="setTab('history',this)">Riwayat</button>
+        </div>
+    </div>
+</nav>
 
-        <div class="glass-card rounded-3xl p-8">
-            <h3 class="text-lg font-bold mb-6">Input Uang Fisik</h3>
-            <div class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-xs font-bold text-white/40 mb-2 uppercase">Total Uang Tunai di Laci</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 font-bold">Rp</span>
-                            <input type="number" id="actualCash" oninput="calcDiff()" class="glass-input w-full pl-12 pr-4 py-4 rounded-2xl text-xl font-black" placeholder="0">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-white/40 mb-2 uppercase">Selisih (Variance)</label>
-                        <div id="varianceBox" class="w-full px-4 py-4 rounded-2xl text-xl font-black bg-white/5 flex items-center">
-                            Rp 0
-                        </div>
-                    </div>
-                </div>
+<div class="max-w-4xl mx-auto px-4 py-6">
 
-                <div>
-                    <label class="block text-xs font-bold text-white/40 mb-2 uppercase">Catatan / Alasan Selisih</label>
-                    <textarea class="glass-input w-full px-4 py-3 rounded-2xl text-sm h-24" placeholder="Contoh: Salah kembalian pelanggan..."></textarea>
-                </div>
+<!-- ===== TAB: CLOSE SHIFT ===== -->
+<div id="tabClose">
 
-                <div class="pt-6 border-t border-white/5">
-                    <button onclick="processCloseShift()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-2xl font-bold transition shadow-lg shadow-indigo-500/20">Proses Tutup Shift</button>
-                </div>
-            </div>
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Penjualan</div>
+            <div class="text-lg font-extrabold text-white" id="kpiTotal">Rp 0</div>
+            <div class="text-xs mt-0.5" style="color:rgba(255,255,255,.3)" id="kpiTrxCount">0 transaksi</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Tunai (Sistem)</div>
+            <div class="text-lg font-extrabold text-green-400" id="kpiCash">Rp 0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Non-Tunai</div>
+            <div class="text-lg font-extrabold text-indigo-400" id="kpiNonCash">Rp 0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Customer Dilayani</div>
+            <div class="text-lg font-extrabold text-amber-400" id="kpiCust">0</div>
         </div>
     </div>
 
-    <script>
-        let expectedTotal = 500000; // Modal awal
+    <div class="grid md:grid-cols-2 gap-6">
 
-        function loadData() {
-            const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
-            let totalSales = 0;
-            let cashSales = 0;
+        <!-- Left: Denomination Counter -->
+        <div class="glass-card rounded-2xl p-5">
+            <div class="font-bold text-white mb-4">💵 Hitung Uang Fisik</div>
 
-            trxs.forEach(t => {
-                totalSales += t.total;
-                if (t.method === 'cash') cashSales += t.total;
-            });
+            <!-- Modal awal -->
+            <div class="flex items-center justify-between mb-4 pb-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
+                <span class="text-sm font-semibold" style="color:rgba(255,255,255,.6)">Modal Awal (Opening Float)</span>
+                <div class="relative">
+                    <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style="color:rgba(255,255,255,.4)">Rp</span>
+                    <input type="number" id="openingFloat" value="500000" oninput="calcAll()" class="glass-input pl-8 pr-2 py-1.5 rounded-lg text-sm font-bold w-32 text-right">
+                </div>
+            </div>
 
-            document.getElementById('sysSales').textContent = 'Rp ' + totalSales.toLocaleString('id-ID');
-            document.getElementById('sysCash').textContent = 'Rp ' + cashSales.toLocaleString('id-ID');
-            expectedTotal += cashSales;
-            calcDiff();
-        }
+            <!-- Denomination rows -->
+            <div class="space-y-0" id="denomTable">
+                <!-- Generated by JS -->
+            </div>
 
-        function calcDiff() {
-            const actual = parseFloat(document.getElementById('actualCash').value) || 0;
-            const diff = actual - expectedTotal;
-            const box = document.getElementById('varianceBox');
-            
-            box.textContent = (diff >= 0 ? '+ Rp ' : '- Rp ') + Math.abs(diff).toLocaleString('id-ID');
-            
-            if (diff === 0) {
-                box.className = "w-full px-4 py-4 rounded-2xl text-xl font-black bg-emerald-500/10 text-emerald-400 flex items-center";
-            } else if (diff < 0) {
-                box.className = "w-full px-4 py-4 rounded-2xl text-xl font-black bg-rose-500/10 text-rose-400 flex items-center";
-            } else {
-                box.className = "w-full px-4 py-4 rounded-2xl text-xl font-black bg-amber-500/10 text-amber-400 flex items-center";
-            }
-        }
+            <div class="mt-4 pt-4 flex justify-between items-center" style="border-top:1px solid rgba(255,255,255,.08)">
+                <span class="text-sm font-bold" style="color:rgba(255,255,255,.5)">Total Fisik</span>
+                <span class="text-lg font-extrabold text-white" id="denomTotal">Rp 0</span>
+            </div>
+        </div>
 
-        function processCloseShift() {
-            if (confirm('Yakin ingin menutup shift? Data transaksi akan diarsipkan.')) {
-                alert('Shift berhasil ditutup. Laporan telah dikirim ke email owner.');
-                window.location.href = 'dashboard.html';
-            }
-        }
+        <!-- Right: Reconciliation -->
+        <div class="space-y-4">
+            <!-- Variance Box -->
+            <div class="glass-card rounded-2xl p-5">
+                <div class="font-bold text-white mb-4">⚖️ Rekonsiliasi</div>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span style="color:rgba(255,255,255,.5)">Tunai Sistem</span>
+                        <span class="font-bold text-white" id="recCashSys">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span style="color:rgba(255,255,255,.5)">Modal Awal</span>
+                        <span class="font-bold text-white" id="recFloat">Rp 500.000</span>
+                    </div>
+                    <div class="flex justify-between" style="border-top:1px solid rgba(255,255,255,.08);padding-top:.75rem">
+                        <span style="color:rgba(255,255,255,.5)">Ekspektasi di Laci</span>
+                        <span class="font-bold text-indigo-300" id="recExpected">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span style="color:rgba(255,255,255,.5)">Uang Fisik Terhitung</span>
+                        <span class="font-bold text-white" id="recActual">Rp 0</span>
+                    </div>
+                </div>
 
-        document.addEventListener('DOMContentLoaded', loadData);
-    </script>
+                <div class="mt-4 p-3 rounded-xl text-center" id="varianceBox" style="background:rgba(255,255,255,.05)">
+                    <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Selisih (Variance)</div>
+                    <div class="text-2xl font-extrabold" id="varianceVal">Rp 0</div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="glass-card rounded-2xl p-5">
+                <div class="font-bold text-white mb-3">📝 Catatan</div>
+                <textarea id="shiftNotes" class="glass-input w-full px-3 py-2.5 rounded-xl text-sm h-20 resize-none" placeholder="Alasan selisih, kejadian khusus, dll..."></textarea>
+            </div>
+
+            <!-- Staff -->
+            <div class="glass-card rounded-2xl p-5">
+                <div class="font-bold text-white mb-3">👤 Kasir / Staff</div>
+                <input type="text" id="staffName" class="glass-input w-full px-3 py-2.5 rounded-xl text-sm" placeholder="Nama kasir yang bertugas...">
+            </div>
+
+            <!-- Close Shift Button -->
+            <button onclick="closeShift()" class="w-full py-4 rounded-2xl font-bold text-white transition shadow-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 8px 24px rgba(99,102,241,.3);">
+                🔐 Tutup Shift Sekarang
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TAB: HISTORY ===== -->
+<div id="tabHistory" class="hidden">
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="px-5 py-4 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,.07)">
+            <div class="font-bold text-white">📋 Riwayat Shift</div>
+            <span class="text-xs" style="color:rgba(255,255,255,.4)" id="histCount">0 shift</span>
+        </div>
+        <div id="histBody"></div>
+        <div id="histEmpty" class="hidden py-16 text-center">
+            <div class="text-4xl mb-3">🔐</div>
+            <div class="text-sm font-semibold" style="color:rgba(255,255,255,.4)">Belum ada shift yang ditutup</div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /max-w -->
+
+<div id="toast" class="toast toast-ok"></div>
+
+<script>
+const DENOMS = [100000,50000,20000,10000,5000,2000,1000,500,200,100];
+let cashSysTotal = 0;
+let activeTab = 'close';
+
+function rp(n){ return 'Rp '+Number(n||0).toLocaleString('id-ID'); }
+
+function setTab(tab, btn){
+    activeTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tabClose').classList.toggle('hidden', tab!=='close');
+    document.getElementById('tabHistory').classList.toggle('hidden', tab!=='history');
+    if(tab==='history') renderHistory();
+}
+
+function buildDenomTable(){
+    const tbl = document.getElementById('denomTable');
+    tbl.innerHTML = DENOMS.map(d=>`
+        <div class="denom-row py-2.5 flex items-center justify-between">
+            <span class="text-sm font-semibold text-white w-20">${rp(d)}</span>
+            <div class="flex items-center gap-2">
+                <button onclick="adjustDenom(${d},-1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-lg font-bold" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)">−</button>
+                <input type="number" id="denom_${d}" value="0" min="0" oninput="calcAll()" class="denom-input">
+                <button onclick="adjustDenom(${d},1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-lg font-bold" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)">+</button>
+            </div>
+            <span class="text-sm font-bold text-indigo-300 w-28 text-right" id="denomSub_${d}">Rp 0</span>
+        </div>`).join('');
+}
+
+function adjustDenom(denom, delta){
+    const inp = document.getElementById('denom_'+denom);
+    const cur = parseInt(inp.value)||0;
+    inp.value = Math.max(0, cur+delta);
+    calcAll();
+}
+
+function calcAll(){
+    let physTotal = 0;
+    DENOMS.forEach(d=>{
+        const qty = parseInt(document.getElementById('denom_'+d).value)||0;
+        const sub = qty * d;
+        physTotal += sub;
+        document.getElementById('denomSub_'+d).textContent = rp(sub);
+    });
+
+    const floatVal = parseFloat(document.getElementById('openingFloat').value)||0;
+    const expected = cashSysTotal + floatVal;
+    const diff = physTotal - expected;
+
+    document.getElementById('denomTotal').textContent = rp(physTotal);
+    document.getElementById('recFloat').textContent = rp(floatVal);
+    document.getElementById('recExpected').textContent = rp(expected);
+    document.getElementById('recActual').textContent = rp(physTotal);
+
+    const vBox = document.getElementById('varianceBox');
+    const vVal = document.getElementById('varianceVal');
+    if(diff === 0){
+        vBox.style.background = 'rgba(16,185,129,.1)';
+        vVal.style.color = '#4ade80';
+        vVal.textContent = 'Rp 0 ✓ Cocok!';
+    } else if(diff < 0){
+        vBox.style.background = 'rgba(239,68,68,.1)';
+        vVal.style.color = '#fca5a5';
+        vVal.textContent = '−' + rp(Math.abs(diff)) + ' (kurang)';
+    } else {
+        vBox.style.background = 'rgba(245,158,11,.1)';
+        vVal.style.color = '#fcd34d';
+        vVal.textContent = '+' + rp(diff) + ' (lebih)';
+    }
+}
+
+function loadKPIs(){
+    const trxs = LunomiDB.getTransactions();
+    // Only today's transactions for current shift context
+    const today = new Date().toISOString().slice(0,10);
+    const todayTrxs = trxs.filter(t=>t.createdAt&&t.createdAt.slice(0,10)===today);
+
+    let total=0, cash=0, nonCash=0;
+    todayTrxs.forEach(t=>{
+        total += (t.total||0);
+        const m = (t.payMethod||t.method||'').toLowerCase();
+        if(m==='tunai'||m==='cash') cash += (t.total||0);
+        else nonCash += (t.total||0);
+    });
+    cashSysTotal = cash;
+
+    document.getElementById('kpiTotal').textContent = rp(total);
+    document.getElementById('kpiTrxCount').textContent = todayTrxs.length+' transaksi';
+    document.getElementById('kpiCash').textContent = rp(cash);
+    document.getElementById('kpiNonCash').textContent = rp(nonCash);
+    const uniqCust = new Set(todayTrxs.filter(t=>t.customerId).map(t=>t.customerId)).size;
+    document.getElementById('kpiCust').textContent = uniqCust;
+    document.getElementById('recCashSys').textContent = rp(cash);
+    calcAll();
+}
+
+function getShifts(){
+    return JSON.parse(localStorage.getItem('lunomi_shifts')||'[]');
+}
+function saveShifts(arr){
+    localStorage.setItem('lunomi_shifts', JSON.stringify(arr));
+}
+
+function closeShift(){
+    const floatVal = parseFloat(document.getElementById('openingFloat').value)||0;
+
+    let physTotal = 0;
+    DENOMS.forEach(d=>{ physTotal += (parseInt(document.getElementById('denom_'+d).value)||0)*d; });
+
+    const expected = cashSysTotal + floatVal;
+    const diff = physTotal - expected;
+    const notes = document.getElementById('shiftNotes').value.trim();
+    const staff = document.getElementById('staffName').value.trim() || 'Kasir';
+
+    const today = new Date().toISOString().slice(0,10);
+    const trxs = LunomiDB.getTransactions();
+    const todayTrxs = trxs.filter(t=>t.createdAt&&t.createdAt.slice(0,10)===today);
+    let total=0, cash=0, nonCash=0;
+    todayTrxs.forEach(t=>{
+        total+=(t.total||0);
+        const m=(t.payMethod||t.method||'').toLowerCase();
+        if(m==='tunai'||m==='cash') cash+=(t.total||0); else nonCash+=(t.total||0);
+    });
+
+    const denomSnapshot = {};
+    DENOMS.forEach(d=>{ const qty=parseInt(document.getElementById('denom_'+d).value)||0; if(qty>0) denomSnapshot[d]=qty; });
+
+    const record = {
+        id: 'SHIFT-'+ Date.now(),
+        closedAt: new Date().toISOString(),
+        staff,
+        outlet: (SessionManager.get('outlet')||{}).name||'—',
+        openingFloat: floatVal,
+        totalSales: total,
+        cashSales: cash,
+        nonCashSales: nonCash,
+        trxCount: todayTrxs.length,
+        expectedCash: expected,
+        physicalCash: physTotal,
+        variance: diff,
+        denomSnapshot,
+        notes
+    };
+
+    const shifts = getShifts();
+    shifts.unshift(record);
+    saveShifts(shifts);
+
+    AuditLog.add('shift_close', `${staff} tutup shift — penjualan ${rp(total)}, selisih ${diff>=0?'+':''}${rp(diff)}`);
+
+    showToast('✅ Shift berhasil ditutup!');
+
+    // Reset denomination inputs
+    DENOMS.forEach(d=>{ document.getElementById('denom_'+d).value=0; document.getElementById('denomSub_'+d).textContent='Rp 0'; });
+    document.getElementById('shiftNotes').value='';
+    document.getElementById('staffName').value='';
+    document.getElementById('denomTotal').textContent='Rp 0';
+    calcAll();
+}
+
+function renderHistory(){
+    const shifts = getShifts();
+    const body = document.getElementById('histBody');
+    const empty = document.getElementById('histEmpty');
+    document.getElementById('histCount').textContent = shifts.length+' shift';
+
+    if(!shifts.length){ body.innerHTML=''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+
+    body.innerHTML = shifts.map(s=>{
+        const dt = new Date(s.closedAt).toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+        const diffColor = s.variance===0 ? '#4ade80' : s.variance<0 ? '#fca5a5' : '#fcd34d';
+        const diffLabel = s.variance===0 ? 'Cocok' : s.variance>0 ? '+'+rp(s.variance) : rp(s.variance);
+        return `<div class="px-5 py-4 flex items-center gap-4" style="border-bottom:1px solid rgba(255,255,255,.05)">
+            <div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(99,102,241,.12)">🔐</div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-sm font-bold text-white">${s.staff}</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,.07);color:rgba(255,255,255,.4)">${s.outlet}</span>
+                </div>
+                <div class="text-xs mt-0.5 flex gap-3 flex-wrap" style="color:rgba(255,255,255,.35)">
+                    <span>${dt}</span>
+                    <span>${s.trxCount} trx</span>
+                    <span>Penjualan: ${rp(s.totalSales)}</span>
+                </div>
+            </div>
+            <div class="text-right flex-shrink-0">
+                <div class="text-sm font-extrabold" style="color:${diffColor}">${diffLabel}</div>
+                <div class="text-xs mt-0.5" style="color:rgba(255,255,255,.35)">variance</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function showToast(msg, isErr=false){
+    const t=document.getElementById('toast');
+    t.className='toast '+(isErr?'toast-err':'toast-ok');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    const s=SessionManager.get('session');
+    if(!s){window.location.href='index.html';return;}
+    const outlet=SessionManager.get('outlet');
+    if(outlet) document.getElementById('outletLabel').textContent=outlet.name;
+    buildDenomTable();
+    loadKPIs();
+});
+</script>
 </body>
 </html>

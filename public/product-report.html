@@ -3,113 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Produk - Lunomi</title>
+    <title>Lunomi — Laporan Produk</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #020617; color: white; min-height: 100vh; }
-        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.2) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.15) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;outline:none;}
+        .period-btn{padding:.4rem 1rem;border-radius:999px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);transition:all .2s;}
+        .period-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.5);color:white;}
+        .sort-btn{padding:.3rem .8rem;border-radius:.5rem;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);transition:all .2s;}
+        .sort-btn.active{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.4);color:#a5b4fc;}
+        th{white-space:nowrap;}
+        tr:hover td{background:rgba(255,255,255,.02);}
     </style>
 </head>
-<body class="p-4 sm:p-8">
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
+<body>
+
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="history.back()" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">📦</div>
             <div>
-                <h1 class="text-2xl font-extrabold">Laporan Penjualan Produk</h1>
-                <p class="text-sm text-white/50">Analisa menu terlaris dan performa penjualan</p>
-            </div>
-            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass-card p-6 rounded-2xl">
-                <p class="text-xs font-bold text-white/40 uppercase mb-1">Total Item Terjual</p>
-                <h3 id="totalQty" class="text-3xl font-extrabold">0</h3>
-            </div>
-            <div class="glass-card p-6 rounded-2xl">
-                <p class="text-xs font-bold text-white/40 uppercase mb-1">Produk Terlaris</p>
-                <h3 id="topProduct" class="text-xl font-extrabold text-indigo-400">—</h3>
-            </div>
-            <div class="glass-card p-6 rounded-2xl">
-                <p class="text-xs font-bold text-white/40 uppercase mb-1">Total Omzet Produk</p>
-                <h3 id="totalRevenue" class="text-3xl font-extrabold">Rp 0</h3>
+                <div class="font-extrabold text-white text-sm">Laporan Produk</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)" id="outletLabel">—</div>
             </div>
         </div>
+        <div class="flex gap-2">
+            <button class="period-btn" onclick="setPeriod(7,this)">7 Hari</button>
+            <button class="period-btn" onclick="setPeriod(30,this)">30 Hari</button>
+            <button class="period-btn" onclick="setPeriod(90,this)">3 Bulan</button>
+            <button class="period-btn active" onclick="setPeriod(0,this)">Semua</button>
+        </div>
+    </div>
+</nav>
 
-        <div class="glass-card rounded-2xl overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-white/5 text-xs font-bold uppercase tracking-wider text-white/40">
-                        <th class="px-6 py-4">Nama Produk</th>
-                        <th class="px-6 py-4 text-center">Qty Terjual</th>
-                        <th class="px-6 py-4 text-right">Total Penjualan</th>
-                        <th class="px-6 py-4 text-right">Kontribusi</th>
-                    </tr>
-                </thead>
-                <tbody id="reportTable" class="divide-y divide-white/5">
-                    <!-- Data will be loaded here -->
-                </tbody>
-            </table>
+<div class="max-w-5xl mx-auto px-4 py-6">
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Item Terjual</div>
+            <div class="text-2xl font-extrabold text-white" id="kpiQty">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1 text-indigo-400">Produk Terlaris</div>
+            <div class="text-sm font-extrabold text-indigo-400 leading-tight" id="kpiTop">—</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1 text-amber-400">Total Varian Produk</div>
+            <div class="text-2xl font-extrabold text-amber-400" id="kpiVariants">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Omzet Produk</div>
+            <div class="text-lg font-extrabold text-white" id="kpiRevenue">Rp 0</div>
         </div>
     </div>
 
-    <script>
-        function renderReport() {
-            const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
-            const productMap = {};
-            let totalQty = 0;
-            let totalRevenue = 0;
+    <!-- Controls -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <input id="searchInput" type="text" placeholder="🔍 Cari nama produk..." oninput="renderTable()"
+            class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[180px] max-w-xs">
+        <div class="flex gap-2 items-center flex-wrap">
+            <span class="text-xs" style="color:rgba(255,255,255,.4)">Urutkan:</span>
+            <button class="sort-btn active" onclick="setSort('qty',this)">Qty ↓</button>
+            <button class="sort-btn" onclick="setSort('revenue',this)">Omzet ↓</button>
+            <button class="sort-btn" onclick="setSort('name',this)">Nama</button>
+        </div>
+    </div>
 
-            trxs.forEach(t => {
-                t.items.forEach(item => {
-                    if (!productMap[item.name]) {
-                        productMap[item.name] = { qty: 0, revenue: 0 };
-                    }
-                    productMap[item.name].qty += item.qty;
-                    productMap[item.name].revenue += (item.qty * item.price);
-                    totalQty += item.qty;
-                    totalRevenue += (item.qty * item.price);
-                });
-            });
-
-            const sortedProducts = Object.entries(productMap)
-                .map(([name, data]) => ({ name, ...data }))
-                .sort((a, b) => b.qty - a.qty);
-
-            document.getElementById('totalQty').textContent = totalQty.toLocaleString('id-ID');
-            document.getElementById('totalRevenue').textContent = 'Rp ' + totalRevenue.toLocaleString('id-ID');
-            document.getElementById('topProduct').textContent = sortedProducts.length > 0 ? sortedProducts[0].name : '—';
-
-            const table = document.getElementById('reportTable');
-            if (sortedProducts.length === 0) {
-                table.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-white/30 text-sm">Belum ada data transaksi</td></tr>';
-                return;
-            }
-
-            table.innerHTML = sortedProducts.map(p => {
-                const contribution = ((p.revenue / totalRevenue) * 100).toFixed(1);
-                return `
-                    <tr class="hover:bg-white/5 transition">
-                        <td class="px-6 py-4 font-bold text-sm">${p.name}</td>
-                        <td class="px-6 py-4 text-center text-sm">${p.qty}</td>
-                        <td class="px-6 py-4 text-right text-sm font-mono">Rp ${p.revenue.toLocaleString('id-ID')}</td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex items-center justify-end gap-2">
-                                <div class="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                    <div class="h-full bg-indigo-500" style="width: ${contribution}%"></div>
-                                </div>
-                                <span class="text-[10px] font-bold text-white/40 w-8">${contribution}%</span>
-                            </div>
-                        </td>
+    <!-- Table -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider" style="color:rgba(255,255,255,.35)">#</th>
+                        <th class="px-4 py-3 text-xs font-bold uppercase tracking-wider" style="color:rgba(255,255,255,.35)">Produk</th>
+                        <th class="px-4 py-3 text-xs font-bold uppercase tracking-wider text-center" style="color:rgba(255,255,255,.35)">Qty</th>
+                        <th class="px-4 py-3 text-xs font-bold uppercase tracking-wider text-right" style="color:rgba(255,255,255,.35)">Omzet</th>
+                        <th class="px-4 py-3 text-xs font-bold uppercase tracking-wider text-right" style="color:rgba(255,255,255,.35)">Harga Rata-rata</th>
+                        <th class="px-4 py-3 text-xs font-bold uppercase tracking-wider" style="color:rgba(255,255,255,.35)">Kontribusi</th>
                     </tr>
-                `;
-            }).join('');
-        }
+                </thead>
+                <tbody id="reportTable"></tbody>
+            </table>
+        </div>
+        <div id="emptyState" class="hidden py-16 text-center">
+            <div class="text-4xl mb-3">📦</div>
+            <div class="text-sm font-semibold" style="color:rgba(255,255,255,.4)">Belum ada data transaksi</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.25)">Data produk akan muncul setelah ada transaksi</div>
+        </div>
+    </div>
 
-        document.addEventListener('DOMContentLoaded', renderReport);
-    </script>
+</div>
+
+<script>
+let activePeriod = 0;
+let activeSort = 'qty';
+let allProducts = [];
+let totalRevenue = 0;
+
+function rp(n){ return 'Rp '+Number(n||0).toLocaleString('id-ID'); }
+
+function setPeriod(days, btn){
+    activePeriod = days;
+    document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    loadData();
+}
+
+function setSort(sort, btn){
+    activeSort = sort;
+    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTable();
+}
+
+function loadData(){
+    let trxs = LunomiDB.getTransactions();
+    if(activePeriod > 0){
+        const cutoff = new Date(Date.now() - activePeriod * 86400000);
+        trxs = trxs.filter(t=>new Date(t.createdAt)>=cutoff);
+    }
+
+    const map = {};
+    let qty = 0;
+    let rev = 0;
+
+    trxs.forEach(t=>(t.items||[]).forEach(it=>{
+        const name = it.name||'—';
+        if(!map[name]) map[name]={qty:0,revenue:0,prices:[]};
+        map[name].qty += (it.qty||1);
+        const lineRev = (it.price||0)*(it.qty||1);
+        map[name].revenue += lineRev;
+        map[name].prices.push(it.price||0);
+        qty += (it.qty||1);
+        rev += lineRev;
+    }));
+
+    allProducts = Object.entries(map).map(([name,d])=>({
+        name, qty:d.qty, revenue:d.revenue,
+        avgPrice: d.prices.length ? Math.round(d.prices.reduce((a,b)=>a+b,0)/d.prices.length) : 0
+    }));
+    totalRevenue = rev;
+
+    document.getElementById('kpiQty').textContent = qty.toLocaleString('id-ID');
+    document.getElementById('kpiVariants').textContent = allProducts.length;
+    document.getElementById('kpiRevenue').textContent = rp(rev);
+
+    const top = [...allProducts].sort((a,b)=>b.qty-a.qty)[0];
+    document.getElementById('kpiTop').textContent = top ? top.name : '—';
+
+    renderTable();
+}
+
+function renderTable(){
+    const q = (document.getElementById('searchInput').value||'').toLowerCase();
+    let filtered = allProducts.filter(p=>!q||p.name.toLowerCase().includes(q));
+
+    if(activeSort==='qty') filtered.sort((a,b)=>b.qty-a.qty);
+    else if(activeSort==='revenue') filtered.sort((a,b)=>b.revenue-a.revenue);
+    else filtered.sort((a,b)=>a.name.localeCompare(b.name));
+
+    const tbody = document.getElementById('reportTable');
+    const empty = document.getElementById('emptyState');
+
+    if(!filtered.length){ tbody.innerHTML=''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+
+    const maxQty = filtered.length ? filtered.slice().sort((a,b)=>b.qty-a.qty)[0].qty : 1;
+
+    tbody.innerHTML = filtered.map((p,i)=>{
+        const pct = totalRevenue ? ((p.revenue/totalRevenue)*100).toFixed(1) : '0.0';
+        const barW = maxQty ? Math.round(p.qty/maxQty*100) : 0;
+        return `<tr style="border-bottom:1px solid rgba(255,255,255,.05)">
+            <td class="px-5 py-3.5 text-sm font-bold" style="color:rgba(255,255,255,.3)">${i+1}</td>
+            <td class="px-4 py-3.5 font-semibold text-white text-sm">${p.name}</td>
+            <td class="px-4 py-3.5 text-center">
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-sm font-bold text-white">${p.qty.toLocaleString('id-ID')}</span>
+                    <div class="w-16 h-1 rounded-full" style="background:rgba(255,255,255,.08)"><div class="h-1 rounded-full" style="width:${barW}%;background:linear-gradient(90deg,#6366f1,#4f46e5)"></div></div>
+                </div>
+            </td>
+            <td class="px-4 py-3.5 text-right font-bold text-white text-sm">${rp(p.revenue)}</td>
+            <td class="px-4 py-3.5 text-right text-sm" style="color:rgba(255,255,255,.5)">${rp(p.avgPrice)}</td>
+            <td class="px-4 py-3.5">
+                <div class="flex items-center gap-2">
+                    <div class="flex-1 h-1.5 rounded-full" style="background:rgba(255,255,255,.08)"><div class="h-1.5 rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#10b981,#059669)"></div></div>
+                    <span class="text-xs font-bold w-10 text-right" style="color:rgba(255,255,255,.4)">${pct}%</span>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    const s=SessionManager.get('session');
+    if(!s){window.location.href='index.html';return;}
+    const outlet=SessionManager.get('outlet');
+    if(outlet) document.getElementById('outletLabel').textContent=outlet.name;
+    loadData();
+});
+</script>
 </body>
 </html>
