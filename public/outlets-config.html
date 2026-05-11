@@ -3,37 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi — Konfigurasi Outlet</title>
+    <title>Konfigurasi Outlet - Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>*{font-family:'Plus Jakarta Sans',sans-serif;}body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}.glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}.glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        .glass-input:focus { outline: none; border-color: rgba(99,102,241,0.5); background: rgba(255,255,255,0.08); }
+        .glass-input option { background: #1e293b; }
+    </style>
 </head>
-<body>
-<nav class="glass-nav sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">⚙️</div>
-        <div><div class="font-extrabold text-white text-sm">Konfigurasi Outlet</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+<body class="p-4 sm:p-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Konfigurasi Outlet</h1>
+                <p class="text-sm text-white/50">Setup informasi dan pengaturan outlet aktif</p>
+            </div>
+            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Identitas Outlet -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-indigo-400">store</span> Identitas Outlet
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-white/40 mb-1">Nama Outlet *</label>
+                        <input type="text" id="cfgName" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Lunomi Restoran">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">No. Telepon</label>
+                        <input type="tel" id="cfgPhone" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="021-XXXX-XXXX">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Email</label>
+                        <input type="email" id="cfgEmail" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="outlet@email.com">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-white/40 mb-1">Alamat</label>
+                        <textarea id="cfgAddress" rows="2" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Jl. Contoh No. 1, Kota, Provinsi"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Kota</label>
+                        <input type="text" id="cfgCity" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Jakarta">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">NPWP (opsional)</label>
+                        <input type="text" id="cfgNPWP" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="00.000.000.0-000.000">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jam Operasional -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-400">schedule</span> Jam Operasional
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Jam Buka</label>
+                        <input type="time" id="cfgOpen" class="glass-input w-full px-4 py-2 rounded-xl text-sm" value="09:00">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Jam Tutup</label>
+                        <input type="time" id="cfgClose" class="glass-input w-full px-4 py-2 rounded-xl text-sm" value="22:00">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Hari Libur</label>
+                        <select id="cfgOffDay" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                            <option value="">Tidak ada</option>
+                            <option value="senin">Senin</option>
+                            <option value="selasa">Selasa</option>
+                            <option value="rabu">Rabu</option>
+                            <option value="kamis">Kamis</option>
+                            <option value="jumat">Jumat</option>
+                            <option value="sabtu">Sabtu</option>
+                            <option value="minggu">Minggu</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Zona Waktu</label>
+                        <select id="cfgTz" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                            <option value="WIB">WIB (UTC+7)</option>
+                            <option value="WITA">WITA (UTC+8)</option>
+                            <option value="WIT">WIT (UTC+9)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pengaturan Struk -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-emerald-400">receipt</span> Struk & Nota
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Header Struk</label>
+                        <textarea id="cfgReceiptHeader" rows="2" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Teks yang tampil di atas struk"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Footer Struk</label>
+                        <textarea id="cfgReceiptFooter" rows="2" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Teks yang tampil di bawah struk"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">Prefix No. Struk</label>
+                            <input type="text" id="cfgReceiptPrefix" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="INV">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">Lebar Kertas</label>
+                            <select id="cfgPaperWidth" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                                <option value="58">58mm</option>
+                                <option value="80" selected>80mm</option>
+                                <option value="a4">A4</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol Simpan -->
+            <div class="flex justify-end gap-3">
+                <button onclick="resetConfig()" class="px-6 py-3 rounded-xl glass-card text-sm font-semibold hover:bg-white/10 transition">Reset</button>
+                <button onclick="saveConfig()" class="px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-bold transition shadow-lg shadow-indigo-500/20">
+                    Simpan Konfigurasi
+                </button>
+            </div>
+        </div>
     </div>
-</nav>
-<div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <div class="text-6xl mb-6">⚙️</div>
-    <h1 class="text-2xl font-extrabold text-white mb-2">Konfigurasi Outlet</h1>
-    <p class="mb-8 max-w-md mx-auto" style="color:rgba(255,255,255,.5)">Setup awal dan konfigurasi setiap outlet Lunomi.</p>
-    <div class="glass-card rounded-2xl p-6 max-w-sm mx-auto text-left">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(255,255,255,.35)">Fitur yang akan hadir</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.6)"><li>✦ Setup 3 outlet aktif</li><li>✦ Info alamat & kontak</li><li>✦ Pengaturan jam operasional</li><li>✦ Konfigurasi POS per outlet</li></ul>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 px-5 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold shadow-xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">check_circle</span>
+        <span id="toastMsg"></span>
     </div>
-    <button onclick="window.location.href='dashboard.html'" class="mt-8 px-6 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">← Kembali ke Dashboard</button>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
-    try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
-    const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-    if(o)document.getElementById('outletLabel').textContent=o.name;}
-    catch(e){window.location.href='index.html';}
-});
-</script>
+
+    <script>
+    const CFG_KEY = 'lunomi_outlet';
+
+    function loadConfig() {
+        const outlet = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
+        document.getElementById('cfgName').value = outlet.name || '';
+        document.getElementById('cfgPhone').value = outlet.phone || '';
+        document.getElementById('cfgEmail').value = outlet.email || '';
+        document.getElementById('cfgAddress').value = outlet.address || '';
+        document.getElementById('cfgCity').value = outlet.city || '';
+        document.getElementById('cfgNPWP').value = outlet.npwp || '';
+        document.getElementById('cfgOpen').value = outlet.openTime || '09:00';
+        document.getElementById('cfgClose').value = outlet.closeTime || '22:00';
+        document.getElementById('cfgOffDay').value = outlet.offDay || '';
+        document.getElementById('cfgTz').value = outlet.timezone || 'WIB';
+        document.getElementById('cfgReceiptHeader').value = outlet.receiptHeader || '';
+        document.getElementById('cfgReceiptFooter').value = outlet.receiptFooter || '';
+        document.getElementById('cfgReceiptPrefix').value = outlet.receiptPrefix || 'INV';
+        document.getElementById('cfgPaperWidth').value = outlet.paperWidth || '80';
+    }
+
+    function saveConfig() {
+        const name = document.getElementById('cfgName').value.trim();
+        if (!name) { alert('Nama outlet wajib diisi.'); return; }
+
+        const outlet = {
+            name,
+            phone: document.getElementById('cfgPhone').value.trim(),
+            email: document.getElementById('cfgEmail').value.trim(),
+            address: document.getElementById('cfgAddress').value.trim(),
+            city: document.getElementById('cfgCity').value.trim(),
+            npwp: document.getElementById('cfgNPWP').value.trim(),
+            openTime: document.getElementById('cfgOpen').value,
+            closeTime: document.getElementById('cfgClose').value,
+            offDay: document.getElementById('cfgOffDay').value,
+            timezone: document.getElementById('cfgTz').value,
+            receiptHeader: document.getElementById('cfgReceiptHeader').value.trim(),
+            receiptFooter: document.getElementById('cfgReceiptFooter').value.trim(),
+            receiptPrefix: document.getElementById('cfgReceiptPrefix').value.trim() || 'INV',
+            paperWidth: document.getElementById('cfgPaperWidth').value,
+            updatedAt: new Date().toISOString()
+        };
+
+        localStorage.setItem(CFG_KEY, JSON.stringify(outlet));
+
+        if (typeof AuditLog !== 'undefined') AuditLog.add('outlet_config_save', 'Konfigurasi outlet "' + name + '" disimpan');
+
+        showToast('Konfigurasi berhasil disimpan!');
+    }
+
+    function resetConfig() {
+        if (!confirm('Reset semua konfigurasi ke nilai awal?')) return;
+        localStorage.removeItem(CFG_KEY);
+        loadConfig();
+        showToast('Konfigurasi direset');
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.style.opacity = '1';
+        t.style.transform = 'translateY(0)';
+        setTimeout(() => { t.style.opacity = '0'; }, 2500);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        try { const s = localStorage.getItem('lunomi_session'); if (!s) { window.location.href = 'index.html'; return; } }
+        catch(e) { window.location.href = 'index.html'; return; }
+        loadConfig();
+    });
+    </script>
 </body>
 </html>

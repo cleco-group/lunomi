@@ -3,239 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi Outlet - Manajemen Outlet</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/brand.css">
+    <title>Manajemen Outlet - Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .outlet-card { transition: all 0.3s; }
-        .outlet-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
-        .status-online { background: #d1fae5; color: #065f46; }
-        .status-offline { background: #fee2e2; color: #991b1b; }
-        .status-maintenance { background: #fef3c7; color: #78350f; }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        .glass-input:focus { outline: none; border-color: rgba(99,102,241,0.5); background: rgba(255,255,255,0.08); }
+        .glass-input option { background: #1e293b; }
+        .outlet-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .outlet-card:hover { transform: translateY(-2px); }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">🏪 Outlet Management</h1>
-                    <p class="text-sm text-gray-500">Lunomi - Kelola Semua Outlet</p>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="openAddOutlet()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold">
-                        + Tambah Outlet
-                    </button>
-                    <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
-                </div>
+<body class="p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Manajemen Outlet</h1>
+                <p class="text-sm text-white/50">Kelola semua outlet Lunomi</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="openAddModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">add</span> Tambah Outlet
+                </button>
+                <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
             </div>
         </div>
-    </div>
-    <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
-        <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-                <p class="text-gray-600">Total Outlet</p>
-                <p class="text-2xl font-bold text-gray-900" id="totalOutlet">0</p>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="glass-card p-5 rounded-2xl border-l-4 border-indigo-500">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Outlet</p>
+                <h3 id="statTotal" class="text-2xl font-extrabold">0</h3>
             </div>
-            <div>
-                <p class="text-gray-600">🟢 Online</p>
-                <p class="text-2xl font-bold text-green-600" id="onlineOutlet">0</p>
+            <div class="glass-card p-5 rounded-2xl border-l-4 border-emerald-500">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Online</p>
+                <h3 id="statOnline" class="text-2xl font-extrabold text-emerald-400">0</h3>
             </div>
-            <div>
-                <p class="text-gray-600">🔴 Offline</p>
-                <p class="text-2xl font-bold text-red-600" id="offlineOutlet">0</p>
+            <div class="glass-card p-5 rounded-2xl border-l-4 border-red-500">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Offline</p>
+                <h3 id="statOffline" class="text-2xl font-extrabold text-red-400">0</h3>
             </div>
-            <div>
-                <p class="text-gray-600">💰 Total Revenue</p>
-                <p class="text-2xl font-bold text-blue-600" id="totalRevenue">Rp 0</p>
+            <div class="glass-card p-5 rounded-2xl border-l-4 border-orange-500">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Revenue</p>
+                <h3 id="statRevenue" class="text-2xl font-extrabold">Rp 0</h3>
             </div>
         </div>
-    </div>
-    <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
-        <div class="max-w-7xl mx-auto flex gap-3 flex-wrap">
-            <input type="text" id="searchOutlet" placeholder="Cari outlet..." class="flex-1 min-w-48 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onkeyup="filterOutlets()">
-            <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterOutlets()">
+
+        <!-- Filter -->
+        <div class="glass-card rounded-2xl p-4 mb-6 flex flex-wrap gap-3 items-center">
+            <input type="text" id="searchInput" placeholder="Cari outlet..." oninput="renderOutlets()"
+                class="glass-input flex-1 min-w-48 px-4 py-2 rounded-xl text-sm">
+            <select id="statusFilter" onchange="renderOutlets()" class="glass-input px-4 py-2 rounded-xl text-sm">
                 <option value="">Semua Status</option>
                 <option value="online">Online</option>
                 <option value="offline">Offline</option>
                 <option value="maintenance">Maintenance</option>
             </select>
         </div>
+
+        <!-- Outlet Grid -->
+        <div id="outletGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <div id="emptyState" class="hidden text-center py-20 text-white/30">
+            <span class="material-symbols-outlined text-5xl block mb-3">store</span>
+            <p class="text-lg font-semibold">Belum ada outlet</p>
+            <p class="text-sm mt-1">Klik "Tambah Outlet" untuk memulai</p>
+        </div>
     </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="outletList"></div>
-    </div>
-    <div id="addOutletModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 class="text-lg font-bold mb-4">Tambah Outlet Baru</h2>
+
+    <!-- Add/Edit Modal -->
+    <div id="modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 id="modalTitle" class="text-lg font-bold mb-5">Tambah Outlet Baru</h3>
+            <input type="hidden" id="editId">
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Nama Outlet</label>
-                    <input type="text" id="outletName" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Misal: Outlet Jl. Sudirman">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-white/40 mb-1">Nama Outlet *</label>
+                        <input type="text" id="fName" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Outlet Jl. Sudirman">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-white/40 mb-1">Alamat *</label>
+                        <textarea id="fAddress" rows="2" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Alamat lengkap"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Kota *</label>
+                        <input type="text" id="fCity" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Jakarta">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">No. Telepon</label>
+                        <input type="tel" id="fPhone" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="021-XXXX-XXXX">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Manager</label>
+                        <input type="text" id="fManager" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Nama manager">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Status</label>
+                        <select id="fStatus" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                            <option value="online">Online</option>
+                            <option value="offline">Offline</option>
+                            <option value="maintenance">Maintenance</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Jam Buka</label>
+                        <input type="time" id="fOpen" class="glass-input w-full px-4 py-2 rounded-xl text-sm" value="09:00">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Jam Tutup</label>
+                        <input type="time" id="fClose" class="glass-input w-full px-4 py-2 rounded-xl text-sm" value="22:00">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Alamat</label>
-                    <textarea id="outletAddress" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Alamat lengkap" rows="3"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Kota</label>
-                    <input type="text" id="outletCity" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Jakarta">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Nomor Telepon</label>
-                    <input type="tel" id="outletPhone" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="021-XXXX-XXXX">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Manager</label>
-                    <input type="text" id="outletManager" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nama manager">
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="closeAddOutlet()" class="flex-1 border border-gray-300 px-4 py-2 rounded text-sm font-semibold hover:bg-gray-50">Batal</button>
-                    <button onclick="saveOutlet()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-blue-700">Simpan</button>
-                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeModal()" class="flex-1 py-2 rounded-xl glass-card text-sm font-semibold hover:bg-white/10 transition">Batal</button>
+                <button onclick="saveOutlet()" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-bold transition">Simpan</button>
             </div>
         </div>
     </div>
-    <div id="detailOutletModal" style="display:none" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-screen overflow-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold">Detail Outlet</h2>
-                <button onclick="closeDetailOutlet()" class="text-gray-500 hover:text-gray-700 font-bold text-xl">×</button>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-bold">Detail Outlet</h3>
+                <button onclick="closeDetail()" class="text-white/40 hover:text-white transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
             </div>
-            <div id="outletDetails" class="space-y-4"></div>
+            <div id="detailContent" class="space-y-3"></div>
         </div>
     </div>
+
     <script>
-        // Sample data
-        const OUT = [
-            {id:1,n:'Outlet Jl. Sudirman',a:'Jl. Jendral Sudirman No. 123, Jakarta Pusat',c:'Jakarta',p:'021-7777-7777',m:'Ahmad',st:'online',rev:45200000,emp:12,ord:128,rat:4.8},
-            {id:2,n:'Outlet Senayan',a:'Jl. Gerbang Senayan No. 45, Jakarta Selatan',c:'Jakarta',p:'021-8888-8888',m:'Siti',st:'online',rev:38500000,emp:10,ord:105,rat:4.6},
-            {id:3,n:'Outlet Blok M',a:'Jl. Melawai No. 78, Jakarta Selatan',c:'Jakarta',p:'021-9999-9999',m:'Budi',st:'offline',rev:22300000,emp:8,ord:64,rat:4.2},
-            {id:4,n:'Outlet Kemang',a:'Jl. Kemang Raya No. 56, Jakarta Selatan',c:'Jakarta',p:'021-5555-5555',m:'Rina',st:'online',rev:35800000,emp:9,ord:98,rat:4.5},
-            {id:5,n:'Outlet Menteng',a:'Jl. Menteng Atas No. 34, Jakarta Pusat',c:'Jakarta',p:'021-6666-6666',m:'Hendra',st:'maintenance',rev:18900000,emp:7,ord:52,rat:4.3},
-            {id:6,n:'Outlet Thamrin',a:'Jl. M.H. Thamrin No. 12, Jakarta Pusat',c:'Jakarta',p:'021-3333-3333',m:'Dewi',st:'online',rev:42100000,emp:11,ord:115,rat:4.7},
-            {id:7,n:'Outlet Gatot Subroto',a:'Jl. Gatot Subroto No. 90, Jakarta Selatan',c:'Jakarta',p:'021-4444-4444',m:'Yanto',st:'online',rev:39600000,emp:10,ord:110,rat:4.4},
-            {id:8,n:'Outlet Cikini',a:'Jl. Cikini Raya No. 23, Jakarta Pusat',c:'Jakarta',p:'021-2222-2222',m:'Lisa',st:'online',rev:41700000,emp:11,ord:118,rat:4.6}
-        ];
-        let outlets = JSON.parse(JSON.stringify(OUT));
-        function render() {
-            const list = document.getElementById('outletList');
-            const search = document.getElementById('searchOutlet').value.toLowerCase();
-            const status = document.getElementById('statusFilter').value;
-            const filtered = outlets.filter(o => 
-                (o.n.toLowerCase().includes(search) || o.a.toLowerCase().includes(search)) &&
-                (!status || o.st === status)
-            );
-            list.innerHTML = filtered.map(o =>
-                '<div class="outlet-card bg-white rounded-lg shadow p-6 border-l-4 border-' + (o.st === 'online' ? 'green' : o.st === 'offline' ? 'red' : 'yellow') + '-500">' +
-                '<div class="flex justify-between items-start mb-4">' +
-                '<div><div class="font-bold text-lg">' + o.n + '</div>' +
-                '<div class="text-sm text-gray-600">' + o.c + '</div></div>' +
-                '<span class="px-3 py-1 rounded-full text-xs font-semibold ' + 
-                (o.st === 'online' ? 'status-online' : o.st === 'offline' ? 'status-offline' : 'status-maintenance') + '">' +
-                (o.st === 'online' ? '🟢 Online' : o.st === 'offline' ? '🔴 Offline' : '🟡 Maintenance') + '</span></div>' +
-                '<div class="grid grid-cols-2 gap-4 mb-4 text-sm'><div><p class="text-gray-600">Revenue</p><p class="font-bold">Rp ' + (o.rev/1000000).toFixed(1) + 'M</p></div>' +
-                '<div><p class="text-gray-600">Karyawan</p><p class="font-bold">' + o.emp + ' orang</p></div>' +
-                '<div><p class="text-gray-600">Order</p><p class="font-bold">' + o.ord + '</p></div>' +
-                '<div><p class="text-gray-600">Rating</p><p class="font-bold">⭐ ' + o.rat + '</p></div></div>' +
-                '<div class="flex gap-2">' +
-                '<button onclick="viewDetail(' + o.id + ')" class="flex-1 text-blue-600 border border-blue-600 px-3 py-2 rounded text-xs font-semibold hover:bg-blue-50">Detail</button>' +
-                '<button onclick="editOutlet(' + o.id + ')" class="flex-1 text-gray-600 border border-gray-300 px-3 py-2 rounded text-xs font-semibold hover:bg-gray-50">Edit</button>' +
-                '</div></div>'
-            ).join('');
-            updateStats();
+    const OUTLETS_KEY = 'lunomi_outlets';
+
+    function getOutlets() {
+        return JSON.parse(localStorage.getItem(OUTLETS_KEY) || '[]');
+    }
+
+    function saveOutlets(arr) {
+        localStorage.setItem(OUTLETS_KEY, JSON.stringify(arr));
+    }
+
+    function fmtRev(n) { return 'Rp ' + (n / 1000000).toFixed(1) + 'M'; }
+
+    const STATUS_CFG = {
+        online: { label: 'Online', color: 'emerald', dot: 'bg-emerald-500' },
+        offline: { label: 'Offline', color: 'red', dot: 'bg-red-500' },
+        maintenance: { label: 'Maintenance', color: 'yellow', dot: 'bg-yellow-500' }
+    };
+
+    function renderOutlets() {
+        const outlets = getOutlets();
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const statusF = document.getElementById('statusFilter').value;
+
+        const filtered = outlets.filter(o =>
+            (o.name.toLowerCase().includes(search) || (o.address || '').toLowerCase().includes(search) || (o.city || '').toLowerCase().includes(search)) &&
+            (!statusF || o.status === statusF)
+        );
+
+        const online = outlets.filter(o => o.status === 'online').length;
+        const offline = outlets.filter(o => o.status === 'offline').length;
+        const revenue = outlets.reduce((s, o) => s + (o.revenue || 0), 0);
+
+        document.getElementById('statTotal').textContent = outlets.length;
+        document.getElementById('statOnline').textContent = online;
+        document.getElementById('statOffline').textContent = offline;
+        document.getElementById('statRevenue').textContent = 'Rp ' + Math.round(revenue).toLocaleString('id-ID');
+
+        const grid = document.getElementById('outletGrid');
+        const empty = document.getElementById('emptyState');
+
+        if (!filtered.length) {
+            grid.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
         }
-        function updateStats() {
-            const online = outlets.filter(o => o.st === 'online').length;
-            const offline = outlets.filter(o => o.st === 'offline').length;
-            const totalRev = outlets.reduce((s, o) => s + o.rev, 0);
-            document.getElementById('totalOutlet').textContent = outlets.length;
-            document.getElementById('onlineOutlet').textContent = online;
-            document.getElementById('offlineOutlet').textContent = offline;
-            document.getElementById('totalRevenue').textContent = 'Rp ' + (totalRev/1000000).toFixed(1) + 'M';
+        empty.classList.add('hidden');
+
+        const cfg = STATUS_CFG;
+        grid.innerHTML = filtered.map(o => {
+            const st = cfg[o.status] || cfg.offline;
+            const borderColor = st.color === 'emerald' ? 'border-emerald-500' : st.color === 'red' ? 'border-red-500' : 'border-yellow-500';
+            const badgeBg = st.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400' : st.color === 'red' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400';
+            return `
+            <div class="outlet-card glass-card rounded-2xl p-6 border-l-4 ${borderColor}">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-base leading-tight">${o.name}</h4>
+                        <p class="text-xs text-white/50 mt-0.5">${o.city || '-'}</p>
+                    </div>
+                    <span class="px-2 py-1 rounded-md ${badgeBg} text-[10px] font-bold uppercase flex items-center gap-1 shrink-0">
+                        <span class="w-1.5 h-1.5 rounded-full ${st.dot} inline-block"></span>${st.label}
+                    </span>
+                </div>
+                <p class="text-xs text-white/40 mb-4 line-clamp-2">${o.address || 'Alamat belum diisi'}</p>
+                <div class="grid grid-cols-2 gap-3 text-xs mb-4">
+                    <div class="glass-card rounded-xl p-2.5">
+                        <p class="text-white/40 mb-0.5">Revenue</p>
+                        <p class="font-bold">${fmtRev(o.revenue || 0)}</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-2.5">
+                        <p class="text-white/40 mb-0.5">Karyawan</p>
+                        <p class="font-bold">${o.employees || 0} org</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-2.5">
+                        <p class="text-white/40 mb-0.5">Jam Operasional</p>
+                        <p class="font-bold">${o.openTime || '09:00'} – ${o.closeTime || '22:00'}</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-2.5">
+                        <p class="text-white/40 mb-0.5">Manager</p>
+                        <p class="font-bold truncate">${o.manager || '-'}</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openDetail('${o.id}')" class="flex-1 py-2 rounded-xl glass-card text-xs font-semibold hover:bg-white/10 transition">Detail</button>
+                    <button onclick="openEditModal('${o.id}')" class="flex-1 py-2 rounded-xl glass-card text-xs font-semibold hover:bg-white/10 transition">Edit</button>
+                    <button onclick="deleteOutlet('${o.id}')" class="py-2 px-3 rounded-xl glass-card text-xs font-semibold hover:bg-red-500/20 text-red-400 transition">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function openAddModal() {
+        document.getElementById('editId').value = '';
+        document.getElementById('modalTitle').textContent = 'Tambah Outlet Baru';
+        document.getElementById('fName').value = '';
+        document.getElementById('fAddress').value = '';
+        document.getElementById('fCity').value = '';
+        document.getElementById('fPhone').value = '';
+        document.getElementById('fManager').value = '';
+        document.getElementById('fStatus').value = 'online';
+        document.getElementById('fOpen').value = '09:00';
+        document.getElementById('fClose').value = '22:00';
+        document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function openEditModal(id) {
+        const o = getOutlets().find(x => x.id === id);
+        if (!o) return;
+        document.getElementById('editId').value = id;
+        document.getElementById('modalTitle').textContent = 'Edit Outlet';
+        document.getElementById('fName').value = o.name || '';
+        document.getElementById('fAddress').value = o.address || '';
+        document.getElementById('fCity').value = o.city || '';
+        document.getElementById('fPhone').value = o.phone || '';
+        document.getElementById('fManager').value = o.manager || '';
+        document.getElementById('fStatus').value = o.status || 'online';
+        document.getElementById('fOpen').value = o.openTime || '09:00';
+        document.getElementById('fClose').value = o.closeTime || '22:00';
+        document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('modal').classList.add('hidden');
+    }
+
+    function saveOutlet() {
+        const name = document.getElementById('fName').value.trim();
+        const address = document.getElementById('fAddress').value.trim();
+        const city = document.getElementById('fCity').value.trim();
+        if (!name || !address || !city) { alert('Nama, alamat, dan kota wajib diisi.'); return; }
+
+        const outlets = getOutlets();
+        const editId = document.getElementById('editId').value;
+        const data = {
+            name, address, city,
+            phone: document.getElementById('fPhone').value.trim(),
+            manager: document.getElementById('fManager').value.trim(),
+            status: document.getElementById('fStatus').value,
+            openTime: document.getElementById('fOpen').value,
+            closeTime: document.getElementById('fClose').value
+        };
+
+        if (editId) {
+            const idx = outlets.findIndex(o => o.id === editId);
+            if (idx >= 0) outlets[idx] = { ...outlets[idx], ...data };
+            if (typeof AuditLog !== 'undefined') AuditLog.add('outlet_edit', 'Outlet "' + name + '" diperbarui');
+        } else {
+            data.id = 'out_' + Date.now();
+            data.revenue = 0;
+            data.employees = 0;
+            data.createdAt = new Date().toISOString();
+            outlets.push(data);
+            if (typeof AuditLog !== 'undefined') AuditLog.add('outlet_add', 'Outlet baru "' + name + '" ditambahkan — ' + city);
         }
-        function filterOutlets() {
-            render();
-        }
-        function openAddOutlet() {
-            document.getElementById('addOutletModal').style.display = 'flex';
-        }
-        function closeAddOutlet() {
-            document.getElementById('addOutletModal').style.display = 'none';
-            document.getElementById('outletName').value = '';
-            document.getElementById('outletAddress').value = '';
-            document.getElementById('outletCity').value = '';
-            document.getElementById('outletPhone').value = '';
-            document.getElementById('outletManager').value = '';
-        }
-        function saveOutlet() {
-            const n = document.getElementById('outletName').value;
-            const a = document.getElementById('outletAddress').value;
-            const c = document.getElementById('outletCity').value;
-            const p = document.getElementById('outletPhone').value;
-            const m = document.getElementById('outletManager').value;
-            if (!n || !a || !c) {
-                alert('Isi semua field yang wajib');
-                return;
-            }
-            const id = Math.max(...outlets.map(o => o.id), 0) + 1;
-            outlets.push({id,n,a,c,p,m,st:'online',rev:0,emp:0,ord:0,rat:0});
-            render();
-            closeAddOutlet();
-            alert('✓ Outlet ditambahkan');
-        }
-        function viewDetail(id) {
-            const o = outlets.find(x => x.id === id);
-            if (o) {
-                const details = document.getElementById('outletDetails');
-                details.innerHTML = 
-                    '<div class="space-y-4">' +
-                    '<div class="p-4 bg-gray-50 rounded-lg">' +
-                    '<p class="text-sm text-gray-600 mb-1">Nama Outlet</p>' +
-                    '<p class="font-bold">' + o.n + '</p></div>' +
-                    '<div class="p-4 bg-gray-50 rounded-lg">' +
-                    '<p class="text-sm text-gray-600 mb-1">Alamat</p>' +
-                    '<p class="font-bold">' + o.a + '</p></div>' +
-                    '<div class="p-4 bg-gray-50 rounded-lg">' +
-                    '<p class="text-sm text-gray-600 mb-1">Kota</p>' +
-                    '<p class="font-bold">' + o.c + '</p></div>' +
-                    '<div class="p-4 bg-gray-50 rounded-lg">' +
-                    '<p class="text-sm text-gray-600 mb-1">Telepon</p>' +
-                    '<p class="font-bold">' + o.p + '</p></div>' +
-                    '<div class="p-4 bg-gray-50 rounded-lg">' +
-                    '<p class="text-sm text-gray-600 mb-1">Manager</p>' +
-                    '<p class="font-bold">' + o.m + '</p></div>' +
-                    '<div class="grid grid-cols-2 gap-4">' +
-                    '<div class="p-4 bg-blue-50 rounded-lg"><p class="text-xs text-gray-600">Revenue</p><p class="text-lg font-bold text-blue-600">Rp ' + (o.rev/1000000).toFixed(1) + 'M</p></div>' +
-                    '<div class="p-4 bg-green-50 rounded-lg"><p class="text-xs text-gray-600">Karyawan</p><p class="text-lg font-bold text-green-600">' + o.emp + '</p></div>' +
-                    '<div class="p-4 bg-purple-50 rounded-lg"><p class="text-xs text-gray-600">Order</p><p class="text-lg font-bold text-purple-600">' + o.ord + '</p></div>' +
-                    '<div class="p-4 bg-yellow-50 rounded-lg"><p class="text-xs text-gray-600">Rating</p><p class="text-lg font-bold text-yellow-600">⭐ ' + o.rat + '</p></div>' +
-                    '</div>' +
-                    '</div>';
-                document.getElementById('detailOutletModal').style.display = 'flex';
-            }
-        }
-        function closeDetailOutlet() {
-            document.getElementById('detailOutletModal').style.display = 'none';
-        }
-        function editOutlet(id) {
-            alert('Edit outlet ' + id + ' - Coming soon!');
-        }
-        function logout() {
-            localStorage.removeItem('lunomi_session');
-            window.location.href = 'index.html';
-        }
-        function checkSession() {
-            const s = localStorage.getItem('lunomi_session');
-            if (!s) { window.location.href = 'index.html'; return; }
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-            checkSession();
-            render();
-        });
+
+        saveOutlets(outlets);
+        closeModal();
+        renderOutlets();
+    }
+
+    function deleteOutlet(id) {
+        const o = getOutlets().find(x => x.id === id);
+        if (!confirm('Hapus outlet "' + (o ? o.name : id) + '"?')) return;
+        const updated = getOutlets().filter(x => x.id !== id);
+        saveOutlets(updated);
+        if (typeof AuditLog !== 'undefined') AuditLog.add('outlet_delete', 'Outlet "' + (o ? o.name : id) + '" dihapus');
+        renderOutlets();
+    }
+
+    function openDetail(id) {
+        const o = getOutlets().find(x => x.id === id);
+        if (!o) return;
+        const st = STATUS_CFG[o.status] || STATUS_CFG.offline;
+        document.getElementById('detailContent').innerHTML = `
+            <div class="glass-card rounded-xl p-4 space-y-3">
+                <div class="flex justify-between"><span class="text-white/40 text-xs">Nama</span><span class="font-bold text-sm text-right max-w-48">${o.name}</span></div>
+                <div class="flex justify-between"><span class="text-white/40 text-xs">Kota</span><span class="text-sm">${o.city || '-'}</span></div>
+                <div class="flex justify-between"><span class="text-white/40 text-xs">Alamat</span><span class="text-sm text-right max-w-48">${o.address || '-'}</span></div>
+                <div class="flex justify-between"><span class="text-white/40 text-xs">Telepon</span><span class="text-sm">${o.phone || '-'}</span></div>
+                <div class="flex justify-between"><span class="text-white/40 text-xs">Manager</span><span class="text-sm">${o.manager || '-'}</span></div>
+                <div class="flex justify-between"><span class="text-white/40 text-xs">Jam Operasional</span><span class="text-sm">${o.openTime || '09:00'} – ${o.closeTime || '22:00'}</span></div>
+                <div class="flex justify-between"><span class="text-white/40 text-xs">Status</span>
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${st.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400' : st.color === 'red' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}">${st.label}</span>
+                </div>
+            </div>
+        `;
+        document.getElementById('detailModal').classList.remove('hidden');
+    }
+
+    function closeDetail() {
+        document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        try { const s = localStorage.getItem('lunomi_session'); if (!s) { window.location.href = 'index.html'; return; } }
+        catch(e) { window.location.href = 'index.html'; return; }
+        renderOutlets();
+    });
     </script>
 </body>
 </html>
