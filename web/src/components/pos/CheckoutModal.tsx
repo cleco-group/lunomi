@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useCartStore } from '../../stores/cartStore';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import toast from 'react-hot-toast';
