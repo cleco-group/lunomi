@@ -139,7 +139,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             </button>
             <div
               className="overflow-hidden transition-all duration-200"
-              style={{ maxHeight: openMenus.includes(group.key) ? '300px' : '0' }}
+              style={{ maxHeight: openMenus.includes(group.key) ? '500px' : '0' }}
             >
               {group.items.map(item => (
                 <Link
