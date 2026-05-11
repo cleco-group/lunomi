@@ -25,6 +25,7 @@ const NAV: NavGroup[] = [
       { path: '/kitchen', label: 'Kitchen Display' },
       { path: '/booking', label: 'Manajemen Booking' },
       { path: '/tables', label: 'Manajemen Meja' },
+      { path: '/outlet', label: 'Manajemen Outlet' },
     ],
   },
   {
