@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Pengeluaran OPEX</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../assets/js/assets/js/core/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
@@ -214,6 +214,7 @@
             exps.unshift({id:'EXP-'+Date.now(),date,cat,desc,amount,note,outlet_id:outlet?outlet.id:''});
         }
         saveExpenses(exps);
+        AuditLog.add(editingId?'expense_edit':'expense_add', `${editingId?'Edit':'Catat'} pengeluaran: ${desc} (${cat}) ${rp(amount)}`);
         closeAddModal();
         renderList();
         updateStats();
@@ -222,8 +223,10 @@
 
     function deleteExpense(id){
         if(!confirm('Hapus catatan ini?'))return;
+        const target=getExpenses().find(x=>x.id===id);
         const exps=getExpenses().filter(x=>x.id!==id);
         saveExpenses(exps);
+        if(target) AuditLog.add('expense_delete', `Hapus pengeluaran: ${target.desc} ${rp(target.amount)}`);
         renderList();
         updateStats();
         showToast('Catatan dihapus','info');
