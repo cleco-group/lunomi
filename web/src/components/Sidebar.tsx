@@ -39,6 +39,7 @@ const NAV: NavGroup[] = [
     items: [
       { path: '/customer', label: 'Manajemen Customer' },
       { path: '/invoice', label: 'Invoice & Nota' },
+      { path: '/loyalty', label: 'Loyalty Program' },
       { path: '/analytics', label: 'Analytics' },
     ],
   },
