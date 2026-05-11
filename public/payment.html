@@ -3,36 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi — Payment Gateway</title>
+    <title>Payment Gateway - Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>*{font-family:'Plus Jakarta Sans',sans-serif;}body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}.glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}.glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        .glass-input:focus { outline: none; border-color: rgba(99,102,241,0.5); background: rgba(255,255,255,0.08); }
+        .glass-input option { background: #1e293b; }
+        .method-card { transition: all 0.2s; cursor: pointer; }
+        .method-card:hover { background: rgba(255,255,255,0.08); }
+        .method-card.enabled { border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.07); }
+        .toggle { position: relative; display: inline-flex; width: 44px; height: 24px; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; inset: 0; background: rgba(255,255,255,0.15); border-radius: 999px; cursor: pointer; transition: .3s; }
+        .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: .3s; }
+        input:checked + .slider { background: #6366f1; }
+        input:checked + .slider::before { transform: translateX(20px); }
+    </style>
 </head>
-<body>
-<nav class="glass-nav sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">💳</div>
-        <div><div class="font-extrabold text-white text-sm">Payment Gateway</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+<body class="p-4 sm:p-8">
+<div class="max-w-5xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-2xl font-extrabold">Payment Gateway</h1>
+            <p class="text-sm text-white/50">Konfigurasi metode pembayaran dan monitor transaksi digital</p>
+        </div>
+        <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
     </div>
-</nav>
-<div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <div class="text-6xl mb-6">💳</div>
-    <h1 class="text-2xl font-extrabold text-white mb-2">Payment Gateway</h1>
-    <p class="mb-8 max-w-md mx-auto" style="color:rgba(255,255,255,.5)">Konfigurasi dan monitor semua metode pembayaran digital.</p>
-    <div class="glass-card rounded-2xl p-6 max-w-sm mx-auto text-left">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(255,255,255,.35)">Fitur yang akan hadir</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.6)"><li>✦ Integrasi Midtrans & iPaymu</li><li>✦ QRIS otomatis</li><li>✦ Log transaksi digital</li><li>✦ Rekonsiliasi otomatis</li><li>✦ Settlement harian</li></ul>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card p-5 rounded-2xl border-l-4 border-indigo-500">
+            <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Digital</p>
+            <h3 id="statDigital" class="text-2xl font-extrabold">Rp 0</h3>
+            <p class="text-xs text-white/30 mt-1">Bulan ini</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl border-l-4 border-emerald-500">
+            <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Transaksi QRIS</p>
+            <h3 id="statQRIS" class="text-2xl font-extrabold">0</h3>
+            <p class="text-xs text-white/30 mt-1">Bulan ini</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl border-l-4 border-blue-500">
+            <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Transfer Bank</p>
+            <h3 id="statTransfer" class="text-2xl font-extrabold">Rp 0</h3>
+            <p class="text-xs text-white/30 mt-1">Bulan ini</p>
+        </div>
+        <div class="glass-card p-5 rounded-2xl border-l-4 border-orange-500">
+            <p class="text-[10px] font-bold text-white/40 uppercase mb-1">E-Wallet</p>
+            <h3 id="statWallet" class="text-2xl font-extrabold">Rp 0</h3>
+            <p class="text-xs text-white/30 mt-1">Bulan ini</p>
+        </div>
     </div>
-    <button onclick="window.location.href='dashboard.html'" class="mt-8 px-6 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">← Kembali ke Dashboard</button>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Kiri: Metode Pembayaran -->
+        <div class="space-y-6">
+
+            <!-- Pembayaran Tunai -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">Tunai</h3>
+                <div id="cashMethods" class="space-y-3"></div>
+            </div>
+
+            <!-- QRIS & Transfer -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">QRIS & Transfer</h3>
+                <div id="qrisMethods" class="space-y-3"></div>
+                <!-- QRIS Config -->
+                <div id="qrisConfig" class="mt-4 pt-4 border-t border-white/10 space-y-3 hidden">
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Merchant ID QRIS</label>
+                        <input type="text" id="qrisMerchantId" class="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="ID dari Midtrans/iPaymu">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Nama Tampil di QRIS</label>
+                        <input type="text" id="qrisName" class="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="Lunomi Restoran">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">No. Rekening (Transfer)</label>
+                        <input type="text" id="bankAccount" class="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="BCA 1234567890 a/n Outlet">
+                    </div>
+                </div>
+            </div>
+
+            <!-- E-Wallet -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">E-Wallet</h3>
+                <div id="walletMethods" class="space-y-3"></div>
+            </div>
+
+            <button onclick="savePayment()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-bold transition shadow-lg shadow-indigo-500/20">
+                Simpan Konfigurasi
+            </button>
+        </div>
+
+        <!-- Kanan: Log Transaksi Digital -->
+        <div class="glass-card rounded-2xl overflow-hidden self-start">
+            <div class="p-5 border-b border-white/5 flex justify-between items-center">
+                <h3 class="font-bold">Log Pembayaran Digital</h3>
+                <select id="logFilter" class="glass-input text-xs px-3 py-1.5 rounded-xl" onchange="renderLog()">
+                    <option value="">Semua metode</option>
+                    <option value="qris">QRIS</option>
+                    <option value="transfer">Transfer</option>
+                    <option value="gopay">GoPay</option>
+                    <option value="ovo">OVO</option>
+                    <option value="dana">DANA</option>
+                    <option value="shopeepay">ShopeePay</option>
+                </select>
+            </div>
+            <div id="logList" class="divide-y divide-white/5 max-h-[520px] overflow-y-auto text-sm">
+                <div class="px-5 py-10 text-center text-white/30">
+                    <span class="material-symbols-outlined text-3xl block mb-2">payments</span>
+                    Belum ada transaksi digital
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 px-5 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold shadow-xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+    <span class="material-symbols-outlined text-sm">check_circle</span>
+    <span id="toastMsg"></span>
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded',()=>{
-    try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
-    const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-    if(o)document.getElementById('outletLabel').textContent=o.name;}
-    catch(e){window.location.href='index.html';}
+const PAY_KEY = 'lunomi_payment_config';
+
+const METHODS = {
+    cash: [
+        { id: 'cash', label: 'Tunai', icon: 'payments', color: 'emerald' },
+        { id: 'debit', label: 'Kartu Debit', icon: 'credit_card', color: 'blue' },
+        { id: 'credit', label: 'Kartu Kredit', icon: 'credit_card', color: 'purple' },
+    ],
+    qris: [
+        { id: 'qris', label: 'QRIS', icon: 'qr_code_2', color: 'indigo' },
+        { id: 'transfer', label: 'Transfer Bank', icon: 'account_balance', color: 'blue' },
+    ],
+    wallet: [
+        { id: 'gopay', label: 'GoPay', icon: 'account_balance_wallet', color: 'emerald' },
+        { id: 'ovo', label: 'OVO', icon: 'account_balance_wallet', color: 'purple' },
+        { id: 'dana', label: 'DANA', icon: 'account_balance_wallet', color: 'blue' },
+        { id: 'shopeepay', label: 'ShopeePay', icon: 'account_balance_wallet', color: 'orange' },
+        { id: 'linkaja', label: 'LinkAja', icon: 'account_balance_wallet', color: 'red' },
+    ]
+};
+
+const COLOR_MAP = {
+    emerald: 'text-emerald-400', blue: 'text-blue-400', purple: 'text-purple-400',
+    indigo: 'text-indigo-400', orange: 'text-orange-400', red: 'text-red-400'
+};
+
+let cfg = {};
+
+function loadConfig() {
+    cfg = JSON.parse(localStorage.getItem(PAY_KEY) || '{"enabled":{"cash":true},"qrisMerchantId":"","qrisName":"","bankAccount":""}');
+    renderMethods('cashMethods', METHODS.cash);
+    renderMethods('qrisMethods', METHODS.qris);
+    renderMethods('walletMethods', METHODS.wallet);
+    document.getElementById('qrisMerchantId').value = cfg.qrisMerchantId || '';
+    document.getElementById('qrisName').value = cfg.qrisName || '';
+    document.getElementById('bankAccount').value = cfg.bankAccount || '';
+    updateQRISConfig();
+    computeStats();
+    renderLog();
+}
+
+function renderMethods(containerId, methods) {
+    document.getElementById(containerId).innerHTML = methods.map(m => `
+        <div class="method-card glass-card rounded-xl px-4 py-3 flex items-center justify-between ${cfg.enabled?.[m.id] ? 'enabled' : ''}" id="mc_${m.id}">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined ${COLOR_MAP[m.color] || 'text-white/60'}">${m.icon}</span>
+                <span class="text-sm font-semibold">${m.label}</span>
+            </div>
+            <label class="toggle" onclick="event.stopPropagation()">
+                <input type="checkbox" id="tog_${m.id}" ${cfg.enabled?.[m.id] ? 'checked' : ''} onchange="toggleMethod('${m.id}')">
+                <span class="slider"></span>
+            </label>
+        </div>
+    `).join('');
+}
+
+function toggleMethod(id) {
+    if (!cfg.enabled) cfg.enabled = {};
+    cfg.enabled[id] = document.getElementById('tog_' + id).checked;
+    const card = document.getElementById('mc_' + id);
+    if (card) card.classList.toggle('enabled', cfg.enabled[id]);
+    if (id === 'qris' || id === 'transfer') updateQRISConfig();
+}
+
+function updateQRISConfig() {
+    const show = cfg.enabled?.qris || cfg.enabled?.transfer;
+    document.getElementById('qrisConfig').classList.toggle('hidden', !show);
+}
+
+function computeStats() {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const trxs = LunomiDB.getTransactions().filter(t => t.createdAt >= monthStart);
+
+    let digital = 0, qrisCount = 0, transfer = 0, wallet = 0;
+    trxs.forEach(t => {
+        const pm = (t.paymentMethod || '').toLowerCase();
+        const amt = t.total || 0;
+        if (pm === 'qris') { digital += amt; qrisCount++; }
+        else if (pm === 'transfer') { digital += amt; transfer += amt; }
+        else if (['gopay','ovo','dana','shopeepay','linkaja'].includes(pm)) { digital += amt; wallet += amt; }
+    });
+
+    const fmt = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+    document.getElementById('statDigital').textContent = fmt(digital);
+    document.getElementById('statQRIS').textContent = qrisCount;
+    document.getElementById('statTransfer').textContent = fmt(transfer);
+    document.getElementById('statWallet').textContent = fmt(wallet);
+}
+
+function renderLog() {
+    const filterMethod = document.getElementById('logFilter').value;
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+    const digitalMethods = ['qris','transfer','gopay','ovo','dana','shopeepay','linkaja','debit','credit'];
+    let trxs = LunomiDB.getTransactions()
+        .filter(t => t.createdAt >= monthStart)
+        .filter(t => digitalMethods.includes((t.paymentMethod || '').toLowerCase()))
+        .filter(t => !filterMethod || (t.paymentMethod || '').toLowerCase() === filterMethod)
+        .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+    const list = document.getElementById('logList');
+    if (!trxs.length) {
+        list.innerHTML = '<div class="px-5 py-10 text-center text-white/30"><span class="material-symbols-outlined text-3xl block mb-2">payments</span>Belum ada transaksi digital</div>';
+        return;
+    }
+
+    const METHOD_COLORS = {
+        qris: 'bg-indigo-500/20 text-indigo-400', transfer: 'bg-blue-500/20 text-blue-400',
+        gopay: 'bg-emerald-500/20 text-emerald-400', ovo: 'bg-purple-500/20 text-purple-400',
+        dana: 'bg-blue-500/20 text-blue-400', shopeepay: 'bg-orange-500/20 text-orange-400',
+        linkaja: 'bg-red-500/20 text-red-400', debit: 'bg-blue-500/20 text-blue-400',
+        credit: 'bg-purple-500/20 text-purple-400'
+    };
+
+    list.innerHTML = trxs.slice(0, 50).map(t => {
+        const pm = (t.paymentMethod || 'lainnya').toLowerCase();
+        const badge = METHOD_COLORS[pm] || 'bg-white/10 text-white/50';
+        const dt = t.createdAt ? new Date(t.createdAt).toLocaleString('id-ID', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '-';
+        return `
+            <div class="px-5 py-3 flex justify-between items-center gap-3 hover:bg-white/5 transition">
+                <div class="min-w-0">
+                    <p class="font-semibold truncate text-xs">${t.id || 'TRX'}</p>
+                    <p class="text-white/40 text-[10px]">${dt}</p>
+                </div>
+                <div class="text-right shrink-0">
+                    <span class="px-2 py-0.5 rounded-md ${badge} text-[10px] font-bold uppercase block mb-0.5">${pm}</span>
+                    <p class="font-bold text-xs">Rp ${Math.round(t.total || 0).toLocaleString('id-ID')}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function savePayment() {
+    cfg.qrisMerchantId = document.getElementById('qrisMerchantId').value.trim();
+    cfg.qrisName = document.getElementById('qrisName').value.trim();
+    cfg.bankAccount = document.getElementById('bankAccount').value.trim();
+    cfg.updatedAt = new Date().toISOString();
+    localStorage.setItem(PAY_KEY, JSON.stringify(cfg));
+    if (typeof AuditLog !== 'undefined') {
+        const enabled = Object.entries(cfg.enabled || {}).filter(([,v]) => v).map(([k]) => k).join(', ');
+        AuditLog.add('payment_config_save', 'Metode aktif: ' + (enabled || 'tunai'));
+    }
+    showToast('Konfigurasi pembayaran disimpan!');
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.style.opacity = '1';
+    setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    try { const s = localStorage.getItem('lunomi_session'); if (!s) { window.location.href = 'index.html'; return; } }
+    catch(e) { window.location.href = 'index.html'; return; }
+    loadConfig();
 });
 </script>
 </body>
