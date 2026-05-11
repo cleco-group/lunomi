@@ -32,7 +32,7 @@ export default function Kitchen() {
           <div className="text-right">
             <p className="text-sm text-white/60">Total Orders</p>
             <p className="text-2xl font-bold" style={{ color: '#C9A84C' }}>
-              {pendingOrders.length + preparingOrders.length + readyOrders.length}
+              {(pendingOrders?.length || 0) + (preparingOrders?.length || 0) + (readyOrders?.length || 0)}
             </p>
           </div>
           <button
@@ -53,15 +53,15 @@ export default function Kitchen() {
       <div className="px-6 py-4 flex gap-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full" style={{ background: '#3b82f6' }}></div>
-          <span className="text-white font-semibold">Pending: {pendingOrders.length}</span>
+          <span className="text-white font-semibold">Pending: {pendingOrders?.length || 0}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full" style={{ background: '#fbbf24' }}></div>
-          <span className="text-white font-semibold">Preparing: {preparingOrders.length}</span>
+          <span className="text-white font-semibold">Preparing: {preparingOrders?.length || 0}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full" style={{ background: '#22c55e' }}></div>
-          <span className="text-white font-semibold">Ready: {readyOrders.length}</span>
+          <span className="text-white font-semibold">Ready: {readyOrders?.length || 0}</span>
         </div>
       </div>
 
@@ -77,10 +77,10 @@ export default function Kitchen() {
             <div>
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ background: '#3b82f6' }}></div>
-                Pending ({pendingOrders.length})
+                Pending ({pendingOrders?.length || 0})
               </h2>
               <div className="space-y-4">
-                {pendingOrders.length === 0 ? (
+                {!pendingOrders || pendingOrders.length === 0 ? (
                   <div className="text-center py-12 text-white/40">
                     No pending orders
                   </div>
@@ -96,10 +96,10 @@ export default function Kitchen() {
             <div>
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ background: '#fbbf24' }}></div>
-                Preparing ({preparingOrders.length})
+                Preparing ({preparingOrders?.length || 0})
               </h2>
               <div className="space-y-4">
-                {preparingOrders.length === 0 ? (
+                {!preparingOrders || preparingOrders.length === 0 ? (
                   <div className="text-center py-12 text-white/40">
                     No orders in preparation
                   </div>
@@ -115,10 +115,10 @@ export default function Kitchen() {
             <div>
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ background: '#22c55e' }}></div>
-                Ready ({readyOrders.length})
+                Ready ({readyOrders?.length || 0})
               </h2>
               <div className="space-y-4">
-                {readyOrders.length === 0 ? (
+                {!readyOrders || readyOrders.length === 0 ? (
                   <div className="text-center py-12 text-white/40">
                     No orders ready
                   </div>

@@ -12,16 +12,18 @@ export default function OrderCard({ order, companyId }: OrderCardProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!order?.created_at) return;
+    
     const interval = setInterval(() => {
-      if (order.created_at) {
-        const now = Date.now();
-        const created = new Date(order.created_at).getTime();
+      const now = Date.now();
+      const created = new Date(order.created_at).getTime();
+      if (!isNaN(created)) {
         setElapsed(Math.floor((now - created) / 1000));
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [order.created_at]);
+  }, [order?.created_at]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -33,7 +35,7 @@ export default function OrderCard({ order, companyId }: OrderCardProps) {
     setLoading(true);
     try {
       await updateOrderStatus(companyId, order.id, newStatus);
-      toast.success(`Order ${order.orderNumber} updated to ${newStatus}`);
+      toast.success(`Order ${order.order_number || order.id} updated to ${newStatus}`);
     } catch (error) {
       toast.error('Failed to update order status');
     } finally {
@@ -47,6 +49,8 @@ export default function OrderCard({ order, companyId }: OrderCardProps) {
     preparing: 'rgba(251, 191, 36, 0.2)',
     ready: 'rgba(34, 197, 94, 0.2)'
   };
+  if (!order) return null;
+
   const statusColor = statusColors[order.status as string] ?? 'rgba(255,255,255,0.1)';
 
   return (

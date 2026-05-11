@@ -44,6 +44,7 @@ export function useOrders(companyId: string, statuses: string[]) {
 
   const fetchOrders = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('orders')
         .select('*')
@@ -54,10 +55,11 @@ export function useOrders(companyId: string, statuses: string[]) {
       if (error) throw error;
       
       setOrders(data || []);
-      setLoading(false);
     } catch (err) {
       console.error('Error fetching orders:', err);
       setError(err as Error);
+      setOrders([]);
+    } finally {
       setLoading(false);
     }
   };
