@@ -26,6 +26,8 @@ const NAV: NavGroup[] = [
       { path: '/booking', label: 'Manajemen Booking' },
       { path: '/tables', label: 'Manajemen Meja' },
       { path: '/outlet', label: 'Manajemen Outlet' },
+      { path: '/shift', label: 'Tutup Shift' },
+      { path: '/payment', label: 'Metode Pembayaran' },
     ],
   },
   {
@@ -36,6 +38,14 @@ const NAV: NavGroup[] = [
       { path: '/inventory', label: 'Stok Barang' },
       { path: '/supplier', label: 'Manajemen Supplier' },
       { path: '/purchase', label: 'Pembelian Barang' },
+    ],
+  },
+  {
+    label: 'SDM & Karyawan',
+    key: 'sdm',
+    items: [
+      { path: '/hr', label: 'Data Karyawan' },
+      { path: '/attendance', label: 'Absensi' },
     ],
   },
   {
@@ -54,7 +64,7 @@ const NAV: NavGroup[] = [
 
 export default function Sidebar({ onLogout }: SidebarProps) {
   const location = useLocation();
-  const [openMenus, setOpenMenus] = useState<string[]>(['ops', 'inventory', 'customer']);
+  const [openMenus, setOpenMenus] = useState<string[]>(['ops', 'inventory', 'sdm', 'customer']);
 
   const toggleMenu = (key: string) => {
     setOpenMenus(prev =>
