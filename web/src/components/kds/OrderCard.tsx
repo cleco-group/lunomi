@@ -47,7 +47,7 @@ export default function OrderCard({ order, companyId }: OrderCardProps) {
     preparing: 'rgba(251, 191, 36, 0.2)',
     ready: 'rgba(34, 197, 94, 0.2)'
   };
-  const statusColor = statusColors[order.status] ?? 'rgba(255,255,255,0.1)';
+  const statusColor = statusColors[order.status as string] ?? 'rgba(255,255,255,0.1)';
 
   return (
     <div
