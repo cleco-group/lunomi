@@ -34,13 +34,15 @@ export default function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps
       const seq = String(existing.length + 1).padStart(3, '0');
       const orderNumber = `ORD-${dateStr}-${seq}`;
 
+      const orderItems = items.map(item => ({ name: item.name, qty: item.qty, category: item.category, price: item.price }));
+
       const newOrder = {
         id: 'ord_' + Date.now(),
         orderNumber,
         status: 'pending',
         orderType,
         tableNo: tableNo.trim() || null,
-        items: items.map(item => ({ name: item.name, qty: item.qty, category: item.category })),
+        items: orderItems,
         subtotal,
         tax,
         total,
@@ -61,10 +63,33 @@ export default function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps
         date: now.toISOString().slice(0, 10),
         total,
         paymentMethod,
-        items: newOrder.items,
+        items: orderItems,
+        createdAt: now.toISOString(),
         status: 'paid',
       });
       localStorage.setItem('lunomi_transactions', JSON.stringify(txs));
+
+      // Auto-create invoice entry
+      const invDateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+      const existingInv = JSON.parse(localStorage.getItem('lunomi_invoices') || '[]');
+      const invSeq = String(existingInv.length + 1).padStart(3, '0');
+      existingInv.unshift({
+        invoiceNo: `INV-${invDateStr}-${invSeq}`,
+        trxId: newOrder.id,
+        customerName: orderType === 'dine_in' && tableNo ? `Meja ${tableNo}` : orderType === 'takeaway' ? 'Takeaway' : 'Delivery',
+        customerPhone: '',
+        items: orderItems.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+        subtotal,
+        discount: 0,
+        tax,
+        total,
+        payMethod: paymentMethod,
+        note: orderType === 'delivery' ? 'Delivery order' : '',
+        status: 'paid',
+        issuedAt: now.toISOString(),
+        paidAt: now.toISOString(),
+      });
+      localStorage.setItem('lunomi_invoices', JSON.stringify(existingInv));
 
       toast.success(`Order ${orderNumber} berhasil dibuat!`);
       clearCart();

@@ -109,9 +109,9 @@ export default function Dashboard() {
       <Sidebar onLogout={logout} />
 
       <main className="flex-1 min-h-screen lg:ml-64">
-        <header className="sticky top-0 z-50 px-6 lg:px-8 py-4 flex items-center justify-between"
+        <header className="sticky top-0 z-50 pl-14 pr-6 lg:px-8 py-4 flex items-center justify-between"
           style={{ background: 'rgba(2,6,23,0.7)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <h1 className="text-xl font-bold text-white pl-10 lg:pl-0">Dashboard Utama</h1>
+          <h1 className="text-xl font-bold text-white">Dashboard Utama</h1>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-white">{user?.email}</p>

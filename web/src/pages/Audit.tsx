@@ -119,7 +119,7 @@ export default function Audit() {
       <Sidebar onLogout={signOut} />
       <main className="flex-1 min-h-screen lg:ml-64">
         {/* Header */}
-        <header className="sticky top-0 z-40 px-8 py-4 flex items-center justify-between" style={{ background: 'rgba(2,6,23,.7)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
+        <header className="sticky top-0 z-40 pl-14 pr-6 lg:px-8 py-4 flex items-center justify-between" style={{ background: 'rgba(2,6,23,.7)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
           <div>
             <h1 className="text-xl font-black text-white">Audit Trail</h1>
             <p className="text-xs text-white/40">Riwayat aktivitas dan perubahan sistem</p>
