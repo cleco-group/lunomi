@@ -30,6 +30,7 @@ const NAV: NavGroup[] = [
     label: 'Inventory & Produk',
     key: 'inventory',
     items: [
+      { path: '/product', label: 'Master Menu' },
       { path: '/inventory', label: 'Stok Barang' },
     ],
   },
