@@ -3,36 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi — Online Integration</title>
+    <title>Online Integration - Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../../assets/js/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>*{font-family:'Plus Jakarta Sans',sans-serif;}body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}.glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}.glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        .glass-input:focus { outline: none; border-color: rgba(99,102,241,0.5); background: rgba(255,255,255,0.08); }
+        .glass-input option { background: #1e293b; }
+        .platform-card { transition: all 0.2s; }
+        .platform-card.connected { border-color: rgba(34,197,94,0.4); }
+        .toggle { position: relative; display: inline-flex; width: 44px; height: 24px; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; inset: 0; background: rgba(255,255,255,0.15); border-radius: 999px; cursor: pointer; transition: .3s; }
+        .slider::before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:white; border-radius:50%; transition:.3s; }
+        input:checked + .slider { background: #22c55e; }
+        input:checked + .slider::before { transform: translateX(20px); }
+        .order-card { transition: all 0.15s; }
+        .order-card:hover { background: rgba(255,255,255,0.07); }
+        .tab-btn { padding: .4rem 1rem; border-radius: 9999px; font-size: .75rem; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.5); transition: all .2s; }
+        .tab-btn.active { background: rgba(99,102,241,.25); border-color: rgba(99,102,241,.5); color: white; }
+    </style>
 </head>
-<body>
-<nav class="glass-nav sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">🛍️</div>
-        <div><div class="font-extrabold text-white text-sm">Online Integration</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+<body class="p-4 sm:p-8">
+<div class="max-w-6xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-2xl font-extrabold">Online Integration</h1>
+            <p class="text-sm text-white/50">Kelola pesanan dari platform online delivery</p>
+        </div>
+        <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
     </div>
-</nav>
-<div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <div class="text-6xl mb-6">🛍️</div>
-    <h1 class="text-2xl font-extrabold text-white mb-2">Online Integration</h1>
-    <p class="mb-8 max-w-md mx-auto" style="color:rgba(255,255,255,.5)">Sinkronisasi pesanan dari Shopee, TikTok, dan Tokopedia.</p>
-    <div class="glass-card rounded-2xl p-6 max-w-sm mx-auto text-left">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(255,255,255,.35)">Fitur yang akan hadir</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.6)"><li>✦ Shopee Food sync</li><li>✦ TikTok Shop</li><li>✦ Tokopedia integration</li><li>✦ Auto-accept pesanan</li><li>✦ Sinkronisasi inventory</li></ul>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card p-5 rounded-2xl border-l-4 border-orange-500">
+            <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Order Online Hari Ini</p>
+            <h3 id="statToday" class="text-2xl font-extrabold">0</h3>
+        </div>
+        <div class="glass-card p-5 rounded-2xl border-l-4 border-emerald-500">
+            <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Selesai</p>
+            <h3 id="statDone" class="text-2xl font-extrabold text-emerald-400">0</h3>
+        </div>
+        <div class="glass-card p-5 rounded-2xl border-l-4 border-yellow-500">
+            <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Pending</p>
+            <h3 id="statPending" class="text-2xl font-extrabold text-yellow-400">0</h3>
+        </div>
+        <div class="glass-card p-5 rounded-2xl border-l-4 border-blue-500">
+            <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Revenue Online</p>
+            <h3 id="statRevenue" class="text-2xl font-extrabold">Rp 0</h3>
+        </div>
     </div>
-    <button onclick="window.location.href='dashboard.html'" class="mt-8 px-6 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">← Kembali ke Dashboard</button>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Kiri: Platform Config -->
+        <div class="space-y-4">
+            <h3 class="text-sm font-bold text-white/50 uppercase tracking-widest">Platform</h3>
+            <div id="platformList" class="space-y-3"></div>
+            <button onclick="saveOnline()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-bold transition mt-2">
+                Simpan Pengaturan
+            </button>
+        </div>
+
+        <!-- Kanan: Order Queue -->
+        <div class="lg:col-span-2">
+            <div class="glass-card rounded-2xl overflow-hidden">
+                <div class="p-5 border-b border-white/5 flex flex-wrap gap-3 items-center justify-between">
+                    <h3 class="font-bold">Antrian Pesanan Online</h3>
+                    <div class="flex gap-2 flex-wrap">
+                        <button class="tab-btn active" onclick="setTab('all', this)">Semua</button>
+                        <button class="tab-btn" onclick="setTab('new', this)">Baru</button>
+                        <button class="tab-btn" onclick="setTab('cooking', this)">Dimasak</button>
+                        <button class="tab-btn" onclick="setTab('ready', this)">Siap</button>
+                    </div>
+                </div>
+                <div class="p-4 border-b border-white/5 flex gap-3">
+                    <button onclick="addDemoOrder()" class="px-3 py-1.5 glass-card hover:bg-white/10 rounded-xl text-xs font-semibold transition flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs">add</span> Simulasi Pesanan Baru
+                    </button>
+                    <select id="platformFilter" class="glass-input text-xs px-3 py-1.5 rounded-xl" onchange="renderOrders()">
+                        <option value="">Semua platform</option>
+                        <option value="shopee">Shopee Food</option>
+                        <option value="gofood">GoFood</option>
+                        <option value="grabfood">GrabFood</option>
+                        <option value="tiktok">TikTok Shop</option>
+                    </select>
+                </div>
+                <div id="orderList" class="divide-y divide-white/5 max-h-[480px] overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Platform Detail Modal -->
+<div id="platformModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="glass-card rounded-2xl p-6 w-full max-w-md mx-4">
+        <h3 id="modalPlatformTitle" class="text-lg font-bold mb-5">Konfigurasi Platform</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-white/40 mb-1">API Key / Token</label>
+                <input type="text" id="platApiKey" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Masukkan API key dari platform">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-white/40 mb-1">Merchant ID</label>
+                <input type="text" id="platMerchantId" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="ID merchant Anda">
+            </div>
+            <div class="flex items-center justify-between p-3 glass-card rounded-xl">
+                <div>
+                    <p class="text-sm font-semibold">Auto-accept pesanan</p>
+                    <p class="text-xs text-white/40">Terima otomatis tanpa konfirmasi manual</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="platAutoAccept">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="flex items-center justify-between p-3 glass-card rounded-xl">
+                <div>
+                    <p class="text-sm font-semibold">Sync inventory</p>
+                    <p class="text-xs text-white/40">Sinkronkan stok menu ke platform</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="platSyncInventory">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+            <button onclick="closePlatformModal()" class="flex-1 py-2 rounded-xl glass-card text-sm font-semibold hover:bg-white/10 transition">Batal</button>
+            <button onclick="savePlatformConfig()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-sm font-bold transition">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 px-5 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold shadow-xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+    <span class="material-symbols-outlined text-sm">check_circle</span>
+    <span id="toastMsg"></span>
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded',()=>{
-    try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
-    const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-    if(o)document.getElementById('outletLabel').textContent=o.name;}
-    catch(e){window.location.href='index.html';}
+const ONLINE_KEY = 'lunomi_online_config';
+const ORDERS_KEY = 'lunomi_online_orders';
+
+const PLATFORMS = [
+    { id: 'shopee',   label: 'Shopee Food',  color: 'orange', icon: '🍊' },
+    { id: 'gofood',   label: 'GoFood',       color: 'emerald', icon: '🟢' },
+    { id: 'grabfood', label: 'GrabFood',     color: 'emerald', icon: '🟩' },
+    { id: 'tiktok',   label: 'TikTok Shop',  color: 'pink',   icon: '🎵' },
+];
+
+const STATUS_CFG = {
+    new:     { label: 'Baru',    cls: 'bg-yellow-500/20 text-yellow-400' },
+    cooking: { label: 'Dimasak', cls: 'bg-blue-500/20 text-blue-400' },
+    ready:   { label: 'Siap',    cls: 'bg-emerald-500/20 text-emerald-400' },
+    done:    { label: 'Selesai', cls: 'bg-white/10 text-white/40' },
+    cancel:  { label: 'Batal',   cls: 'bg-red-500/20 text-red-400' },
+};
+
+let cfg = {};
+let currentTab = 'all';
+let editingPlatform = null;
+
+const MENU_SAMPLES = ['Nasi Goreng Spesial','Mie Ayam Bakso','Ayam Bakar','Es Teh Manis','Soto Ayam','Gado-gado','Rendang','Nasi Padang'];
+
+function loadOnline() {
+    cfg = JSON.parse(localStorage.getItem(ONLINE_KEY) || '{"enabled":{},"platforms":{}}');
+    renderPlatforms();
+    computeStats();
+    renderOrders();
+}
+
+function renderPlatforms() {
+    document.getElementById('platformList').innerHTML = PLATFORMS.map(p => {
+        const isConn = !!(cfg.platforms?.[p.id]?.apiKey);
+        return `
+        <div class="platform-card glass-card rounded-2xl p-4 ${isConn ? 'connected' : ''}">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">${p.icon}</span>
+                    <div>
+                        <p class="font-bold text-sm">${p.label}</p>
+                        <p class="text-xs ${isConn ? 'text-emerald-400' : 'text-white/30'}">${isConn ? 'Terhubung' : 'Belum terhubung'}</p>
+                    </div>
+                </div>
+                <label class="toggle" onclick="event.stopPropagation()">
+                    <input type="checkbox" id="ptog_${p.id}" ${cfg.enabled?.[p.id] ? 'checked' : ''} onchange="togglePlatform('${p.id}')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <button onclick="openPlatformModal('${p.id}')" class="w-full py-1.5 glass-card hover:bg-white/10 rounded-xl text-xs font-semibold transition">
+                ${isConn ? 'Edit Konfigurasi' : 'Hubungkan'}
+            </button>
+        </div>`;
+    }).join('');
+}
+
+function togglePlatform(id) {
+    if (!cfg.enabled) cfg.enabled = {};
+    cfg.enabled[id] = document.getElementById('ptog_' + id).checked;
+    if (typeof AuditLog !== 'undefined') AuditLog.add('online_toggle', id + ' ' + (cfg.enabled[id] ? 'diaktifkan' : 'dimatikan'));
+}
+
+function openPlatformModal(id) {
+    editingPlatform = id;
+    const p = PLATFORMS.find(x => x.id === id);
+    document.getElementById('modalPlatformTitle').textContent = 'Konfigurasi ' + (p?.label || id);
+    const platCfg = cfg.platforms?.[id] || {};
+    document.getElementById('platApiKey').value = platCfg.apiKey || '';
+    document.getElementById('platMerchantId').value = platCfg.merchantId || '';
+    document.getElementById('platAutoAccept').checked = platCfg.autoAccept ?? false;
+    document.getElementById('platSyncInventory').checked = platCfg.syncInventory ?? false;
+    document.getElementById('platformModal').classList.remove('hidden');
+}
+
+function closePlatformModal() {
+    document.getElementById('platformModal').classList.add('hidden');
+    editingPlatform = null;
+}
+
+function savePlatformConfig() {
+    if (!editingPlatform) return;
+    if (!cfg.platforms) cfg.platforms = {};
+    cfg.platforms[editingPlatform] = {
+        apiKey: document.getElementById('platApiKey').value.trim(),
+        merchantId: document.getElementById('platMerchantId').value.trim(),
+        autoAccept: document.getElementById('platAutoAccept').checked,
+        syncInventory: document.getElementById('platSyncInventory').checked,
+    };
+    closePlatformModal();
+    renderPlatforms();
+    showToast('Konfigurasi platform disimpan');
+}
+
+function saveOnline() {
+    cfg.updatedAt = new Date().toISOString();
+    localStorage.setItem(ONLINE_KEY, JSON.stringify(cfg));
+    if (typeof AuditLog !== 'undefined') {
+        const enabled = Object.entries(cfg.enabled || {}).filter(([,v]) => v).map(([k]) => k).join(', ');
+        AuditLog.add('online_config_save', 'Platform aktif: ' + (enabled || 'tidak ada'));
+    }
+    showToast('Pengaturan online disimpan!');
+}
+
+function getOrders() {
+    return JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+}
+
+function computeStats() {
+    const today = new Date().toISOString().slice(0, 10);
+    const orders = getOrders().filter(o => o.createdAt?.slice(0, 10) === today);
+    document.getElementById('statToday').textContent = orders.length;
+    document.getElementById('statDone').textContent = orders.filter(o => o.status === 'done').length;
+    document.getElementById('statPending').textContent = orders.filter(o => ['new','cooking'].includes(o.status)).length;
+    const rev = orders.filter(o => o.status === 'done').reduce((s, o) => s + (o.total || 0), 0);
+    document.getElementById('statRevenue').textContent = 'Rp ' + Math.round(rev).toLocaleString('id-ID');
+}
+
+function renderOrders() {
+    const filterPlatform = document.getElementById('platformFilter').value;
+    let orders = getOrders()
+        .filter(o => currentTab === 'all' || o.status === currentTab)
+        .filter(o => !filterPlatform || o.platform === filterPlatform)
+        .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+    const list = document.getElementById('orderList');
+    if (!orders.length) {
+        list.innerHTML = '<div class="px-5 py-12 text-center text-white/30 text-sm"><span class="material-symbols-outlined text-3xl block mb-2">delivery_dining</span>Tidak ada pesanan</div>';
+        return;
+    }
+
+    const pMap = Object.fromEntries(PLATFORMS.map(p => [p.id, p]));
+    list.innerHTML = orders.slice(0, 30).map(o => {
+        const st = STATUS_CFG[o.status] || STATUS_CFG.new;
+        const plat = pMap[o.platform] || { label: o.platform, icon: '📦' };
+        const dt = o.createdAt ? new Date(o.createdAt).toLocaleString('id-ID', {hour:'2-digit',minute:'2-digit'}) : '-';
+        const nextActions = {
+            new: `<button onclick="updateOrderStatus('${o.id}','cooking')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-bold transition">Masak</button>`,
+            cooking: `<button onclick="updateOrderStatus('${o.id}','ready')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-xs font-bold transition">Siap</button>`,
+            ready: `<button onclick="updateOrderStatus('${o.id}','done')" class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-bold transition">Selesai</button>`,
+        };
+        return `
+        <div class="order-card px-5 py-4">
+            <div class="flex justify-between items-start gap-3 mb-2">
+                <div>
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-base">${plat.icon}</span>
+                        <span class="font-bold text-sm">#${o.orderNo}</span>
+                        <span class="px-2 py-0.5 rounded-full ${st.cls} text-[10px] font-bold uppercase">${st.label}</span>
+                    </div>
+                    <p class="text-xs text-white/40">${plat.label} · ${dt} · ${o.customer || 'Customer'}</p>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="font-bold text-sm">Rp ${Math.round(o.total || 0).toLocaleString('id-ID')}</p>
+                    ${nextActions[o.status] || ''}
+                </div>
+            </div>
+            <p class="text-xs text-white/50 truncate">${(o.items || []).map(i => i.name).join(', ')}</p>
+        </div>`;
+    }).join('');
+}
+
+function updateOrderStatus(id, newStatus) {
+    const orders = getOrders();
+    const o = orders.find(x => x.id === id);
+    if (!o) return;
+    o.status = newStatus;
+    o.updatedAt = new Date().toISOString();
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    if (typeof AuditLog !== 'undefined') AuditLog.add('online_order_status', 'Order #' + o.orderNo + ' → ' + newStatus);
+    computeStats();
+    renderOrders();
+}
+
+function addDemoOrder() {
+    const orders = getOrders();
+    const platforms = ['shopee', 'gofood', 'grabfood', 'tiktok'];
+    const platform = platforms[Math.floor(Math.random() * platforms.length)];
+    const items = Array.from({length: Math.ceil(Math.random() * 3)}, () => ({
+        name: MENU_SAMPLES[Math.floor(Math.random() * MENU_SAMPLES.length)],
+        qty: Math.ceil(Math.random() * 2),
+        price: (Math.ceil(Math.random() * 5) * 10 + 20) * 1000
+    }));
+    const total = items.reduce((s, i) => s + i.qty * i.price, 0);
+    const orderNo = String(orders.length + 1).padStart(4, '0');
+    orders.push({
+        id: 'onl_' + Date.now(),
+        orderNo,
+        platform,
+        customer: ['Budi S.', 'Rina D.', 'Ahmad F.', 'Siti M.', 'Hendra K.'][Math.floor(Math.random() * 5)],
+        items,
+        total,
+        status: 'new',
+        createdAt: new Date().toISOString()
+    });
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    if (typeof AuditLog !== 'undefined') AuditLog.add('online_order_new', 'Pesanan baru #' + orderNo + ' dari ' + platform);
+    computeStats();
+    renderOrders();
+}
+
+function setTab(tab, btn) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderOrders();
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.style.opacity = '1';
+    setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    try { const s = localStorage.getItem('lunomi_session'); if (!s) { window.location.href = 'index.html'; return; } }
+    catch(e) { window.location.href = 'index.html'; return; }
+    loadOnline();
 });
 </script>
 </body>

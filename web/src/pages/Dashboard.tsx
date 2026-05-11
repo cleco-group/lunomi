@@ -39,7 +39,7 @@ interface TopProduct {
 }
 
 export default function Dashboard() {
-  const { user, signOut } = useSupabaseAuth();
+  const { user, signOut: logout } = useSupabaseAuth();
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     totalRevenue: 0,
     totalOrders: 0,

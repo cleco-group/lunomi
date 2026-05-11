@@ -5,87 +5,344 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pajak PB1 - Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../../assets/js/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: #020617; color: white; min-height: 100vh; }
         .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        .glass-input:focus { outline: none; border-color: rgba(249,115,22,0.5); }
+        .glass-input option { background: #1e293b; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; color: black; }
+            .glass-card { background: white; border: 1px solid #ccc; backdrop-filter: none; }
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
     <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8 no-print">
             <div>
                 <h1 class="text-2xl font-extrabold">Pelaporan Pajak PB1</h1>
                 <p class="text-sm text-white/50">Kepatuhan pajak restoran untuk pelaporan daerah (Bapenda)</p>
             </div>
-            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+            <div class="flex gap-3">
+                <button onclick="window.print()" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">print</span> Cetak
+                </button>
+                <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Period Filter -->
+        <div class="glass-card rounded-2xl p-4 mb-6 flex flex-wrap gap-4 items-center no-print">
+            <span class="text-sm font-semibold text-white/60">Filter Periode:</span>
+            <input type="month" id="filterMonth" class="glass-input px-4 py-2 rounded-xl text-sm">
+            <button onclick="applyFilter()" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-xl text-sm font-bold transition">Terapkan</button>
+            <button onclick="clearFilter()" class="px-4 py-2 glass-card hover:bg-white/10 rounded-xl text-sm font-semibold transition">Semua Periode</button>
+            <span id="filterLabel" class="text-xs text-white/40 ml-auto"></span>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="glass-card p-6 rounded-2xl border-l-4 border-orange-500">
                 <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total PPN Terkumpul</p>
                 <h3 id="totalTax" class="text-2xl font-extrabold">Rp 0</h3>
+                <p id="taxRate" class="text-xs text-white/40 mt-1"></p>
             </div>
             <div class="glass-card p-6 rounded-2xl border-l-4 border-blue-500">
                 <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Service Charge</p>
                 <h3 id="totalService" class="text-2xl font-extrabold">Rp 0</h3>
+                <p id="serviceRate" class="text-xs text-white/40 mt-1"></p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-purple-500">
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Omzet Neto</p>
+                <h3 id="totalGross" class="text-2xl font-extrabold">Rp 0</h3>
+                <p class="text-xs text-white/40 mt-1">Sebelum pajak</p>
             </div>
             <div class="glass-card p-6 rounded-2xl border-l-4 border-emerald-500">
-                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Status Pelaporan</p>
-                <h3 class="text-xl font-extrabold text-emerald-400 flex items-center gap-2">
-                    <span class="material-symbols-outlined">verified</span> Terverifikasi
-                </h3>
+                <p class="text-[10px] font-bold text-white/40 uppercase mb-1">Total Transaksi</p>
+                <h3 id="totalTrx" class="text-2xl font-extrabold">0</h3>
+                <p id="totalSetoran" class="text-xs text-white/40 mt-1"></p>
             </div>
         </div>
 
-        <div class="glass-card rounded-2xl overflow-hidden">
-            <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                <h4 class="font-bold">Riwayat Setoran Pajak</h4>
-                <button class="px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-xl text-xs font-bold transition">Upload NTPD Baru</button>
+        <!-- NTPD Table -->
+        <div class="glass-card rounded-2xl overflow-hidden mb-6">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center no-print">
+                <h4 class="font-bold">Riwayat Setoran Pajak (NTPD)</h4>
+                <button onclick="openNTPDModal()" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">add</span> Upload NTPD Baru
+                </button>
             </div>
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/40">
                         <th class="px-6 py-4">Periode</th>
                         <th class="px-6 py-4">No. Transaksi (NTPD)</th>
+                        <th class="px-6 py-4">Tanggal Setor</th>
                         <th class="px-6 py-4 text-right">Jumlah Setoran</th>
+                        <th class="px-6 py-4">Keterangan</th>
                         <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 no-print"></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
-                    <tr class="hover:bg-white/5 transition">
-                        <td class="px-6 py-4 text-sm font-bold">April 2026</td>
-                        <td class="px-6 py-4 text-sm font-mono text-white/60">NTPD-9928310023</td>
-                        <td class="px-6 py-4 text-right text-sm font-bold">Rp 12,450,000</td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="px-2 py-1 rounded-md bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase">Selesai</span>
+                <tbody id="ntpdTable" class="divide-y divide-white/5">
+                    <tr id="emptyNTPD">
+                        <td colspan="7" class="px-6 py-12 text-center text-white/30">
+                            <span class="material-symbols-outlined text-4xl block mb-2">receipt_long</span>
+                            Belum ada catatan setoran NTPD
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
+
+        <!-- Transaction Detail -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="p-6 border-b border-white/5">
+                <h4 class="font-bold">Detail Transaksi Pajak</h4>
+                <p class="text-xs text-white/40 mt-1">Rincian perhitungan pajak per transaksi</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                            <th class="px-6 py-4">Tanggal</th>
+                            <th class="px-6 py-4">No. Transaksi</th>
+                            <th class="px-6 py-4 text-right">Omzet Neto</th>
+                            <th class="px-6 py-4 text-right">PPN</th>
+                            <th class="px-6 py-4 text-right">Serv. Charge</th>
+                            <th class="px-6 py-4 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trxTable" class="divide-y divide-white/5 text-sm">
+                        <tr id="emptyTrx">
+                            <td colspan="6" class="px-6 py-12 text-center text-white/30">
+                                Tidak ada transaksi pada periode ini
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- NTPD Modal -->
+    <div id="ntpdModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden no-print">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-bold mb-5">Tambah Catatan NTPD</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-white/40 mb-1">Periode Pajak</label>
+                    <input type="month" id="ntpdPeriod" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-white/40 mb-1">Nomor NTPD</label>
+                    <input type="text" id="ntpdNumber" placeholder="cth. NTPD-9928310023" class="glass-input w-full px-4 py-2 rounded-xl text-sm" maxlength="30">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-white/40 mb-1">Tanggal Setor</label>
+                    <input type="date" id="ntpdDate" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-white/40 mb-1">Jumlah Setoran (Rp)</label>
+                    <input type="number" id="ntpdAmount" placeholder="0" class="glass-input w-full px-4 py-2 rounded-xl text-sm" min="0">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-white/40 mb-1">Keterangan</label>
+                    <input type="text" id="ntpdNote" placeholder="Opsional" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeNTPDModal()" class="flex-1 py-2 rounded-xl glass-card text-sm font-semibold hover:bg-white/10 transition">Batal</button>
+                <button onclick="saveNTPD()" class="flex-1 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-sm font-bold transition">Simpan</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        function loadTaxData() {
-            const trxs = JSON.parse(localStorage.getItem('lunomi_transactions') || '[]');
-            let totalTax = 0;
-            let totalService = 0;
+    const NTPD_KEY = 'lunomi_tax_payments';
+    let currentFilter = null;
 
-            trxs.forEach(t => {
-                // Assuming 10% tax and 5% service from gross
-                const gross = t.total / 1.15; 
-                totalTax += gross * 0.10;
-                totalService += gross * 0.05;
-            });
+    function fmt(n) { return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
 
-            document.getElementById('totalTax').textContent = 'Rp ' + Math.round(totalTax).toLocaleString('id-ID');
-            document.getElementById('totalService').textContent = 'Rp ' + Math.round(totalService).toLocaleString('id-ID');
+    function getPeriodLabel(isoMonth) {
+        if (!isoMonth) return '';
+        const [y, m] = isoMonth.split('-');
+        const names = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        return names[parseInt(m) - 1] + ' ' + y;
+    }
+
+    function loadTaxData() {
+        const config = JSON.parse(localStorage.getItem('lunomi_config') || '{"tax":10,"service":0}');
+        const taxPct = parseFloat(config.tax) || 10;
+        const svcPct = parseFloat(config.service) || 0;
+        const divisor = 1 + (taxPct + svcPct) / 100;
+
+        document.getElementById('taxRate').textContent = 'Rate: ' + taxPct + '%';
+        document.getElementById('serviceRate').textContent = 'Rate: ' + svcPct + '%';
+
+        const allTrxs = LunomiDB.getTransactions();
+        let trxs = allTrxs;
+
+        if (currentFilter) {
+            trxs = allTrxs.filter(t => t.createdAt && t.createdAt.slice(0, 7) === currentFilter);
+            document.getElementById('filterLabel').textContent = 'Menampilkan: ' + getPeriodLabel(currentFilter) + ' (' + trxs.length + ' transaksi)';
+        } else {
+            document.getElementById('filterLabel').textContent = 'Semua periode — ' + allTrxs.length + ' transaksi';
         }
-        document.addEventListener('DOMContentLoaded', loadTaxData);
+
+        let totalTax = 0, totalSvc = 0, totalNet = 0;
+        const rows = trxs.map(t => {
+            const gross = (t.total || 0) / divisor;
+            const tax = gross * (taxPct / 100);
+            const svc = gross * (svcPct / 100);
+            totalNet += gross;
+            totalTax += tax;
+            totalSvc += svc;
+            return { t, gross, tax, svc };
+        });
+
+        document.getElementById('totalTax').textContent = fmt(totalTax);
+        document.getElementById('totalService').textContent = fmt(totalSvc);
+        document.getElementById('totalGross').textContent = fmt(totalNet);
+        document.getElementById('totalTrx').textContent = trxs.length.toLocaleString('id-ID');
+
+        const ntpds = JSON.parse(localStorage.getItem(NTPD_KEY) || '[]');
+        const filteredNTPD = currentFilter ? ntpds.filter(n => n.period === currentFilter) : ntpds;
+        const totalSetoran = filteredNTPD.reduce((s, n) => s + (n.amount || 0), 0);
+        document.getElementById('totalSetoran').textContent = filteredNTPD.length + ' catatan · ' + fmt(totalSetoran);
+
+        renderNTPD(filteredNTPD);
+        renderTrxTable(rows);
+    }
+
+    function renderNTPD(ntpds) {
+        const tbody = document.getElementById('ntpdTable');
+        const empty = document.getElementById('emptyNTPD');
+        while (tbody.children.length > 1) tbody.removeChild(tbody.lastChild);
+        if (!ntpds.length) { empty.style.display = ''; return; }
+        empty.style.display = 'none';
+
+        [...ntpds].sort((a, b) => b.period.localeCompare(a.period)).forEach(n => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-white/5 transition';
+            tr.innerHTML = `
+                <td class="px-6 py-4 text-sm font-bold">${getPeriodLabel(n.period)}</td>
+                <td class="px-6 py-4 text-sm font-mono text-white/60">${n.ntpd}</td>
+                <td class="px-6 py-4 text-sm text-white/60">${n.date || '-'}</td>
+                <td class="px-6 py-4 text-right text-sm font-bold">${fmt(n.amount || 0)}</td>
+                <td class="px-6 py-4 text-sm text-white/50">${n.note || '-'}</td>
+                <td class="px-6 py-4 text-center">
+                    <span class="px-2 py-1 rounded-md bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase">Selesai</span>
+                </td>
+                <td class="px-6 py-4 text-center no-print">
+                    <button onclick="deleteNTPD('${n.id}')" class="text-red-400 hover:text-red-300 transition">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderTrxTable(rows) {
+        const tbody = document.getElementById('trxTable');
+        const empty = document.getElementById('emptyTrx');
+        while (tbody.children.length > 1) tbody.removeChild(tbody.lastChild);
+        if (!rows.length) { empty.style.display = ''; return; }
+        empty.style.display = 'none';
+
+        rows.slice(0, 100).forEach(({ t, gross, tax, svc }) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-white/5 transition text-sm';
+            tr.innerHTML = `
+                <td class="px-6 py-3 text-white/60">${t.createdAt ? t.createdAt.slice(0,10) : '-'}</td>
+                <td class="px-6 py-3 font-mono text-white/50 text-xs">${t.id || '-'}</td>
+                <td class="px-6 py-3 text-right">${fmt(gross)}</td>
+                <td class="px-6 py-3 text-right text-orange-400">${fmt(tax)}</td>
+                <td class="px-6 py-3 text-right text-blue-400">${fmt(svc)}</td>
+                <td class="px-6 py-3 text-right font-bold">${fmt(t.total || 0)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        if (rows.length > 100) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td colspan="6" class="px-6 py-3 text-center text-xs text-white/30">... dan ${rows.length - 100} transaksi lainnya</td>`;
+            tbody.appendChild(tr);
+        }
+    }
+
+    function applyFilter() {
+        const val = document.getElementById('filterMonth').value;
+        if (!val) return;
+        currentFilter = val;
+        loadTaxData();
+    }
+
+    function clearFilter() {
+        currentFilter = null;
+        document.getElementById('filterMonth').value = '';
+        loadTaxData();
+    }
+
+    function openNTPDModal() {
+        const today = new Date();
+        document.getElementById('ntpdPeriod').value = today.toISOString().slice(0, 7);
+        document.getElementById('ntpdDate').value = today.toISOString().slice(0, 10);
+        document.getElementById('ntpdNumber').value = '';
+        document.getElementById('ntpdAmount').value = '';
+        document.getElementById('ntpdNote').value = '';
+        document.getElementById('ntpdModal').classList.remove('hidden');
+    }
+
+    function closeNTPDModal() {
+        document.getElementById('ntpdModal').classList.add('hidden');
+    }
+
+    function saveNTPD() {
+        const period = document.getElementById('ntpdPeriod').value;
+        const ntpd = document.getElementById('ntpdNumber').value.trim();
+        const date = document.getElementById('ntpdDate').value;
+        const amount = parseFloat(document.getElementById('ntpdAmount').value) || 0;
+        const note = document.getElementById('ntpdNote').value.trim();
+
+        if (!period || !ntpd) { alert('Periode dan nomor NTPD wajib diisi.'); return; }
+
+        const records = JSON.parse(localStorage.getItem(NTPD_KEY) || '[]');
+        records.push({ id: 'ntpd_' + Date.now(), period, ntpd, date, amount, note, createdAt: new Date().toISOString() });
+        localStorage.setItem(NTPD_KEY, JSON.stringify(records));
+
+        if (typeof AuditLog !== 'undefined') AuditLog.add('tax_ntpd_add', 'NTPD ' + ntpd + ' — ' + getPeriodLabel(period) + ' — ' + fmt(amount));
+
+        closeNTPDModal();
+        loadTaxData();
+    }
+
+    function deleteNTPD(id) {
+        if (!confirm('Hapus catatan NTPD ini?')) return;
+        const records = JSON.parse(localStorage.getItem(NTPD_KEY) || '[]');
+        const del = records.find(r => r.id === id);
+        localStorage.setItem(NTPD_KEY, JSON.stringify(records.filter(r => r.id !== id)));
+        if (typeof AuditLog !== 'undefined') AuditLog.add('tax_ntpd_delete', 'NTPD ' + (del ? del.ntpd : id) + ' dihapus');
+        loadTaxData();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        try { const s = localStorage.getItem('lunomi_session'); if (!s) { window.location.href = 'index.html'; return; } }
+        catch(e) { window.location.href = 'index.html'; return; }
+
+        const now = new Date();
+        currentFilter = now.toISOString().slice(0, 7);
+        document.getElementById('filterMonth').value = currentFilter;
+        loadTaxData();
+    });
     </script>
 </body>
 </html>

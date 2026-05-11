@@ -3,37 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi — Pengaturan Printer</title>
+    <title>Pengaturan Printer - Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../../assets/js/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>*{font-family:'Plus Jakarta Sans',sans-serif;}body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}.glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}.glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        .glass-input:focus { outline: none; border-color: rgba(99,102,241,0.5); background: rgba(255,255,255,0.08); }
+        .glass-input option { background: #1e293b; }
+        .receipt-preview { font-family: 'Courier New', monospace; font-size: 12px; background: #fff; color: #000; padding: 16px; border-radius: 8px; white-space: pre-wrap; min-height: 200px; max-width: 280px; margin: 0 auto; }
+    </style>
 </head>
-<body>
-<nav class="glass-nav sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">🖨️</div>
-        <div><div class="font-extrabold text-white text-sm">Pengaturan Printer</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+<body class="p-4 sm:p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Pengaturan Printer</h1>
+                <p class="text-sm text-white/50">Konfigurasi printer struk dan template nota</p>
+            </div>
+            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Kiri: Settings -->
+            <div class="space-y-6">
+                <!-- Koneksi Printer -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-400">print</span> Koneksi Printer
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">Tipe Koneksi</label>
+                            <select id="printerType" class="glass-input w-full px-4 py-2 rounded-xl text-sm" onchange="togglePrinterFields()">
+                                <option value="browser">Browser Print (Default)</option>
+                                <option value="usb">USB / Serial</option>
+                                <option value="network">Network (IP)</option>
+                                <option value="bluetooth">Bluetooth</option>
+                            </select>
+                        </div>
+                        <div id="networkFields" class="hidden space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold text-white/40 mb-1">IP Address Printer</label>
+                                <input type="text" id="printerIP" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="192.168.1.100">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-white/40 mb-1">Port</label>
+                                <input type="number" id="printerPort" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="9100" value="9100">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">Ukuran Kertas</label>
+                            <select id="paperSize" class="glass-input w-full px-4 py-2 rounded-xl text-sm" onchange="updatePreview()">
+                                <option value="58">58mm (Struk kecil)</option>
+                                <option value="80" selected>80mm (Struk standar)</option>
+                                <option value="a4">A4 (Invoice)</option>
+                            </select>
+                        </div>
+                        <button onclick="testPrint()" class="w-full py-2 glass-card hover:bg-white/10 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">print</span> Test Cetak
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Template Struk -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-orange-400">receipt_long</span> Template Struk
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">Header (muncul di atas)</label>
+                            <textarea id="receiptHeader" rows="3" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Nama outlet, alamat, telepon..." oninput="updatePreview()"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">Footer (muncul di bawah)</label>
+                            <textarea id="receiptFooter" rows="2" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Terima kasih, ucapan, dll..." oninput="updatePreview()"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-white/40 mb-1">Copies (rangkap)</label>
+                                <input type="number" id="printCopies" min="1" max="5" class="glass-input w-full px-4 py-2 rounded-xl text-sm" value="1">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-white/40 mb-1">Font Size</label>
+                                <select id="fontSize" class="glass-input w-full px-4 py-2 rounded-xl text-sm" onchange="updatePreview()">
+                                    <option value="10">Kecil (10pt)</option>
+                                    <option value="12" selected>Normal (12pt)</option>
+                                    <option value="14">Besar (14pt)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opsi Tambahan -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-emerald-400">tune</span> Opsi Cetak
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 glass-card rounded-xl cursor-pointer hover:bg-white/10 transition">
+                            <div>
+                                <p class="text-sm font-semibold">Auto Print setelah transaksi</p>
+                                <p class="text-xs text-white/40">Langsung cetak struk tanpa konfirmasi</p>
+                            </div>
+                            <input type="checkbox" id="autoPrint" class="w-4 h-4 accent-indigo-500">
+                        </label>
+                        <label class="flex items-center justify-between p-3 glass-card rounded-xl cursor-pointer hover:bg-white/10 transition">
+                            <div>
+                                <p class="text-sm font-semibold">Tampilkan QR Code</p>
+                                <p class="text-xs text-white/40">QR link survey/sosmed di struk</p>
+                            </div>
+                            <input type="checkbox" id="showQR" class="w-4 h-4 accent-indigo-500">
+                        </label>
+                        <label class="flex items-center justify-between p-3 glass-card rounded-xl cursor-pointer hover:bg-white/10 transition">
+                            <div>
+                                <p class="text-sm font-semibold">Cetak KDS ke Dapur</p>
+                                <p class="text-xs text-white/40">Print order ke printer dapur secara otomatis</p>
+                            </div>
+                            <input type="checkbox" id="kitchenPrint" class="w-4 h-4 accent-indigo-500">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button onclick="savePrinter()" class="px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-bold transition shadow-lg shadow-indigo-500/20">
+                        Simpan Pengaturan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kanan: Preview Struk -->
+            <div>
+                <div class="glass-card rounded-2xl p-6 sticky top-6">
+                    <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-white/60">preview</span> Preview Struk
+                    </h3>
+                    <div id="previewContainer" class="receipt-preview"></div>
+                </div>
+            </div>
+        </div>
     </div>
-</nav>
-<div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <div class="text-6xl mb-6">🖨️</div>
-    <h1 class="text-2xl font-extrabold text-white mb-2">Pengaturan Printer</h1>
-    <p class="mb-8 max-w-md mx-auto" style="color:rgba(255,255,255,.5)">Konfigurasi printer struk dan label untuk semua outlet.</p>
-    <div class="glass-card rounded-2xl p-6 max-w-sm mx-auto text-left">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(255,255,255,.35)">Fitur yang akan hadir</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.6)"><li>✦ Koneksi printer thermal</li><li>✦ Template struk custom</li><li>✦ Print test page</li><li>✦ Multi-printer per outlet</li></ul>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 px-5 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold shadow-xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">check_circle</span>
+        <span id="toastMsg"></span>
     </div>
-    <button onclick="window.location.href='dashboard.html'" class="mt-8 px-6 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">← Kembali ke Dashboard</button>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
-    try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
-    const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-    if(o)document.getElementById('outletLabel').textContent=o.name;}
-    catch(e){window.location.href='index.html';}
-});
-</script>
+
+    <script>
+    const PRINTER_KEY = 'lunomi_printer_config';
+
+    function loadPrinter() {
+        const cfg = JSON.parse(localStorage.getItem(PRINTER_KEY) || '{}');
+        document.getElementById('printerType').value = cfg.type || 'browser';
+        document.getElementById('printerIP').value = cfg.ip || '';
+        document.getElementById('printerPort').value = cfg.port || 9100;
+        document.getElementById('paperSize').value = cfg.paperSize || '80';
+        document.getElementById('receiptHeader').value = cfg.header || '';
+        document.getElementById('receiptFooter').value = cfg.footer || '';
+        document.getElementById('printCopies').value = cfg.copies || 1;
+        document.getElementById('fontSize').value = cfg.fontSize || '12';
+        document.getElementById('autoPrint').checked = cfg.autoPrint ?? false;
+        document.getElementById('showQR').checked = cfg.showQR ?? false;
+        document.getElementById('kitchenPrint').checked = cfg.kitchenPrint ?? false;
+        togglePrinterFields();
+        updatePreview();
+    }
+
+    function togglePrinterFields() {
+        const t = document.getElementById('printerType').value;
+        document.getElementById('networkFields').classList.toggle('hidden', t !== 'network');
+    }
+
+    function updatePreview() {
+        const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
+        const header = document.getElementById('receiptHeader').value || (outlet.name ? outlet.name + '\n' + (outlet.address || '') + '\nTlp: ' + (outlet.phone || '-') : 'LUNOMI RESTORAN\nJl. Contoh No. 1\nTlp: 021-0000');
+        const footer = document.getElementById('receiptFooter').value || 'Terima kasih atas kunjungan Anda!\nSampai jumpa kembali :)';
+        const fontSize = document.getElementById('fontSize').value;
+        const paperSize = document.getElementById('paperSize').value;
+        const cols = paperSize === '58' ? 32 : 42;
+
+        const divider = '-'.repeat(cols);
+        const now = new Date();
+
+        const preview = [
+            header,
+            divider,
+            'No. Struk  : INV-0001',
+            'Tanggal    : ' + now.toLocaleDateString('id-ID'),
+            'Jam        : ' + now.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'}),
+            'Kasir      : Admin',
+            'Meja       : 5',
+            divider,
+            '1 x Nasi Goreng Spesial',
+            '  Rp 35.000',
+            '1 x Es Teh Manis',
+            '  Rp 8.000',
+            '2 x Kerupuk',
+            '  Rp 4.000',
+            divider,
+            'Subtotal   :      Rp 47.000',
+            'PPN 10%    :       Rp 4.700',
+            divider,
+            'TOTAL      :      Rp 51.700',
+            'Bayar      :      Rp 60.000',
+            'Kembali    :       Rp 8.300',
+            divider,
+            footer
+        ].join('\n');
+
+        const el = document.getElementById('previewContainer');
+        el.style.fontSize = fontSize + 'px';
+        el.textContent = preview;
+    }
+
+    function testPrint() {
+        window.print();
+    }
+
+    function savePrinter() {
+        const cfg = {
+            type: document.getElementById('printerType').value,
+            ip: document.getElementById('printerIP').value.trim(),
+            port: parseInt(document.getElementById('printerPort').value) || 9100,
+            paperSize: document.getElementById('paperSize').value,
+            header: document.getElementById('receiptHeader').value.trim(),
+            footer: document.getElementById('receiptFooter').value.trim(),
+            copies: parseInt(document.getElementById('printCopies').value) || 1,
+            fontSize: document.getElementById('fontSize').value,
+            autoPrint: document.getElementById('autoPrint').checked,
+            showQR: document.getElementById('showQR').checked,
+            kitchenPrint: document.getElementById('kitchenPrint').checked,
+            updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem(PRINTER_KEY, JSON.stringify(cfg));
+        if (typeof AuditLog !== 'undefined') AuditLog.add('printer_config_save', 'Pengaturan printer disimpan — ' + cfg.type + ' — kertas ' + cfg.paperSize + 'mm');
+        showToast('Pengaturan printer disimpan!');
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.style.opacity = '1';
+        setTimeout(() => { t.style.opacity = '0'; }, 2500);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        try { const s = localStorage.getItem('lunomi_session'); if (!s) { window.location.href = 'index.html'; return; } }
+        catch(e) { window.location.href = 'index.html'; return; }
+        loadPrinter();
+    });
+    </script>
 </body>
 </html>

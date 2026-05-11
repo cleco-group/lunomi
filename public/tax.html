@@ -3,37 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi — Tax Compliance</title>
+    <title>Pengaturan Pajak - Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../../assets/js/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>*{font-family:'Plus Jakarta Sans',sans-serif;}body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}.glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}.glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        .glass-input:focus { outline: none; border-color: rgba(249,115,22,0.5); background: rgba(255,255,255,0.08); }
+        .glass-input option { background: #1e293b; }
+        .preview-row { display: flex; justify-content: space-between; font-size: 0.8rem; }
+    </style>
 </head>
-<body>
-<nav class="glass-nav sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">📋</div>
-        <div><div class="font-extrabold text-white text-sm">Tax Compliance</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+<body class="p-4 sm:p-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-extrabold">Pengaturan Pajak</h1>
+                <p class="text-sm text-white/50">Konfigurasi PPN, service charge, dan pembulatan</p>
+            </div>
+            <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+        </div>
+
+        <div class="space-y-6">
+            <!-- PPN & Service Charge -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-400">percent</span> Tarif Pajak & Layanan
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">PPN / PB1 (%)</label>
+                        <input type="number" id="taxPPN" min="0" max="100" step="0.5" class="glass-input w-full px-4 py-2 rounded-xl text-sm" oninput="updatePreview()">
+                        <p class="text-xs text-white/30 mt-1">Pajak Bangunan / PPN sesuai regulasi daerah</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Service Charge (%)</label>
+                        <input type="number" id="taxService" min="0" max="100" step="0.5" class="glass-input w-full px-4 py-2 rounded-xl text-sm" oninput="updatePreview()">
+                        <p class="text-xs text-white/30 mt-1">Biaya layanan tambahan (opsional)</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Tipe Kalkulasi</label>
+                        <select id="taxMode" class="glass-input w-full px-4 py-2 rounded-xl text-sm" onchange="updatePreview()">
+                            <option value="inclusive">Inclusive (sudah termasuk)</option>
+                            <option value="exclusive">Exclusive (ditambah di akhir)</option>
+                        </select>
+                        <p class="text-xs text-white/30 mt-1">Cara pajak dihitung dari harga menu</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Pembulatan</label>
+                        <select id="taxRound" class="glass-input w-full px-4 py-2 rounded-xl text-sm" onchange="updatePreview()">
+                            <option value="none">Tidak ada</option>
+                            <option value="100">Rp 100</option>
+                            <option value="500">Rp 500</option>
+                            <option value="1000">Rp 1.000</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pajak Karyawan -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-400">person</span> PPh 21 Karyawan
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">PTKP per Bulan (Rp)</label>
+                        <input type="number" id="taxPTKP" min="0" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="4750000">
+                        <p class="text-xs text-white/30 mt-1">Penghasilan Tidak Kena Pajak</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/40 mb-1">Tarif PPh 21 (%)</label>
+                        <input type="number" id="taxPPh" min="0" max="100" step="0.5" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-base font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-emerald-400">calculate</span> Simulasi Perhitungan
+                </h3>
+                <div class="mb-3">
+                    <label class="block text-xs font-bold text-white/40 mb-1">Harga contoh (Rp)</label>
+                    <input type="number" id="simBase" value="100000" min="0" class="glass-input w-48 px-4 py-2 rounded-xl text-sm" oninput="updatePreview()">
+                </div>
+                <div id="simResult" class="space-y-2 text-sm border-t border-white/10 pt-4 mt-4"></div>
+            </div>
+
+            <!-- Tombol -->
+            <div class="flex justify-end gap-3">
+                <button onclick="resetTax()" class="px-6 py-3 rounded-xl glass-card text-sm font-semibold hover:bg-white/10 transition">Reset Default</button>
+                <button onclick="saveTax()" class="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-sm font-bold transition shadow-lg shadow-orange-500/20">
+                    Simpan Pengaturan
+                </button>
+            </div>
+        </div>
     </div>
-</nav>
-<div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <div class="text-6xl mb-6">📋</div>
-    <h1 class="text-2xl font-extrabold text-white mb-2">Tax Compliance</h1>
-    <p class="mb-8 max-w-md mx-auto" style="color:rgba(255,255,255,.5)">Laporan pajak PPN dan PPh sesuai regulasi Indonesia.</p>
-    <div class="glass-card rounded-2xl p-6 max-w-sm mx-auto text-left">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(255,255,255,.35)">Fitur yang akan hadir</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.6)"><li>✦ Rekap PPN bulanan</li><li>✦ PPh 21 karyawan</li><li>✦ e-Faktur integration</li><li>✦ Export SPT</li><li>✦ Audit trail pajak</li></ul>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 px-5 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold shadow-xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">check_circle</span>
+        <span id="toastMsg"></span>
     </div>
-    <button onclick="window.location.href='dashboard.html'" class="mt-8 px-6 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">← Kembali ke Dashboard</button>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
-    try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
-    const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-    if(o)document.getElementById('outletLabel').textContent=o.name;}
-    catch(e){window.location.href='index.html';}
-});
-</script>
+
+    <script>
+    const TAX_KEY = 'lunomi_config';
+
+    function loadTax() {
+        const cfg = JSON.parse(localStorage.getItem(TAX_KEY) || '{"tax":10,"service":0,"taxMode":"inclusive","round":"none","ptkp":4750000,"pph":5}');
+        document.getElementById('taxPPN').value = cfg.tax ?? 10;
+        document.getElementById('taxService').value = cfg.service ?? 0;
+        document.getElementById('taxMode').value = cfg.taxMode || 'inclusive';
+        document.getElementById('taxRound').value = cfg.round || 'none';
+        document.getElementById('taxPTKP').value = cfg.ptkp ?? 4750000;
+        document.getElementById('taxPPh').value = cfg.pph ?? 5;
+        updatePreview();
+    }
+
+    function updatePreview() {
+        const ppn = parseFloat(document.getElementById('taxPPN').value) || 0;
+        const svc = parseFloat(document.getElementById('taxService').value) || 0;
+        const mode = document.getElementById('taxMode').value;
+        const round = document.getElementById('taxRound').value;
+        const base = parseFloat(document.getElementById('simBase').value) || 100000;
+
+        let neto, ppnAmt, svcAmt, total;
+        if (mode === 'inclusive') {
+            const div = 1 + (ppn + svc) / 100;
+            neto = base / div;
+            ppnAmt = neto * ppn / 100;
+            svcAmt = neto * svc / 100;
+            total = base;
+        } else {
+            neto = base;
+            ppnAmt = base * ppn / 100;
+            svcAmt = base * svc / 100;
+            total = base + ppnAmt + svcAmt;
+        }
+
+        if (round !== 'none') {
+            const r = parseInt(round);
+            total = Math.ceil(total / r) * r;
+        }
+
+        const fmt = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+        document.getElementById('simResult').innerHTML = `
+            <div class="preview-row text-white/60"><span>Harga Dasar (neto)</span><span>${fmt(neto)}</span></div>
+            ${ppn > 0 ? `<div class="preview-row text-orange-400"><span>PPN ${ppn}%</span><span>+ ${fmt(ppnAmt)}</span></div>` : ''}
+            ${svc > 0 ? `<div class="preview-row text-blue-400"><span>Service Charge ${svc}%</span><span>+ ${fmt(svcAmt)}</span></div>` : ''}
+            ${round !== 'none' ? `<div class="preview-row text-yellow-400"><span>Pembulatan</span><span>–</span></div>` : ''}
+            <div class="preview-row font-extrabold border-t border-white/10 pt-2 mt-2 text-base"><span>Total Bayar</span><span>${fmt(total)}</span></div>
+        `;
+    }
+
+    function saveTax() {
+        const cfg = JSON.parse(localStorage.getItem(TAX_KEY) || '{}');
+        cfg.tax = parseFloat(document.getElementById('taxPPN').value) || 0;
+        cfg.service = parseFloat(document.getElementById('taxService').value) || 0;
+        cfg.taxMode = document.getElementById('taxMode').value;
+        cfg.round = document.getElementById('taxRound').value;
+        cfg.ptkp = parseFloat(document.getElementById('taxPTKP').value) || 4750000;
+        cfg.pph = parseFloat(document.getElementById('taxPPh').value) || 5;
+        localStorage.setItem(TAX_KEY, JSON.stringify(cfg));
+
+        if (typeof AuditLog !== 'undefined') AuditLog.add('tax_config_save', 'Pengaturan pajak: PPN ' + cfg.tax + '%, SC ' + cfg.service + '%, mode ' + cfg.taxMode);
+        showToast('Pengaturan pajak disimpan!');
+    }
+
+    function resetTax() {
+        if (!confirm('Reset ke nilai default (PPN 10%, Service 0%)?')) return;
+        document.getElementById('taxPPN').value = 10;
+        document.getElementById('taxService').value = 0;
+        document.getElementById('taxMode').value = 'inclusive';
+        document.getElementById('taxRound').value = 'none';
+        document.getElementById('taxPTKP').value = 4750000;
+        document.getElementById('taxPPh').value = 5;
+        updatePreview();
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.style.opacity = '1';
+        setTimeout(() => { t.style.opacity = '0'; }, 2500);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        try { const s = localStorage.getItem('lunomi_session'); if (!s) { window.location.href = 'index.html'; return; } }
+        catch(e) { window.location.href = 'index.html'; return; }
+        loadTax();
+    });
+    </script>
 </body>
 </html>

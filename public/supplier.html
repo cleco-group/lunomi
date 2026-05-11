@@ -3,180 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Supplier - Lunomi</title>
+    <title>Lunomi — Manajemen Supplier</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../../assets/js/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #020617; color: white; min-height: 100vh; }
-        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
-        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(16,185,129,.15) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:white;outline:none;}
+        .input-glass::placeholder{color:rgba(255,255,255,.3);}
+        .input-glass:focus{border-color:rgba(99,102,241,.6);}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+        .btn-primary:hover{transform:translateY(-1px);}
+        .modal-overlay{background:rgba(0,0,0,.7);backdrop-filter:blur(8px);}
+        .modal-box{background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:1.25rem;}
+        .row-item{border-bottom:1px solid rgba(255,255,255,.05);transition:background .15s;}
+        .row-item:hover{background:rgba(255,255,255,.02);}
+        .cat-badge{display:inline-block;padding:.15rem .55rem;border-radius:999px;font-size:.68rem;font-weight:700;}
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.25rem;border-radius:1rem;font-size:.85rem;font-weight:600;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s;pointer-events:none;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast-ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+        .toast-err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
-<body class="p-4 sm:p-8">
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
+<body>
+
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="history.back()" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">🏭</div>
             <div>
-                <h1 class="text-2xl font-extrabold">Manajemen Supplier</h1>
-                <p class="text-sm text-white/50">Kelola daftar pemasok bahan baku Anda</p>
-            </div>
-            <div class="flex gap-3">
-                <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
-                <button onclick="openAddModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold transition"> + Tambah Supplier</button>
+                <div class="font-extrabold text-white text-sm">Manajemen Supplier</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)" id="outletLabel">—</div>
             </div>
         </div>
+        <button onclick="openModal()" class="btn-primary px-4 py-2 rounded-xl text-xs">+ Tambah Supplier</button>
+    </div>
+</nav>
 
-        <div class="glass-card rounded-2xl overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-white/5 text-xs font-bold uppercase tracking-wider text-white/40">
-                        <th class="px-6 py-4">Nama Supplier</th>
-                        <th class="px-6 py-4">Kontak</th>
-                        <th class="px-6 py-4">Kategori</th>
-                        <th class="px-6 py-4">Alamat</th>
-                        <th class="px-6 py-4 text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="supplierTable" class="divide-y divide-white/5">
-                    <!-- Data will be loaded here -->
-                </tbody>
-            </table>
+<div class="max-w-5xl mx-auto px-4 py-6">
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Total Supplier</div>
+            <div class="text-2xl font-extrabold text-white" id="statTotal">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1 text-indigo-400">Total PO</div>
+            <div class="text-2xl font-extrabold text-indigo-400" id="statPO">0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1 text-amber-400">Nilai Pembelian</div>
+            <div class="text-lg font-extrabold text-amber-400" id="statValue">Rp 0</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4">
+            <div class="text-xs mb-1 text-green-400">Kategori Aktif</div>
+            <div class="text-2xl font-extrabold text-green-400" id="statCats">0</div>
         </div>
     </div>
 
-    <!-- Add/Edit Modal -->
-    <div id="supplierModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6">
-            <h3 id="modalTitle" class="text-xl font-bold mb-4">Tambah Supplier</h3>
-            <div class="space-y-4">
+    <!-- Search + Filter -->
+    <div class="glass-card rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
+        <input id="searchInput" type="text" placeholder="🔍 Cari nama, PIC, telepon..." oninput="renderList()"
+            class="input-glass px-4 py-2 rounded-xl text-sm flex-1 min-w-[180px]">
+        <select id="filterCat" onchange="renderList()" class="input-glass px-3 py-2 rounded-xl text-sm">
+            <option value="all">Semua Kategori</option>
+            <option>Bahan Pokok</option>
+            <option>Daging & Ikan</option>
+            <option>Sayuran</option>
+            <option>Minuman</option>
+            <option>Kemasan</option>
+            <option>Elektronik</option>
+            <option>Lainnya</option>
+        </select>
+    </div>
+
+    <!-- List -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div id="supplierList"></div>
+        <div id="emptyState" class="hidden py-16 text-center">
+            <div class="text-5xl mb-3">🏭</div>
+            <div class="text-sm font-semibold" style="color:rgba(255,255,255,.4)">Belum ada supplier</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.25)">Tambahkan supplier bahan baku outlet Anda</div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="supplierModal" class="modal-overlay hidden fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4">
+    <div class="modal-box w-full max-w-md shadow-2xl">
+        <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <h2 class="font-bold text-white" id="modalTitle">Tambah Supplier</h2>
+            <button onclick="closeModal()" class="text-xl font-bold hover:text-white" style="color:rgba(255,255,255,.4)">×</button>
+        </div>
+        <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div>
+                <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Nama Perusahaan / Supplier *</label>
+                <input id="fName" type="text" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="PT Sumber Makmur">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-white/40 mb-1">Nama Perusahaan/Supplier</label>
-                    <input type="text" id="supName" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Contoh: PT Sumber Makmur">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-white/40 mb-1">PIC / Nama Kontak</label>
-                        <input type="text" id="supPic" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Bpk. Budi">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-white/40 mb-1">No. Telepon</label>
-                        <input type="text" id="supPhone" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="0812...">
-                    </div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">PIC / Nama Kontak</label>
+                    <input id="fPic" type="text" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="Bpk. Budi">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-white/40 mb-1">Kategori</label>
-                    <select id="supCat" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
-                        <option value="Bahan Pokok">Bahan Pokok</option>
-                        <option value="Daging & Ikan">Daging & Ikan</option>
-                        <option value="Sayuran">Sayuran</option>
-                        <option value="Minuman">Minuman</option>
-                        <option value="Kemasan">Kemasan</option>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">No. Telepon *</label>
+                    <input id="fPhone" type="tel" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="0812...">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Kategori</label>
+                    <select id="fCat" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
+                        <option>Bahan Pokok</option>
+                        <option>Daging & Ikan</option>
+                        <option>Sayuran</option>
+                        <option>Minuman</option>
+                        <option>Kemasan</option>
+                        <option>Elektronik</option>
+                        <option>Lainnya</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-white/40 mb-1">Alamat</label>
-                    <textarea id="supAddr" class="glass-input w-full px-4 py-2 rounded-xl text-sm h-20" placeholder="Alamat lengkap..."></textarea>
+                    <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Email</label>
+                    <input id="fEmail" type="email" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="email@...">
                 </div>
             </div>
-            <div class="flex gap-3 mt-6">
-                <button onclick="closeModal()" class="flex-1 py-2 rounded-xl glass-card text-sm font-bold">Batal</button>
-                <button onclick="saveSupplier()" class="flex-1 py-2 rounded-xl bg-indigo-600 text-sm font-bold">Simpan</button>
+            <div>
+                <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Alamat</label>
+                <textarea id="fAddr" rows="2" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm resize-none" placeholder="Alamat lengkap..."></textarea>
             </div>
+            <div>
+                <label class="text-xs font-semibold mb-1.5 block" style="color:rgba(255,255,255,.5)">Catatan</label>
+                <input id="fNote" type="text" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm" placeholder="Min. order, jadwal pengiriman, dll...">
+            </div>
+            <div id="formError" class="hidden px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;"></div>
+        </div>
+        <div class="px-6 pb-5 flex gap-3">
+            <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)">Batal</button>
+            <button onclick="saveSupplier()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm">Simpan</button>
         </div>
     </div>
+</div>
 
-    <script>
-        let suppliers = JSON.parse(localStorage.getItem('lunomi_suppliers') || '[]');
-        let editIndex = -1;
+<div id="toast" class="toast toast-ok"></div>
 
-        function renderSuppliers() {
-            const table = document.getElementById('supplierTable');
-            if (suppliers.length === 0) {
-                table.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-white/30 text-sm">Belum ada data supplier</td></tr>';
-                return;
-            }
-            table.innerHTML = suppliers.map((s, i) => `
-                <tr class="hover:bg-white/5 transition">
-                    <td class="px-6 py-4">
-                        <div class="font-bold text-sm">${s.name}</div>
-                        <div class="text-xs text-white/40">PIC: ${s.pic}</div>
-                    </td>
-                    <td class="px-6 py-4 text-sm">${s.phone}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-400 text-[10px] font-bold uppercase">${s.category}</span>
-                    </td>
-                    <td class="px-6 py-4 text-xs text-white/50 max-w-xs truncate">${s.address}</td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="editSupplier(${i})" class="p-1.5 text-white/40 hover:text-white transition"><span class="material-symbols-outlined text-lg">edit</span></button>
-                        <button onclick="deleteSupplier(${i})" class="p-1.5 text-white/40 hover:text-red-400 transition"><span class="material-symbols-outlined text-lg">delete</span></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
+<script>
+const CAT_COLORS = {
+    'Bahan Pokok':  {bg:'rgba(99,102,241,.15)', color:'#a5b4fc'},
+    'Daging & Ikan':{bg:'rgba(239,68,68,.15)',  color:'#fca5a5'},
+    'Sayuran':      {bg:'rgba(34,197,94,.15)',   color:'#86efac'},
+    'Minuman':      {bg:'rgba(59,130,246,.15)',  color:'#93c5fd'},
+    'Kemasan':      {bg:'rgba(245,158,11,.15)',  color:'#fcd34d'},
+    'Elektronik':   {bg:'rgba(139,92,246,.15)',  color:'#c4b5fd'},
+    'Lainnya':      {bg:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.5)'},
+};
 
-        function openAddModal() {
-            editIndex = -1;
-            document.getElementById('modalTitle').textContent = 'Tambah Supplier';
-            document.getElementById('supName').value = '';
-            document.getElementById('supPic').value = '';
-            document.getElementById('supPhone').value = '';
-            document.getElementById('supCat').value = 'Bahan Pokok';
-            document.getElementById('supAddr').value = '';
-            document.getElementById('supplierModal').classList.remove('hidden');
-        }
+let editingId = null;
 
-        function editSupplier(index) {
-            editIndex = index;
-            const s = suppliers[index];
+function rp(n){ return 'Rp '+Number(n||0).toLocaleString('id-ID'); }
+
+function getSuppliers(){ return JSON.parse(localStorage.getItem('lunomi_suppliers')||'[]'); }
+function saveSuppliers(arr){ localStorage.setItem('lunomi_suppliers', JSON.stringify(arr)); }
+
+function renderList(){
+    const q = (document.getElementById('searchInput').value||'').toLowerCase();
+    const cat = document.getElementById('filterCat').value;
+    let list = getSuppliers().filter(s=>{
+        const matchCat = cat==='all' || s.category===cat;
+        const matchQ = !q || s.name.toLowerCase().includes(q) || (s.pic||'').toLowerCase().includes(q) || (s.phone||'').includes(q);
+        return matchCat && matchQ;
+    });
+
+    const el = document.getElementById('supplierList');
+    const empty = document.getElementById('emptyState');
+
+    if(!list.length){ el.innerHTML=''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+
+    el.innerHTML = list.map(s=>{
+        const cc = CAT_COLORS[s.category]||CAT_COLORS['Lainnya'];
+        const initials = s.name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+        const purchases = JSON.parse(localStorage.getItem('lunomi_purchases')||'[]').filter(p=>p.supplier===s.name);
+        const totalBeli = purchases.reduce((sum,p)=>sum+(p.total||0),0);
+        return `<div class="row-item px-5 py-4 flex items-center gap-4">
+            <div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-extrabold" style="background:${cc.bg};color:${cc.color}">${initials||'S'}</div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold text-white text-sm">${s.name}</span>
+                    <span class="cat-badge" style="background:${cc.bg};color:${cc.color}">${s.category||'—'}</span>
+                </div>
+                <div class="text-xs mt-0.5 flex gap-3 flex-wrap" style="color:rgba(255,255,255,.35)">
+                    ${s.pic?`<span>👤 ${s.pic}</span>`:''}
+                    ${s.phone?`<span>📞 ${s.phone}</span>`:''}
+                    ${totalBeli?`<span>🛒 ${rp(totalBeli)}</span>`:''}
+                </div>
+                ${s.note?`<div class="text-xs mt-0.5 italic" style="color:rgba(255,255,255,.25)">${s.note}</div>`:''}
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                ${s.phone?`<button onclick="WAHelper.send('${s.phone}','')" class="text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:rgba(34,197,94,.1);color:#4ade80">WA</button>`:''}
+                <button onclick="openModal('${s.id}')" class="text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)">Edit</button>
+                <button onclick="deleteSupplier('${s.id}')" class="text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:rgba(239,68,68,.1);color:#f87171">Hapus</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function updateStats(){
+    const suppliers = getSuppliers();
+    const purchases = JSON.parse(localStorage.getItem('lunomi_purchases')||'[]');
+    const totalValue = purchases.reduce((s,p)=>s+(p.total||0),0);
+    const cats = new Set(suppliers.map(s=>s.category).filter(Boolean)).size;
+    document.getElementById('statTotal').textContent = suppliers.length;
+    document.getElementById('statPO').textContent = purchases.length;
+    document.getElementById('statValue').textContent = rp(totalValue);
+    document.getElementById('statCats').textContent = cats;
+}
+
+function openModal(id){
+    editingId = id||null;
+    ['fName','fPic','fPhone','fEmail','fAddr','fNote'].forEach(f=>{ const el=document.getElementById(f); if(el) el.value=''; });
+    document.getElementById('fCat').value = 'Bahan Pokok';
+    document.getElementById('formError').classList.add('hidden');
+
+    if(id){
+        const s = getSuppliers().find(x=>x.id===id);
+        if(s){
             document.getElementById('modalTitle').textContent = 'Edit Supplier';
-            document.getElementById('supName').value = s.name;
-            document.getElementById('supPic').value = s.pic;
-            document.getElementById('supPhone').value = s.phone;
-            document.getElementById('supCat').value = s.category;
-            document.getElementById('supAddr').value = s.address;
-            document.getElementById('supplierModal').classList.remove('hidden');
+            document.getElementById('fName').value = s.name||'';
+            document.getElementById('fPic').value = s.pic||'';
+            document.getElementById('fPhone').value = s.phone||'';
+            document.getElementById('fCat').value = s.category||'Bahan Pokok';
+            document.getElementById('fEmail').value = s.email||'';
+            document.getElementById('fAddr').value = s.address||'';
+            document.getElementById('fNote').value = s.note||'';
         }
+    } else {
+        document.getElementById('modalTitle').textContent = 'Tambah Supplier';
+    }
+    document.getElementById('supplierModal').classList.remove('hidden');
+    document.getElementById('fName').focus();
+}
 
-        function saveSupplier() {
-            const data = {
-                name: document.getElementById('supName').value,
-                pic: document.getElementById('supPic').value,
-                phone: document.getElementById('supPhone').value,
-                category: document.getElementById('supCat').value,
-                address: document.getElementById('supAddr').value
-            };
+function closeModal(){ document.getElementById('supplierModal').classList.add('hidden'); }
 
-            if (!data.name || !data.phone) {
-                alert('Nama dan No. Telepon wajib diisi!');
-                return;
-            }
+function saveSupplier(){
+    const name = document.getElementById('fName').value.trim();
+    const pic = document.getElementById('fPic').value.trim();
+    const phone = document.getElementById('fPhone').value.trim();
+    const category = document.getElementById('fCat').value;
+    const email = document.getElementById('fEmail').value.trim();
+    const address = document.getElementById('fAddr').value.trim();
+    const note = document.getElementById('fNote').value.trim();
+    const err = document.getElementById('formError');
 
-            if (editIndex > -1) {
-                suppliers[editIndex] = data;
-            } else {
-                suppliers.push(data);
-            }
+    if(!name){ err.textContent='Nama supplier harus diisi.'; err.classList.remove('hidden'); return; }
+    if(!phone){ err.textContent='No. telepon harus diisi.'; err.classList.remove('hidden'); return; }
+    err.classList.add('hidden');
 
-            localStorage.setItem('lunomi_suppliers', JSON.stringify(suppliers));
-            closeModal();
-            renderSuppliers();
-        }
+    const suppliers = getSuppliers();
+    if(editingId){
+        const idx = suppliers.findIndex(x=>x.id===editingId);
+        if(idx>=0) suppliers[idx] = {...suppliers[idx], name, pic, phone, category, email, address, note};
+        AuditLog.add('supplier_edit', `Edit supplier: ${name}`);
+    } else {
+        suppliers.unshift({ id:'SUP-'+Date.now(), name, pic, phone, category, email, address, note, createdAt: new Date().toISOString() });
+        AuditLog.add('supplier_add', `Tambah supplier: ${name} (${category})`);
+    }
+    saveSuppliers(suppliers);
+    closeModal();
+    updateStats();
+    renderList();
+    showToast(editingId ? '✏️ Supplier diperbarui' : '✅ Supplier ditambahkan');
+}
 
-        function deleteSupplier(index) {
-            if (confirm('Hapus supplier ini?')) {
-                suppliers.splice(index, 1);
-                localStorage.setItem('lunomi_suppliers', JSON.stringify(suppliers));
-                renderSuppliers();
-            }
-        }
+function deleteSupplier(id){
+    const s = getSuppliers().find(x=>x.id===id);
+    if(!s) return;
+    if(!confirm(`Hapus supplier "${s.name}"?`)) return;
+    const list = getSuppliers().filter(x=>x.id!==id);
+    saveSuppliers(list);
+    AuditLog.add('supplier_delete', `Hapus supplier: ${s.name}`);
+    updateStats();
+    renderList();
+    showToast('🗑️ Supplier dihapus', true);
+}
 
-        function closeModal() {
-            document.getElementById('supplierModal').classList.add('hidden');
-        }
+function showToast(msg, isErr=false){
+    const t=document.getElementById('toast');
+    t.className='toast '+(isErr?'toast-err':'toast-ok');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3000);
+}
 
-        document.addEventListener('DOMContentLoaded', renderSuppliers);
-    </script>
+document.addEventListener('DOMContentLoaded',()=>{
+    const s=SessionManager.get('session');
+    if(!s){window.location.href='index.html';return;}
+    const outlet=SessionManager.get('outlet');
+    if(outlet) document.getElementById('outletLabel').textContent=outlet.name;
+
+    // Migrate old supplier data (no id) to new format
+    const old = getSuppliers();
+    if(old.length && !old[0].id){
+        const migrated = old.map((s,i)=>({...s, id:'SUP-'+Date.now()+i, category:s.category||'Lainnya'}));
+        saveSuppliers(migrated);
+    }
+
+    updateStats();
+    renderList();
+});
+</script>
 </body>
 </html>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi KDS - Kitchen Display System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../../assets/js/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
@@ -156,18 +156,8 @@
         </div>
     </div>
     <script>
-        const ORDERS_INIT = [
-            {id:'ORD-001',time:'09:30',items:'Nasi Goreng x2, Mie Ayam',    st:'pending', et:8,  urgent:false},
-            {id:'ORD-002',time:'09:32',items:'Ikan Bakar, Soto Ayam',       st:'pending', et:12, urgent:false},
-            {id:'ORD-003',time:'09:35',items:'Lumpia x3, Es Teh',           st:'cooking', et:4,  urgent:false},
-            {id:'ORD-004',time:'09:38',items:'Kue Lapis x2, Kopi',          st:'cooking', et:2,  urgent:false},
-            {id:'ORD-005',time:'09:40',items:'Roti Goreng x5',              st:'ready',   et:0,  urgent:false},
-            {id:'ORD-006',time:'09:42',items:'Nasi Goreng — URGENT',        st:'pending', et:6,  urgent:true},
-            {id:'ORD-007',time:'09:45',items:'Smoothie, Jus',               st:'ready',   et:0,  urgent:false},
-            {id:'ORD-008',time:'09:48',items:'Bika Ambon',                  st:'cooking', et:3,  urgent:false}
-        ];
-        let orders=JSON.parse(JSON.stringify(ORDERS_INIT));
-        let elapsed={}, intervalId=null, pickupTargetId=null, toastTimer=null;
+        const KDS_KEY='lunomi_kds_orders';
+        let orders=[], elapsed={}, intervalId=null, pickupTargetId=null, toastTimer=null;
         function showToast(msg,type='success'){
             clearTimeout(toastTimer);
             const C={success:'rgba(34,197,94,0.9)',info:'rgba(99,102,241,0.9)',warning:'rgba(245,158,11,0.9)',error:'rgba(239,68,68,0.9)'};
@@ -177,7 +167,43 @@
             const t=document.getElementById('toast');t.classList.remove('hidden');t.style.opacity='1';
             toastTimer=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.classList.add('hidden'),300);},3000);
         }
-        function initElapsed(){orders.forEach(o=>{elapsed[o.id]=0;});}
+        function initElapsed(){orders.forEach(o=>{if(!elapsed[o.id])elapsed[o.id]=0;});}
+
+        function getKDSState(){return JSON.parse(localStorage.getItem(KDS_KEY)||'[]');}
+        function saveKDSState(){localStorage.setItem(KDS_KEY,JSON.stringify(orders.map(o=>({id:o.id,st:o.st,urgent:o.urgent}))));}
+
+        function loadKDSOrders(){
+            const stateArr=getKDSState();
+            const stateMap={};
+            stateArr.forEach(k=>{stateMap[k.id]=k;});
+            const trxs=LunomiDB.getTransactions();
+            const today=new Date().toISOString().slice(0,10);
+            orders=trxs.filter(t=>t.createdAt&&t.createdAt.slice(0,10)===today).map(t=>{
+                const ex=stateMap[t.id];
+                if(ex?.st==='taken') return null;
+                const items=(t.items||[]).map(i=>`${i.name} x${i.qty}`).join(', ')||`Trx #${(t.id||'').slice(-6)}`;
+                const time=t.createdAt?new Date(t.createdAt).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'--:--';
+                return {id:t.id||'T-'+Date.now(),time,items,st:ex?.st||'pending',et:10,urgent:ex?.urgent||false};
+            }).filter(Boolean);
+            initElapsed();
+        }
+
+        function pollNewOrders(){
+            const takenIds=getKDSState().filter(k=>k.st==='taken').map(k=>k.id);
+            const trxs=LunomiDB.getTransactions();
+            const today=new Date().toISOString().slice(0,10);
+            let hasNew=false;
+            trxs.filter(t=>t.createdAt&&t.createdAt.slice(0,10)===today).forEach(t=>{
+                if(takenIds.includes(t.id)||orders.find(o=>o.id===t.id)) return;
+                const items=(t.items||[]).map(i=>`${i.name} x${i.qty}`).join(', ')||`Trx #${(t.id||'').slice(-6)}`;
+                const time=t.createdAt?new Date(t.createdAt).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'--:--';
+                orders.push({id:t.id,time,items,st:'pending',et:10,urgent:false});
+                elapsed[t.id]=0;
+                showToast('Order baru masuk','info');
+                hasNew=true;
+            });
+            if(hasNew){saveKDSState();render();}
+        }
         function tick(){
             orders.forEach(o=>{if(o.st==='cooking'||o.st==='pending')elapsed[o.id]=(elapsed[o.id]||0)+1;});
             render();
@@ -235,8 +261,8 @@
                 <div style="display:flex;gap:0.4rem">${action}${urgentToggle}</div>
             </div>`;
         }
-        function startCooking(id){const o=orders.find(x=>x.id===id);if(o){o.st='cooking';showToast(`${id} mulai dimasak`,'info');render();}}
-        function markReady(id){const o=orders.find(x=>x.id===id);if(o){o.st='ready';showToast(`${id} siap diambil!`,'success');render();}}
+        function startCooking(id){const o=orders.find(x=>x.id===id);if(o){o.st='cooking';showToast(`Order mulai dimasak`,'info');saveKDSState();render();}}
+        function markReady(id){const o=orders.find(x=>x.id===id);if(o){o.st='ready';showToast(`Order siap diambil!`,'success');saveKDSState();render();}}
         function requestPickup(id){
             const o=orders.find(x=>x.id===id);if(!o)return;
             pickupTargetId=id;
@@ -247,13 +273,15 @@
         function closePickup(){pickupTargetId=null;document.getElementById('pickupModal').style.display='none';}
         function confirmPickup(){
             if(!pickupTargetId)return;
+            const o=orders.find(x=>x.id===pickupTargetId);
+            if(o){o.st='taken';saveKDSState();}
             orders=orders.filter(x=>x.id!==pickupTargetId);
-            showToast(`${pickupTargetId} telah diambil`,'success');
+            showToast(`Order telah diambil`,'success');
             closePickup();render();
         }
         function toggleUrgent(id){
             const o=orders.find(x=>x.id===id);
-            if(o){o.urgent=!o.urgent;showToast(o.urgent?`${id} ditandai URGENT`:`${id} urgent dihapus`,o.urgent?'warning':'info');render();}
+            if(o){o.urgent=!o.urgent;showToast(o.urgent?`URGENT ditandai`:`Urgent dihapus`,o.urgent?'warning':'info');saveKDSState();render();}
         }
         function updateTime(){
             const n=new Date();
@@ -267,75 +295,14 @@
             catch(e){window.location.href='index.html';return false;}
         }
 
-        function listenToOrders() {
-            if(!window.db) return;
-            const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-            let query = window.db.collection("transactions").where("status", "==", "pending");
-            if (outlet && outlet.id) {
-                query = window.db.collection("transactions").where("outlet_id", "==", outlet.id).where("status", "==", "pending");
-            }
-            
-            query.onSnapshot((snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    const data = change.doc.data();
-                    if (change.type === "added") {
-                        // Cek apakah sudah ada di orders lokal (biar gak duplikat)
-                        if(!orders.find(o => o.id === data.id)) {
-                            const itemsStr = data.items.map(i => `${i.name} x${i.qty}`).join(', ');
-                            orders.push({
-                                id: data.id,
-                                time: data.time,
-                                items: itemsStr,
-                                st: 'pending',
-                                et: 10, // Est 10 menit
-                                urgent: false,
-                                docId: change.doc.id
-                            });
-                            elapsed[data.id] = 0;
-                            // Play sound notification
-                            try { new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU').play().catch(e=>{}); } catch(e){}
-                            showToast(`Order Baru: ${data.id}`, 'info');
-                        }
-                    }
-                });
-                render();
-            }, (error) => {
-                console.error("Firebase listen error:", error);
-            });
-        }
-
-        async function updateStatusInCloud(docId, newStatus) {
-            if(!window.db || !docId) return;
-            try {
-                await window.db.collection("transactions").doc(docId).update({ status: newStatus });
-            } catch(e) { console.error("Update error:", e); }
-        }
-
-        // Modifikasi fungsi update lokal untuk sinkronisasi cloud
-        const _startCooking = startCooking;
-        startCooking = function(id) {
-            const o=orders.find(x=>x.id===id);
-            if(o) { updateStatusInCloud(o.docId, 'cooking'); }
-            _startCooking(id);
-        };
-
-        const _markReady = markReady;
-        markReady = function(id) {
-            const o=orders.find(x=>x.id===id);
-            if(o) { updateStatusInCloud(o.docId, 'ready'); }
-            _markReady(id);
-        };
-
         document.addEventListener('DOMContentLoaded',()=>{
             if(!checkSession())return;
-            // Kosongkan order dummy, ganti dengan data real-time
-            orders = []; 
-            initElapsed();
+            loadKDSOrders();
             render();
             updateTime();
-            listenToOrders();
             setInterval(updateTime,1000);
             intervalId=setInterval(tick,1000);
+            setInterval(pollNewOrders,15000);
         });
         window.addEventListener('beforeunload',()=>{if(intervalId)clearInterval(intervalId);});
     </script>

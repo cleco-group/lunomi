@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunomi — Pembelian Barang</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../../assets/js/lunomi-core.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{font-family:'Plus Jakarta Sans',sans-serif;}
@@ -228,7 +228,7 @@
         if(!date){err.textContent='Tanggal harus diisi.';err.classList.remove('hidden');return;}
         if(!poLines.length||poLines.every(l=>l.qty<=0)){err.textContent='Tambahkan minimal 1 item.';err.classList.remove('hidden');return;}
 
-        const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
+        const outlet=SessionManager.get('outlet');
         const total=poLines.reduce((s,l)=>s+(l.qty*l.price),0);
         const items=poLines.filter(l=>l.qty>0).map(l=>{
             const item=RAW_ITEMS.find(r=>r.id===l.itemId);
@@ -253,6 +253,13 @@
         purchases.unshift(po);
         savePurchases(purchases);
 
+        // Auto-log as expense (bahan baku)
+        if(total>0){
+            const exps=JSON.parse(localStorage.getItem('lunomi_expenses')||'[]');
+            exps.unshift({id:'EXP-PO-'+Date.now(),date,cat:'Bahan Baku',desc:`PO: ${supplier} (${items.length} item)`,amount:total,note:note,outlet_id:outlet?outlet.id:''});
+            localStorage.setItem('lunomi_expenses',JSON.stringify(exps));
+        }
+        AuditLog.add('purchase_order', `PO ke ${supplier}: ${items.length} item, total Rp ${total.toLocaleString('id-ID')}`);
         closePOModal();
         renderHistory();
         updateStats();
@@ -313,12 +320,10 @@
     }
 
     document.addEventListener('DOMContentLoaded',()=>{
-        try{
-            const s=localStorage.getItem('lunomi_session');
-            if(!s){window.location.href='index.html';return;}
-            const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-            if(o) document.getElementById('outletLabel').textContent=o.name;
-        }catch(e){window.location.href='index.html';}
+        const s=SessionManager.get('session');
+        if(!s){window.location.href='index.html';return;}
+        const o=SessionManager.get('outlet');
+        if(o) document.getElementById('outletLabel').textContent=o.name;
         renderHistory();
         updateStats();
     });

@@ -3,350 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi Dashboard</title>
+    <title>Lunomi — Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Sidebar styles inline below -->
     <style>
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        body {
-            background: #061820;
-            background-image:
-                radial-gradient(ellipse 70% 50% at 10% 0%,  rgba(13,59,74,0.6) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 45% at 90% 100%, rgba(201,168,76,0.08) 0%, transparent 60%);
-            min-height: 100vh;
-            color: white;
-            overflow-x: hidden;
-        }
-        .metric-card {
-            background: rgba(13,59,74,0.4);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.08);
-            transition: transform 0.2s;
-        }
-        .metric-card:hover { transform: translateY(-2px); }
-        .glass-nav {
-            background: rgba(2,6,23,0.7);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        
-        /* Sidebar Styles */
-        #sidebar {
-            width: 260px;
-            background: rgba(13,59,74,0.5);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            left: 0;
-            top: 0;
-            z-index: 100;
-            transition: transform 0.3s ease;
-        }
-        .sidebar-header {
-            padding: 1.5rem;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #C9A84C;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem 0;
-        }
-        .menu-item, .sub-menu-item {
-            display: block;
-            padding: 0.75rem 1.5rem;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .menu-item:hover, .sub-menu-item:hover {
-            background: rgba(255,255,255,0.05);
-            color: white;
-        }
-        .menu-item.active {
-            background: rgba(201,168,76,0.15);
-            color: #C9A84C;
-            border-left: 3px solid #C9A84C;
-        }
-        .menu-group .menu-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .arrow {
-            font-size: 0.7rem;
-            transition: transform 0.3s;
-        }
-        .sub-menu {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            background: rgba(0,0,0,0.2);
-        }
-        .sub-menu-item {
-            padding-left: 2.5rem;
-            font-size: 0.9rem;
-        }
-        .sidebar-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid rgba(255,255,255,0.08);
-        }
-        .logout-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: rgba(239,68,68,0.2);
-            color: #fca5a5;
-            border: 1px solid rgba(239,68,68,0.3);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .logout-btn:hover {
-            background: rgba(239,68,68,0.3);
-        }
-        .main-container {
-            margin-left: 260px;
-        }
-        
-        @media (max-width: 768px) {
-            #sidebar {
-                transform: translateX(-100%);
-            }
-            #sidebar.mobile-open {
-                transform: translateX(0);
-            }
-            .main-container {
-                margin-left: 0;
-            }
-        }
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.2) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(16,185,129,.12) 0%,transparent 60%);min-height:100vh;color:white;overflow-x:hidden;}
+        #sidebar{width:240px;background:rgba(2,6,23,.85);backdrop-filter:blur(20px);border-right:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;z-index:100;transition:transform .3s ease;}
+        .sidebar-logo{padding:1.25rem 1.5rem;font-size:1.2rem;font-weight:800;color:#a5b4fc;border-bottom:1px solid rgba(255,255,255,.07);letter-spacing:.05em;}
+        .sidebar-content{flex:1;overflow-y:auto;padding:.5rem 0;}
+        .menu-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.25rem;color:rgba(255,255,255,.55);text-decoration:none;transition:all .2s;cursor:pointer;font-size:.82rem;font-weight:600;border-radius:0;border-left:2px solid transparent;}
+        .menu-item:hover{background:rgba(255,255,255,.05);color:white;}
+        .menu-item.active{background:rgba(99,102,241,.15);color:#a5b4fc;border-left-color:#6366f1;}
+        .menu-section{padding:.5rem 1.25rem .35rem;font-size:.65rem;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;margin-top:.5rem;}
+        .sub-item{padding:.5rem 1.25rem .5rem 2.5rem;display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:rgba(255,255,255,.45);text-decoration:none;transition:all .2s;font-weight:500;}
+        .sub-item:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.03);}
+        .sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.07);}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08);}
+        .metric-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:1.25rem;padding:1.25rem;transition:transform .2s;}
+        .metric-card:hover{transform:translateY(-2px);}
+        .quick-action{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:1rem;padding:1rem;text-align:center;text-decoration:none;color:white;transition:all .2s;cursor:pointer;display:block;}
+        .quick-action:hover{background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.4);}
+        .main-wrap{margin-left:240px;}
+        @media(max-width:768px){#sidebar{transform:translateX(-100%);}#sidebar.open{transform:translateX(0);}.main-wrap{margin-left:0;}}
     </style>
 </head>
 <body class="flex">
 
-    <!-- Sidebar Component -->
-    <aside id="sidebar">
-        <div class="sidebar-header">
-            LUNOMI
+<!-- Sidebar -->
+<aside id="sidebar">
+    <div class="sidebar-logo">⚡ LUNOMI</div>
+    <div class="sidebar-content">
+        <a href="dashboard.html" class="menu-item active">📊 Dashboard</a>
+
+        <div class="menu-section">Operasional</div>
+        <a href="pos.html" class="sub-item">🛒 POS Kasir</a>
+        <a href="tables.html" class="sub-item">🪑 Meja</a>
+        <a href="kitchen.html" class="sub-item">👨‍🍳 Kitchen Display</a>
+        <a href="invoice.html" class="sub-item">🧾 Invoice</a>
+        <a href="shift.html" class="sub-item">🔐 Tutup Shift</a>
+        <a href="booking.html" class="sub-item">📅 Booking</a>
+
+        <div class="menu-section">Produk & Inventori</div>
+        <a href="product.html" class="sub-item">🍽️ Master Menu</a>
+        <a href="inventory.html" class="sub-item">📦 Stok Bahan</a>
+        <a href="purchase.html" class="sub-item">🛒 Pembelian</a>
+        <a href="supplier.html" class="sub-item">🏭 Supplier</a>
+        <a href="stockopname.html" class="sub-item">📋 Stock Opname</a>
+        <a href="recipe.html" class="sub-item">📖 Resep</a>
+
+        <div class="menu-section">Keuangan & Analitik</div>
+        <a href="keuangan.html" class="sub-item">💰 Laporan Keuangan</a>
+        <a href="analytics.html" class="sub-item">📈 Analytics</a>
+        <a href="product-report.html" class="sub-item">📦 Laporan Produk</a>
+        <a href="expense.html" class="sub-item">💸 Pengeluaran</a>
+        <a href="financial-statements.html" class="sub-item">📑 Lap. Formal</a>
+        <a href="tax-report.html" class="sub-item">🏦 Pajak PB1</a>
+
+        <div class="menu-section">SDM & Pelanggan</div>
+        <a href="customer.html" class="sub-item">👥 Customer</a>
+        <a href="loyalty.html" class="sub-item">⭐ Loyalty & CRM</a>
+        <a href="hr.html" class="sub-item">👨‍💼 Karyawan</a>
+        <a href="attendance.html" class="sub-item">🕐 Absensi</a>
+
+        <div class="menu-section">Sistem</div>
+        <a href="audit.html" class="sub-item">🔍 Audit Trail</a>
+        <a href="settings.html" class="sub-item">⚙️ Pengaturan</a>
+    </div>
+    <div class="sidebar-footer">
+        <div class="text-xs mb-2" style="color:rgba(255,255,255,.35)" id="sidebarUser">—</div>
+        <button onclick="doLogout()" class="w-full py-2 rounded-xl text-xs font-bold" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#fca5a5;">Logout</button>
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="main-wrap flex-1 min-h-screen">
+    <header class="glass-nav sticky top-0 z-50 px-5 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="document.getElementById('sidebar').classList.toggle('open')" class="md:hidden text-white opacity-60">☰</button>
+            <div>
+                <div class="font-extrabold text-white text-sm">Dashboard</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)" id="headerDate">—</div>
+            </div>
         </div>
-        
-        <div class="sidebar-content">
-            <!-- Dashboard -->
-            <a href="dashboard.html" class="menu-item active">
-                Dashboard
-            </a>
+        <div class="flex items-center gap-3">
+            <a href="pos.html" class="text-xs px-4 py-2 rounded-xl font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">🛒 Buka POS</a>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm" style="background:rgba(99,102,241,.3)" id="avatarEl">?</div>
+        </div>
+    </header>
 
-            <!-- Operasional Group -->
-            <div class="menu-group">
-                <div class="menu-item" onclick="toggleSubMenu(this)">
-                    Operasional
-                    <span class="arrow">▶</span>
-                </div>
-                <div class="sub-menu">
-                    <a href="pos.html" class="sub-menu-item">POS Kasir</a>
-                    <a href="tables.html" class="sub-menu-item">Manajemen Meja</a>
-                    <a href="kitchen.html" class="sub-menu-item">Kitchen Display</a>
-                    <a href="invoice.html" class="sub-menu-item">Invoice</a>
-                    <a href="shift.html" class="sub-menu-item">Rekonsiliasi Shift</a>
-                </div>
+    <div class="px-5 py-5">
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="metric-card" style="border-left:3px solid #6366f1">
+                <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Penjualan Hari Ini</div>
+                <div class="text-xl font-extrabold text-white" id="kpiToday">Rp 0</div>
+                <div class="text-xs mt-1" id="kpiTodayChg" style="color:rgba(255,255,255,.35)">—</div>
             </div>
-
-            <!-- Inventory Group -->
-            <div class="menu-group">
-                <div class="menu-item" onclick="toggleSubMenu(this)">
-                    Inventory & Produk
-                    <span class="arrow">▶</span>
-                </div>
-                <div class="sub-menu">
-                    <a href="inventory.html" class="sub-menu-item">Stok Barang</a>
-                    <a href="product.html" class="sub-menu-item">Master Menu</a>
-                    <a href="recipe.html" class="sub-menu-item">Master Resep</a>
-                    <a href="purchase.html" class="sub-menu-item">Pembelian</a>
-                    <a href="supplier.html" class="sub-menu-item">Supplier</a>
-                    <a href="stockopname.html" class="sub-menu-item">Stock Opname</a>
-                </div>
+            <div class="metric-card" style="border-left:3px solid #10b981">
+                <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Transaksi Hari Ini</div>
+                <div class="text-xl font-extrabold text-green-400" id="kpiTrx">0</div>
+                <div class="text-xs mt-1" style="color:rgba(255,255,255,.35)" id="kpiAvg">Avg: Rp 0</div>
             </div>
-
-            <!-- Keuangan Group -->
-            <div class="menu-group">
-                <div class="menu-item" onclick="toggleSubMenu(this)">
-                    Keuangan & Analisa
-                    <span class="arrow">▶</span>
-                </div>
-                <div class="sub-menu">
-                    <a href="keuangan.html" class="sub-menu-item">Laporan Keuangan</a>
-                    <a href="product-report.html" class="sub-menu-item">Laporan Produk</a>
-                    <a href="tax-report.html" class="sub-menu-item">Pajak PB1</a>
-                    <a href="financial-statements.html" class="sub-menu-item">Laporan Formal</a>
-                    <a href="expense.html" class="sub-menu-item">Pengeluaran OPEX</a>
-                    <a href="analytics.html" class="sub-menu-item">Analytics</a>
-                </div>
+            <div class="metric-card" style="border-left:3px solid #f59e0b">
+                <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Pelanggan Aktif</div>
+                <div class="text-xl font-extrabold text-amber-400" id="kpiCustomers">0</div>
+                <div class="text-xs mt-1" style="color:rgba(255,255,255,.35)" id="kpiLoyaltyPts">0 poin beredar</div>
             </div>
-
-            <!-- SDM Group -->
-            <div class="menu-group">
-                <div class="menu-item" onclick="toggleSubMenu(this)">
-                    SDM & Pelanggan
-                    <span class="arrow">▶</span>
-                </div>
-                <div class="sub-menu">
-                    <a href="hr.html" class="sub-menu-item">Karyawan</a>
-                    <a href="attendance.html" class="sub-menu-item">Absensi Staf</a>
-                    <a href="staff-schedule.html" class="sub-menu-item">Jadwal Staf</a>
-                    <a href="customer.html" class="sub-menu-item">Customer</a>
-                    <a href="booking.html" class="sub-menu-item">Booking Online</a>
-                    <a href="loyalty.html" class="sub-menu-item">Loyalty & CRM</a>
-                </div>
+            <div class="metric-card" style="border-left:3px solid #ef4444">
+                <div class="text-xs mb-1" style="color:rgba(255,255,255,.4)">Pengeluaran Bulan Ini</div>
+                <div class="text-xl font-extrabold text-red-400" id="kpiExpense">Rp 0</div>
+                <div class="text-xs mt-1" style="color:rgba(255,255,255,.35)" id="kpiProfit">Net: Rp 0</div>
             </div>
-
-            <!-- Sistem -->
-            <a href="settings.html" class="menu-item">
-                Pengaturan
-            </a>
         </div>
 
-        <div class="sidebar-footer">
-            <button class="logout-btn" onclick="window.location.href='login.html'">Logout</button>
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-container flex-1 min-h-screen">
-        <!-- Header -->
-        <header class="glass-nav sticky top-0 z-50 px-8 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleMobileSidebar()" class="md:hidden text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
-                <h1 class="text-xl font-bold">Dashboard Utama</h1>
+        <!-- Charts Row -->
+        <div class="grid lg:grid-cols-3 gap-5 mb-6">
+            <!-- Revenue 7 days -->
+            <div class="glass-card rounded-2xl p-5 lg:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="font-bold text-white text-sm">Tren Penjualan 7 Hari</div>
+                    <div class="text-xs" style="color:rgba(255,255,255,.35)" id="chartTotal">—</div>
+                </div>
+                <div style="height:180px"><canvas id="revenueChart"></canvas></div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="text-right hidden sm:block">
-                    <p class="text-sm font-bold">Admin Lunomi</p>
-                    <p class="text-xs text-white/50">Owner Access</p>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold">A</div>
-            </div>
-        </header>
-
-        <!-- Dashboard Content -->
-        <div class="p-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="metric-card p-6 rounded-2xl">
-                    <p class="text-white/50 text-sm mb-1">Total Penjualan</p>
-                    <h3 class="text-2xl font-bold">Rp 12.450.000</h3>
-                    <p class="text-green-400 text-xs mt-2">↑ 12% dari kemarin</p>
-                </div>
-                <div class="metric-card p-6 rounded-2xl">
-                    <p class="text-white/50 text-sm mb-1">Total Transaksi</p>
-                    <h3 class="text-2xl font-bold">142</h3>
-                    <p class="text-green-400 text-xs mt-2">↑ 5% dari kemarin</p>
-                </div>
-                <div class="metric-card p-6 rounded-2xl">
-                    <p class="text-white/50 text-sm mb-1">Rata-rata Order</p>
-                    <h3 class="text-2xl font-bold">Rp 87.676</h3>
-                    <p class="text-red-400 text-xs mt-2">↓ 2% dari kemarin</p>
-                </div>
-                <div class="metric-card p-6 rounded-2xl">
-                    <p class="text-white/50 text-sm mb-1">Customer Baru</p>
-                    <h3 class="text-2xl font-bold">28</h3>
-                    <p class="text-green-400 text-xs mt-2">↑ 18% dari kemarin</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="metric-card p-6 rounded-2xl min-h-[300px]">
-                    <h3 class="font-bold mb-4">Grafik Penjualan</h3>
-                    <canvas id="salesChart" style="max-height: 200px;"></canvas>
-                </div>
-                <div class="metric-card p-6 rounded-2xl min-h-[300px]">
-                    <h3 class="font-bold mb-4">Produk Terlaris</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span>Nasi Goreng Spesial</span>
-                            <span class="font-bold">42 porsi</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span>Es Teh Manis</span>
-                            <span class="font-bold">38 gelas</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span>Ayam Bakar Madu</span>
-                            <span class="font-bold">25 porsi</span>
-                        </div>
-                    </div>
+            <!-- Top Products -->
+            <div class="glass-card rounded-2xl p-5">
+                <div class="font-bold text-white text-sm mb-4">🏆 Menu Terlaris Hari Ini</div>
+                <div id="topProducts" class="space-y-3">
+                    <div class="text-sm text-center py-6" style="color:rgba(255,255,255,.3)">Belum ada transaksi hari ini</div>
                 </div>
             </div>
         </div>
-    </main>
 
-    <script>
-        function toggleSubMenu(el) {
-            const subMenu = el.nextElementSibling;
-            const arrow = el.querySelector('.arrow');
-            if (subMenu.style.maxHeight) {
-                subMenu.style.maxHeight = null;
-                arrow.style.transform = 'rotate(0deg)';
-            } else {
-                subMenu.style.maxHeight = subMenu.scrollHeight + 'px';
-                arrow.style.transform = 'rotate(90deg)';
-            }
-        }
-        function toggleMobileSidebar() {
-            document.getElementById('sidebar').classList.toggle('mobile-open');
-        }
-        
-        // Initialize Sales Chart
-        document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('salesChart');
-            if (ctx) {
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-                        datasets: [{
-                            label: 'Penjualan (Juta Rp)',
-                            data: [8.5, 10.2, 9.8, 12.4, 11.5, 15.2, 13.8],
-                            borderColor: '#C9A84C',
-                            backgroundColor: 'rgba(201, 168, 76, 0.1)',
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: '#C9A84C',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { color: 'rgba(255,255,255,0.6)' },
-                                grid: { color: 'rgba(255,255,255,0.1)' }
-                            },
-                            x: {
-                                ticks: { color: 'rgba(255,255,255,0.6)' },
-                                grid: { color: 'rgba(255,255,255,0.1)' }
-                            }
-                        }
-                    }
-                });
-            }
-        });
-    </script>
+        <!-- Quick Actions + Recent -->
+        <div class="grid lg:grid-cols-3 gap-5 mb-6">
+            <!-- Quick Actions -->
+            <div class="glass-card rounded-2xl p-5">
+                <div class="font-bold text-white text-sm mb-4">⚡ Akses Cepat</div>
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="pos.html" class="quick-action"><div class="text-2xl mb-1">🛒</div><div class="text-xs font-bold">POS Kasir</div></a>
+                    <a href="customer.html" class="quick-action"><div class="text-2xl mb-1">👥</div><div class="text-xs font-bold">Customer</div></a>
+                    <a href="expense.html" class="quick-action"><div class="text-2xl mb-1">💸</div><div class="text-xs font-bold">Pengeluaran</div></a>
+                    <a href="analytics.html" class="quick-action"><div class="text-2xl mb-1">📊</div><div class="text-xs font-bold">Analytics</div></a>
+                    <a href="shift.html" class="quick-action"><div class="text-2xl mb-1">🔐</div><div class="text-xs font-bold">Tutup Shift</div></a>
+                    <a href="audit.html" class="quick-action"><div class="text-2xl mb-1">🔍</div><div class="text-xs font-bold">Audit Trail</div></a>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="glass-card rounded-2xl p-5 lg:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="font-bold text-white text-sm">🕐 Transaksi Terbaru</div>
+                    <a href="keuangan.html" class="text-xs" style="color:rgba(99,102,241,.8)">Lihat semua →</a>
+                </div>
+                <div id="recentTrx">
+                    <div class="text-sm text-center py-6" style="color:rgba(255,255,255,.3)">Belum ada transaksi</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="grid sm:grid-cols-3 gap-4">
+            <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:rgba(99,102,241,.15)">👥</div>
+                <div>
+                    <div class="text-xs" style="color:rgba(255,255,255,.4)">Karyawan Aktif</div>
+                    <div class="font-extrabold text-white" id="sysStaff">0</div>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:rgba(16,185,129,.15)">🍽️</div>
+                <div>
+                    <div class="text-xs" style="color:rgba(255,255,255,.4)">Menu Tersedia</div>
+                    <div class="font-extrabold text-white" id="sysMenu">0</div>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:rgba(239,68,68,.15)">📋</div>
+                <div>
+                    <div class="text-xs" style="color:rgba(255,255,255,.4)">Log Aktivitas</div>
+                    <div class="font-extrabold text-white" id="sysLogs">0</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div><!-- /main-wrap -->
+
+<script>
+let chartInst = null;
+
+function rp(n){ return 'Rp '+Number(n||0).toLocaleString('id-ID'); }
+
+function doLogout(){
+    if(confirm('Yakin ingin logout?')){
+        SessionManager.set('session',null);
+        window.location.href='index.html';
+    }
+}
+
+function render(){
+    const now = new Date();
+    const today = now.toISOString().slice(0,10);
+    const yesterday = new Date(now - 86400000).toISOString().slice(0,10);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    document.getElementById('headerDate').textContent = now.toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+
+    const allTrxs = LunomiDB.getTransactions();
+    const todayTrxs = allTrxs.filter(t=>t.createdAt&&t.createdAt.slice(0,10)===today);
+    const yTrxs    = allTrxs.filter(t=>t.createdAt&&t.createdAt.slice(0,10)===yesterday);
+
+    const todayRev = todayTrxs.reduce((s,t)=>s+(t.total||0),0);
+    const yRev     = yTrxs.reduce((s,t)=>s+(t.total||0),0);
+    const revChg   = yRev ? Math.round(((todayRev-yRev)/yRev)*100) : null;
+    const avg      = todayTrxs.length ? Math.round(todayRev/todayTrxs.length) : 0;
+
+    document.getElementById('kpiToday').textContent = rp(todayRev);
+    document.getElementById('kpiTodayChg').textContent = revChg !== null ? (revChg>=0?'▲ ':'▼ ')+Math.abs(revChg)+'% vs kemarin' : 'Hari pertama';
+    document.getElementById('kpiTodayChg').style.color = revChg>=0 ? '#4ade80' : '#f87171';
+    document.getElementById('kpiTrx').textContent = todayTrxs.length;
+    document.getElementById('kpiAvg').textContent = 'Avg: '+rp(avg);
+
+    const customers = LunomiDB.getCustomers();
+    const ledger = LoyaltyEngine.getLedger();
+    const totalPts = Object.values(ledger).reduce((s,l)=>s+(l.balance||0),0);
+    document.getElementById('kpiCustomers').textContent = customers.length;
+    document.getElementById('kpiLoyaltyPts').textContent = totalPts.toLocaleString('id-ID')+' poin beredar';
+
+    const expenses = JSON.parse(localStorage.getItem('lunomi_expenses')||'[]');
+    const monthExp = expenses.filter(e=>new Date(e.date)>=monthStart).reduce((s,e)=>s+(e.amount||0),0);
+    const monthRev = allTrxs.filter(t=>new Date(t.createdAt)>=monthStart).reduce((s,t)=>s+(t.total||0),0);
+    const netProfit = monthRev - monthExp;
+    document.getElementById('kpiExpense').textContent = rp(monthExp);
+    document.getElementById('kpiProfit').textContent = 'Net: '+(netProfit<0?'-':'')+rp(Math.abs(netProfit));
+    document.getElementById('kpiProfit').style.color = netProfit>=0 ? '#4ade80' : '#f87171';
+
+    renderChart(allTrxs);
+    renderTopProducts(todayTrxs);
+    renderRecent(allTrxs);
+    renderSystemStatus();
+}
+
+function renderChart(allTrxs){
+    const labels=[], data=[];
+    let total7=0;
+    for(let i=6;i>=0;i--){
+        const d=new Date();
+        d.setDate(d.getDate()-i);
+        const key=d.toISOString().slice(0,10);
+        labels.push(d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
+        const dayRev=allTrxs.filter(t=>t.createdAt&&t.createdAt.slice(0,10)===key).reduce((s,t)=>s+(t.total||0),0);
+        data.push(dayRev);
+        total7+=dayRev;
+    }
+    document.getElementById('chartTotal').textContent = '7 hari: '+rp(total7);
+    if(chartInst) chartInst.destroy();
+    const ctx=document.getElementById('revenueChart').getContext('2d');
+    chartInst=new Chart(ctx,{
+        type:'line',
+        data:{labels,datasets:[{label:'Penjualan',data,borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.1)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6366f1',fill:true,tension:.3}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+            x:{ticks:{color:'rgba(255,255,255,.4)',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}},
+            y:{ticks:{color:'rgba(255,255,255,.4)',font:{size:10},callback:v=>v>=1000000?'Rp '+(v/1000000).toFixed(1)+'Jt':v>=1000?'Rp '+(v/1000).toFixed(0)+'K':'Rp '+v},grid:{color:'rgba(255,255,255,.05)'}}
+        }}
+    });
+}
+
+function renderTopProducts(todayTrxs){
+    const map={};
+    todayTrxs.forEach(t=>(t.items||[]).forEach(it=>{
+        if(!map[it.name])map[it.name]={qty:0};
+        map[it.name].qty+=(it.qty||1);
+    }));
+    const top=Object.entries(map).sort((a,b)=>b[1].qty-a[1].qty).slice(0,5);
+    const el=document.getElementById('topProducts');
+    if(!top.length){ el.innerHTML='<div class="text-sm text-center py-6" style="color:rgba(255,255,255,.3)">Belum ada transaksi hari ini</div>'; return; }
+    const maxQ=top[0][1].qty;
+    el.innerHTML=top.map(([name,d],i)=>`
+        <div class="flex items-center gap-2">
+            <span class="text-xs w-4 text-center font-bold" style="color:rgba(255,255,255,.3)">${i+1}</span>
+            <div class="flex-1">
+                <div class="flex justify-between text-xs mb-1"><span class="text-white font-semibold">${name}</span><span class="text-indigo-400">${d.qty}x</span></div>
+                <div class="h-1 rounded-full" style="background:rgba(255,255,255,.08)"><div class="h-1 rounded-full" style="width:${Math.round(d.qty/maxQ*100)}%;background:linear-gradient(90deg,#6366f1,#4f46e5)"></div></div>
+            </div>
+        </div>`).join('');
+}
+
+function renderRecent(allTrxs){
+    const el=document.getElementById('recentTrx');
+    const recent=[...allTrxs].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6);
+    if(!recent.length){ el.innerHTML='<div class="text-sm text-center py-6" style="color:rgba(255,255,255,.3)">Belum ada transaksi</div>'; return; }
+    el.innerHTML=recent.map(t=>{
+        const cust=t.customerId?LunomiDB.findCustomer(t.customerId):null;
+        const dt=new Date(t.createdAt).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+        return `<div class="flex items-center justify-between py-2" style="border-bottom:1px solid rgba(255,255,255,.05)">
+            <div>
+                <div class="text-sm font-semibold text-white">${cust?cust.name:'Umum'}</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.35)">${dt} · ${t.payMethod||t.method||'—'}</div>
+            </div>
+            <div class="font-bold text-white text-sm">${rp(t.total)}</div>
+        </div>`;
+    }).join('');
+}
+
+function renderSystemStatus(){
+    const staff=JSON.parse(localStorage.getItem('lunomi_staff')||'[]');
+    const products=JSON.parse(localStorage.getItem('lunomi_products')||'[]');
+    const logs=AuditLog.get();
+    document.getElementById('sysStaff').textContent=staff.filter(s=>s.status==='active').length;
+    document.getElementById('sysMenu').textContent=products.filter(p=>p.avail!==false).length;
+    document.getElementById('sysLogs').textContent=logs.length;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    const s=SessionManager.get('session');
+    if(!s){window.location.href='index.html';return;}
+    const outlet=SessionManager.get('outlet');
+    const user=s.name||s.email||'Admin';
+    document.getElementById('sidebarUser').textContent=(outlet?outlet.name+' · ':'')+user;
+    document.getElementById('avatarEl').textContent=user[0].toUpperCase();
+    render();
+    // Auto-refresh KPIs every 60s
+    setInterval(render, 60000);
+});
+</script>
 </body>
 </html>

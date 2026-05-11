@@ -42,11 +42,12 @@ export default function OrderCard({ order, companyId }: OrderCardProps) {
   };
 
   const isUrgent = elapsed > 900; // 15 minutes
-  const statusColor = {
+  const statusColors: Record<string, string> = {
     pending: 'rgba(59, 130, 246, 0.2)',
     preparing: 'rgba(251, 191, 36, 0.2)',
     ready: 'rgba(34, 197, 94, 0.2)'
-  }[order.status] || 'rgba(255,255,255,0.1)';
+  };
+  const statusColor = statusColors[order.status] ?? 'rgba(255,255,255,0.1)';
 
   return (
     <div
