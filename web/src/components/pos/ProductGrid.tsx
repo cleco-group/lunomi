@@ -27,7 +27,7 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
   const loadProducts = async () => {
     try {
       // Try Supabase first
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('products')
         .select('*')
         .eq('company_id', '00000000-0000-0000-0000-000000000001')

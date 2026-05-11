@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
-import { supabase } from '../lib/supabase';
 import Sidebar from '../components/Sidebar';
 import toast from 'react-hot-toast';
 
@@ -46,7 +45,7 @@ const RAW_ITEMS: RawItem[] = [
 ];
 
 export default function Purchase() {
-  const { user } = useSupabaseAuth();
+  const { user: _user, signOut } = useSupabaseAuth();
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -135,7 +134,7 @@ export default function Purchase() {
         newLines[index].unit = item.unit;
       }
     } else {
-      newLines[index][field] = value;
+      (newLines[index] as any)[field] = value;
     }
     
     // Calculate subtotal
@@ -269,7 +268,7 @@ export default function Purchase() {
 
   return (
     <div className="flex min-h-screen" style={{ background: '#061820' }}>
-      <Sidebar />
+      <Sidebar onLogout={signOut} />
       
       <main className="flex-1">
         {/* Header */}
