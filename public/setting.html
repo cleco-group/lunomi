@@ -3,412 +3,619 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi Settings - Pengaturan Sistem</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/brand.css">
+    <title>Pengaturan Sistem - Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../assets/js/lunomi-core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .settings-tab { transition: all 0.3s; }
-        .setting-item { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; }
-        .setting-item:last-child { border-bottom: none; }
-        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 28px; }
-        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
-        input:checked + .slider { background-color: #2563eb; }
-        input:checked + .slider:before { transform: translateX(22px); }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: white; min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: white; }
+        .glass-input:focus { outline: none; border-color: rgba(99,102,241,0.5); background: rgba(255,255,255,0.08); }
+        .glass-input option { background: #1e293b; }
+        .tab-btn { display:flex; align-items:center; gap:8px; width:100%; text-align:left; padding:.6rem 1rem; border-radius:.75rem; font-size:.85rem; font-weight:600; color:rgba(255,255,255,.5); transition:all .2s; cursor:pointer; }
+        .tab-btn:hover { background:rgba(255,255,255,.07); color:white; }
+        .tab-btn.active { background:rgba(99,102,241,.2); color:white; border:1px solid rgba(99,102,241,.3); }
+        .setting-row { display:flex; justify-content:space-between; align-items:center; padding:1rem 0; border-bottom:1px solid rgba(255,255,255,.06); }
+        .setting-row:last-child { border-bottom:none; }
+        .toggle { position:relative; display:inline-flex; width:44px; height:24px; cursor:pointer; }
+        .toggle input { opacity:0; width:0; height:0; }
+        .t-slider { position:absolute; inset:0; background:rgba(255,255,255,.15); border-radius:999px; transition:.3s; }
+        .t-slider::before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:white; border-radius:50%; transition:.3s; }
+        input:checked + .t-slider { background:#6366f1; }
+        input:checked + .t-slider::before { transform:translateX(20px); }
+        .role-badge-owner { background:rgba(249,115,22,.2); color:#fb923c; }
+        .role-badge-admin { background:rgba(99,102,241,.2); color:#a5b4fc; }
+        .role-badge-kasir { background:rgba(34,197,94,.2); color:#4ade80; }
+        .role-badge-dapur { background:rgba(251,191,36,.2); color:#fcd34d; }
+        #tabContent > div { display:none; }
+        #tabContent > div.active { display:block; }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">⚙️ Pengaturan Sistem</h1>
-                    <p class="text-sm text-gray-500">Lunomi - System Configuration</p>
-                </div>
-                <button onclick="logout()" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Logout</button>
+<body class="p-4 sm:p-8">
+<div class="max-w-6xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-2xl font-extrabold">Pengaturan Sistem</h1>
+            <p class="text-sm text-white/50">Konfigurasi global Lunomi POS</p>
+        </div>
+        <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- Sidebar Tab -->
+        <div class="lg:col-span-1">
+            <div class="glass-card rounded-2xl p-3 sticky top-6 space-y-1">
+                <button class="tab-btn active" onclick="switchTab('general',this)">
+                    <span class="material-symbols-outlined text-sm">settings</span> Umum
+                </button>
+                <button class="tab-btn" onclick="switchTab('users',this)">
+                    <span class="material-symbols-outlined text-sm">group</span> User & Role
+                </button>
+                <button class="tab-btn" onclick="switchTab('notification',this)">
+                    <span class="material-symbols-outlined text-sm">notifications</span> Notifikasi
+                </button>
+                <button class="tab-btn" onclick="switchTab('integration',this)">
+                    <span class="material-symbols-outlined text-sm">extension</span> Integrasi
+                </button>
+                <button class="tab-btn" onclick="switchTab('backup',this)">
+                    <span class="material-symbols-outlined text-sm">backup</span> Backup & Data
+                </button>
             </div>
         </div>
-    </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow p-4 sticky top-20">
-                    <nav class="space-y-2">
-                        <button onclick="switchTab('general')" class="tab-btn w-full text-left px-4 py-3 rounded-lg bg-blue-100 text-blue-600 font-semibold text-sm hover:bg-blue-200" id="tab-general">
-                            🏢 Umum
-                        </button>
-                        <button onclick="switchTab('users')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-users">
-                            👥 User & Role
-                        </button>
-                        <button onclick="switchTab('security')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-security">
-                            🔒 Keamanan
-                        </button>
-                        <button onclick="switchTab('notification')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-notification">
-                            🔔 Notifikasi
-                        </button>
-                        <button onclick="switchTab('integration')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-integration">
-                            🔗 Integrasi
-                        </button>
-                        <button onclick="switchTab('backup')" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-700 font-semibold text-sm hover:bg-gray-100" id="tab-backup">
-                            💾 Backup & Data
-                        </button>
-                    </nav>
+
+        <!-- Content -->
+        <div class="lg:col-span-3" id="tabContent">
+
+            <!-- Umum -->
+            <div class="active space-y-6" id="tab-general">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="font-bold mb-5 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-400">business</span> Informasi Bisnis
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-white/40 mb-1">Nama Bisnis</label>
+                            <input type="text" id="bizName" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">Email Bisnis</label>
+                            <input type="email" id="bizEmail" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">No. Telepon</label>
+                            <input type="tel" id="bizPhone" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-white/40 mb-1">Alamat Kantor Pusat</label>
+                            <textarea id="bizAddress" rows="2" class="glass-input w-full px-4 py-2 rounded-xl text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">Mata Uang</label>
+                            <select id="bizCurrency" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                                <option value="IDR">IDR (Rupiah) — Rp</option>
+                                <option value="USD">USD (Dollar) — $</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-white/40 mb-1">Zona Waktu</label>
+                            <select id="bizTz" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                                <option value="WIB">Asia/Jakarta (WIB)</option>
+                                <option value="WITA">Asia/Makassar (WITA)</option>
+                                <option value="WIT">Asia/Jayapura (WIT)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="saveGeneral()" class="mt-6 w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-bold transition">
+                        Simpan Perubahan
+                    </button>
                 </div>
             </div>
-            <div class="lg:col-span-3">
-                <div id="content-general" class="bg-white rounded-lg shadow">
-                    <div class="p-6 border-b border-gray-200">
-                        <h2 class="text-lg font-bold text-gray-900">Pengaturan Umum</h2>
-                        <p class="text-sm text-gray-600 mt-1">Konfigurasi dasar sistem Lunomi</p>
-                    </div>
-                    <div class="p-6 space-y-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Nama Bisnis</label>
-                            <input type="text" value="Lunomi F&B Indonesia" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Email Bisnis</label>
-                            <input type="email" value="info@lunomi.id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Nomor Telepon</label>
-                            <input type="tel" value="021-7777-7777" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Alamat Kantor Pusat</label>
-                            <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3">Jl. Jendral Sudirman No. 123, Jakarta Pusat 12190, Indonesia</textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Currency</label>
-                            <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option>IDR (Rupiah) - Rp</option>
-                                <option>USD (Dollar) - $</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Timezone</label>
-                            <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option>Asia/Jakarta (WIB)</option>
-                                <option>Asia/Makassar (WITA)</option>
-                                <option>Asia/Jayapura (WIT)</option>
-                            </select>
-                        </div>
-                        <button onclick="saveSetting('general')" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700">
-                            Simpan Perubahan
+
+            <!-- User & Role -->
+            <div id="tab-users" class="space-y-4">
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <div class="p-5 border-b border-white/5 flex justify-between items-center">
+                        <h3 class="font-bold">User & Role Management</h3>
+                        <button onclick="openAddUser()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">add</span> Tambah User
                         </button>
                     </div>
+                    <div id="userList" class="divide-y divide-white/5 p-2"></div>
                 </div>
-                <div id="content-users" style="display:none" class="bg-white rounded-lg shadow">
-                    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-                        <div>
-                            <h2 class="text-lg font-bold text-gray-900">User & Role Management</h2>
-                            <p class="text-sm text-gray-600 mt-1">Kelola pengguna dan hak akses</p>
-                        </div>
-                        <button onclick="openAddUser()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold">
-                            + Tambah User
-                        </button>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Andi Setiawan (Owner)</p>
-                                    <p class="text-sm text-gray-600">owner@lunomi.local</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Super Admin</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Edit</button>
-                                <button class="text-red-600 text-sm font-semibold hover:text-red-800">Hapus</button>
-                            </div>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Budi Hartono (Manager)</p>
-                                    <p class="text-sm text-gray-600">manager@lunomi.local</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Admin</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Edit</button>
-                                <button class="text-red-600 text-sm font-semibold hover:text-red-800">Hapus</button>
-                            </div>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Ahmad Wijaya (Kasir)</p>
-                                    <p class="text-sm text-gray-600">kasir@lunomi.local</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">User</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Edit</button>
-                                <button class="text-red-600 text-sm font-semibold hover:text-red-800">Hapus</button>
-                            </div>
-                        </div>
+                <div class="glass-card rounded-2xl p-5">
+                    <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-yellow-400 text-sm">shield</span> Hak Akses per Role
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="text-white/40 border-b border-white/10">
+                                    <th class="text-left py-2 pr-4">Fitur</th>
+                                    <th class="text-center px-2">Owner</th>
+                                    <th class="text-center px-2">Admin</th>
+                                    <th class="text-center px-2">Kasir</th>
+                                    <th class="text-center px-2">Dapur</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rbacTable" class="divide-y divide-white/5"></tbody>
+                        </table>
                     </div>
                 </div>
-                <div id="content-security" style="display:none" class="bg-white rounded-lg shadow">
-                    <div class="p-6 border-b border-gray-200">
-                        <h2 class="text-lg font-bold text-gray-900">Pengaturan Keamanan</h2>
-                        <p class="text-sm text-gray-600 mt-1">Kelola keamanan dan privasi sistem</p>
-                    </div>
-                    <div class="space-y-0">
-                        <div class="setting-item">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Two-Factor Authentication (2FA)</p>
-                                    <p class="text-sm text-gray-600">Tambahkan lapisan keamanan extra</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Session Timeout</p>
-                                    <p class="text-sm text-gray-600">Auto logout setelah 30 menit inaktif</p>
-                                </div>
-                                <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                                    <option>15 menit</option>
-                                    <option selected>30 menit</option>
-                                    <option>60 menit</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Password Encryption</p>
-                                    <p class="text-sm text-gray-600">Enkripsi password dengan standar industry</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Activity Log</p>
-                                    <p class="text-sm text-gray-600">Catat semua aktivitas user untuk audit</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <button onclick="changePassword()" class="px-6 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 font-semibold text-sm">
-                                Ubah Password
+            </div>
+
+            <!-- Notifikasi -->
+            <div id="tab-notification" class="glass-card rounded-2xl p-6">
+                <h3 class="font-bold mb-5 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-400">notifications</span> Pengaturan Notifikasi
+                </h3>
+                <div id="notifList"></div>
+                <button onclick="saveNotifications()" class="mt-5 w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-sm font-bold transition">
+                    Simpan Notifikasi
+                </button>
+            </div>
+
+            <!-- Integrasi -->
+            <div id="tab-integration" class="space-y-4">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="font-bold mb-5 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-400">extension</span> Integrasi Pihak Ketiga
+                    </h3>
+                    <div id="integrationList" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Backup & Data -->
+            <div id="tab-backup" class="space-y-6">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="font-bold mb-5 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-emerald-400">backup</span> Backup Data
+                    </h3>
+                    <div class="glass-card rounded-xl p-5 border-dashed border-2 border-white/20 text-center mb-5">
+                        <span class="material-symbols-outlined text-3xl text-white/40 block mb-2">cloud_upload</span>
+                        <p class="text-sm font-semibold">Backup terakhir: <span id="lastBackupTime">Belum pernah</span></p>
+                        <p class="text-xs text-white/40 mt-1">Ekspor semua data ke file JSON</p>
+                        <div class="flex gap-3 justify-center mt-4">
+                            <button onclick="backupNow()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm">download</span> Backup Sekarang
                             </button>
+                            <label class="px-5 py-2 glass-card hover:bg-white/10 rounded-xl text-sm font-semibold cursor-pointer transition flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm">upload</span> Restore
+                                <input type="file" accept=".json" class="hidden" onchange="restoreBackup(this)">
+                            </label>
                         </div>
                     </div>
+                    <h4 class="font-bold text-sm mb-3">Riwayat Backup</h4>
+                    <div id="backupHistory" class="space-y-2"></div>
                 </div>
-                <div id="content-notification" style="display:none" class="bg-white rounded-lg shadow">
-                    <div class="p-6 border-b border-gray-200">
-                        <h2 class="text-lg font-bold text-gray-900">Pengaturan Notifikasi</h2>
-                        <p class="text-sm text-gray-600 mt-1">Kelola notifikasi dan alert sistem</p>
-                    </div>
-                    <div class="space-y-0">
-                        <div class="setting-item">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Email Notification</p>
-                                    <p class="text-sm text-gray-600">Terima laporan via email</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Stock Alert</p>
-                                    <p class="text-sm text-gray-600">Notifikasi ketika stok minimum</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Order Alert</p>
-                                    <p class="text-sm text-gray-600">Notifikasi order baru masuk</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Revenue Report</p>
-                                    <p class="text-sm text-gray-600">Laporan harian revenue</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-900">System Alert</p>
-                                    <p class="text-sm text-gray-600">Alert untuk masalah sistem</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="content-integration" style="display:none" class="bg-white rounded-lg shadow">
-                    <div class="p-6 border-b border-gray-200">
-                        <h2 class="text-lg font-bold text-gray-900">Integrasi Pihak Ketiga</h2>
-                        <p class="text-sm text-gray-600 mt-1">Hubungkan Lunomi dengan layanan eksternal</p>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <p class="font-semibold text-gray-900">🏦 Midtrans Payment</p>
-                                    <p class="text-sm text-gray-600">Gateway pembayaran (status: terkoneksi)</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Connected</span>
-                            </div>
-                            <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Disconnect</button>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <p class="font-semibold text-gray-900">☁️ Firebase Database</p>
-                                    <p class="text-sm text-gray-600">Cloud database (status: terkoneksi)</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Connected</span>
-                            </div>
-                            <button class="text-blue-600 text-sm font-semibold hover:text-blue-800">Settings</button>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <p class="font-semibold text-gray-900">🤖 Anthropic Claude API</p>
-                                    <p class="text-sm text-gray-600">AI untuk CEO Orchestrator (status: ready)</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">⚙️ Setup</span>
-                            </div>
-                            <button onclick="setupAI()" class="text-blue-600 text-sm font-semibold hover:text-blue-800">Configure</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="content-backup" style="display:none" class="bg-white rounded-lg shadow">
-                    <div class="p-6 border-b border-gray-200">
-                        <h2 class="text-lg font-bold text-gray-900">Backup & Data Management</h2>
-                        <p class="text-sm text-gray-600 mt-1">Backup dan restore data Lunomi</p>
-                    </div>
-                    <div class="p-6 space-y-6">
-                        <div class="border-2 border-dashed border-blue-300 rounded-lg p-6 text-center">
-                            <p class="text-sm text-gray-600 mb-2">Last Backup: 2026-05-01 22:15:30 (1.2 GB)</p>
-                            <p class="text-xs text-gray-500 mb-4">Automatic backup setiap hari jam 22:00 WIB</p>
-                            <div class="flex gap-3 justify-center">
-                                <button onclick="backupNow()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm">
-                                    💾 Backup Sekarang
-                                </button>
-                                <button onclick="restoreBackup()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold text-sm">
-                                    📂 Restore Backup
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900 mb-3">Backup History</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center text-sm p-3 bg-gray-50 rounded-lg">
-                                    <span class="text-gray-700">2026-05-01 22:15:30</span>
-                                    <span class="text-gray-600">1.2 GB</span>
-                                    <button class="text-red-600 text-xs font-semibold hover:text-red-800">Hapus</button>
-                                </div>
-                                <div class="flex justify-between items-center text-sm p-3 bg-gray-50 rounded-lg">
-                                    <span class="text-gray-700">2026-04-30 22:10:15</span>
-                                    <span class="text-gray-600">1.1 GB</span>
-                                    <button class="text-red-600 text-xs font-semibold hover:text-red-800">Hapus</button>
-                                </div>
-                                <div class="flex justify-between items-center text-sm p-3 bg-gray-50 rounded-lg">
-                                    <span class="text-gray-700">2026-04-29 22:05:45</span>
-                                    <span class="text-gray-600">1.0 GB</span>
-                                    <button class="text-red-600 text-xs font-semibold hover:text-red-800">Hapus</button>
-                                </div>
-                            </div>
-                        </div>
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="font-bold mb-4 flex items-center gap-2 text-red-400">
+                        <span class="material-symbols-outlined text-sm">warning</span> Zona Bahaya
+                    </h3>
+                    <div class="space-y-3">
+                        <button onclick="clearAllData()" class="w-full py-3 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm font-bold transition">
+                            Hapus Semua Data Transaksi
+                        </button>
+                        <button onclick="factoryReset()" class="w-full py-3 rounded-xl border border-red-500/50 text-red-300 hover:bg-red-500/20 text-sm font-bold transition">
+                            Factory Reset — Hapus Semua Data
+                        </button>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
-    <script>
-        let currentTab = 'general';
-        function switchTab(tab) {
-            currentTab = tab;
-            // Update button styles
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-100', 'text-blue-600');
-                btn.classList.add('text-gray-700', 'hover:bg-gray-100');
+</div>
+
+<!-- User Modal -->
+<div id="userModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="glass-card rounded-2xl p-6 w-full max-w-md mx-4">
+        <h3 id="userModalTitle" class="text-lg font-bold mb-5">Tambah User</h3>
+        <input type="hidden" id="editUserId">
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-white/40 mb-1">Nama Lengkap</label>
+                <input type="text" id="uName" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-white/40 mb-1">Username</label>
+                <input type="text" id="uUsername" class="glass-input w-full px-4 py-2 rounded-xl text-sm" placeholder="Untuk login">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-white/40 mb-1">Role</label>
+                <select id="uRole" class="glass-input w-full px-4 py-2 rounded-xl text-sm">
+                    <option value="kasir">Kasir</option>
+                    <option value="dapur">Dapur</option>
+                    <option value="admin">Admin</option>
+                    <option value="owner">Owner</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-white/40 mb-1">PIN (4 digit)</label>
+                <input type="password" id="uPin" maxlength="4" inputmode="numeric" class="glass-input w-full px-4 py-2 rounded-xl text-sm tracking-widest" placeholder="••••">
+            </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+            <button onclick="closeUserModal()" class="flex-1 py-2 rounded-xl glass-card text-sm font-semibold hover:bg-white/10 transition">Batal</button>
+            <button onclick="saveUser()" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-bold transition">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 px-5 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold shadow-xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+    <span class="material-symbols-outlined text-sm">check_circle</span>
+    <span id="toastMsg"></span>
+</div>
+
+<script>
+const SYSSET_KEY  = 'lunomi_system_settings';
+const USERS_KEY   = 'lunomi_users';
+const NOTIF_KEY   = 'lunomi_notifications';
+const BACKUP_KEY  = 'lunomi_backup_history';
+
+// ── Tab navigation ───────────────────────────────────────────
+function switchTab(id, btn) {
+    document.querySelectorAll('#tabContent > div').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+}
+
+// ── Umum ─────────────────────────────────────────────────────
+function loadGeneral() {
+    const s = JSON.parse(localStorage.getItem(SYSSET_KEY) || '{}');
+    const outlet = JSON.parse(localStorage.getItem('lunomi_outlet') || '{}');
+    document.getElementById('bizName').value = s.bizName || outlet.name || '';
+    document.getElementById('bizEmail').value = s.bizEmail || '';
+    document.getElementById('bizPhone').value = s.bizPhone || outlet.phone || '';
+    document.getElementById('bizAddress').value = s.bizAddress || outlet.address || '';
+    document.getElementById('bizCurrency').value = s.currency || 'IDR';
+    document.getElementById('bizTz').value = s.timezone || 'WIB';
+}
+
+function saveGeneral() {
+    const s = JSON.parse(localStorage.getItem(SYSSET_KEY) || '{}');
+    s.bizName     = document.getElementById('bizName').value.trim();
+    s.bizEmail    = document.getElementById('bizEmail').value.trim();
+    s.bizPhone    = document.getElementById('bizPhone').value.trim();
+    s.bizAddress  = document.getElementById('bizAddress').value.trim();
+    s.currency    = document.getElementById('bizCurrency').value;
+    s.timezone    = document.getElementById('bizTz').value;
+    s.updatedAt   = new Date().toISOString();
+    localStorage.setItem(SYSSET_KEY, JSON.stringify(s));
+    if (typeof AuditLog !== 'undefined') AuditLog.add('system_settings_save', 'Pengaturan umum disimpan — ' + (s.bizName || ''));
+    showToast('Pengaturan umum disimpan!');
+}
+
+// ── Users ─────────────────────────────────────────────────────
+function getUsers() { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
+
+const ROLE_LABELS = { owner:'Owner', admin:'Admin', kasir:'Kasir', dapur:'Dapur' };
+const ROLE_BADGES = { owner:'role-badge-owner', admin:'role-badge-admin', kasir:'role-badge-kasir', dapur:'role-badge-dapur' };
+
+function renderUsers() {
+    const users = getUsers();
+    const list = document.getElementById('userList');
+    if (!users.length) {
+        list.innerHTML = '<div class="px-5 py-8 text-center text-white/30 text-sm">Belum ada user — tambah dari tombol di atas</div>';
+        return;
+    }
+    list.innerHTML = users.map(u => `
+        <div class="flex items-center justify-between p-4 rounded-xl hover:bg-white/5 transition">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-indigo-600/40 flex items-center justify-center font-bold text-sm">
+                    ${(u.name || u.username || '?')[0].toUpperCase()}
+                </div>
+                <div>
+                    <p class="font-semibold text-sm">${u.name || u.username}</p>
+                    <p class="text-xs text-white/40">@${u.username || '-'}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="px-2 py-1 rounded-md ${ROLE_BADGES[u.role] || 'bg-white/10 text-white/50'} text-[10px] font-bold uppercase">${ROLE_LABELS[u.role] || u.role}</span>
+                <button onclick="openEditUser('${u.id}')" class="text-white/40 hover:text-white transition">
+                    <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
+                <button onclick="deleteUser('${u.id}')" class="text-red-400/60 hover:text-red-400 transition">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+const RBAC = [
+    { label:'POS Kasir', owner:1, admin:1, kasir:1, dapur:0 },
+    { label:'Dashboard', owner:1, admin:1, kasir:0, dapur:0 },
+    { label:'Laporan Penjualan', owner:1, admin:1, kasir:0, dapur:0 },
+    { label:'Manajemen Menu', owner:1, admin:1, kasir:0, dapur:0 },
+    { label:'Manajemen Stok', owner:1, admin:1, kasir:0, dapur:1 },
+    { label:'KDS Dapur', owner:1, admin:1, kasir:0, dapur:1 },
+    { label:'Refund', owner:1, admin:1, kasir:0, dapur:0 },
+    { label:'Pengaturan Sistem', owner:1, admin:0, kasir:0, dapur:0 },
+];
+
+function renderRBAC() {
+    document.getElementById('rbacTable').innerHTML = RBAC.map(r => `
+        <tr class="hover:bg-white/3 transition">
+            <td class="py-2 pr-4 text-white/70">${r.label}</td>
+            ${['owner','admin','kasir','dapur'].map(role =>
+                `<td class="text-center px-2 py-2">${r[role] ? '<span class="text-emerald-400">✓</span>' : '<span class="text-white/20">–</span>'}</td>`
+            ).join('')}
+        </tr>
+    `).join('');
+}
+
+function openAddUser() {
+    document.getElementById('editUserId').value = '';
+    document.getElementById('userModalTitle').textContent = 'Tambah User';
+    document.getElementById('uName').value = '';
+    document.getElementById('uUsername').value = '';
+    document.getElementById('uRole').value = 'kasir';
+    document.getElementById('uPin').value = '';
+    document.getElementById('userModal').classList.remove('hidden');
+}
+
+function openEditUser(id) {
+    const u = getUsers().find(x => x.id === id);
+    if (!u) return;
+    document.getElementById('editUserId').value = id;
+    document.getElementById('userModalTitle').textContent = 'Edit User';
+    document.getElementById('uName').value = u.name || '';
+    document.getElementById('uUsername').value = u.username || '';
+    document.getElementById('uRole').value = u.role || 'kasir';
+    document.getElementById('uPin').value = '';
+    document.getElementById('userModal').classList.remove('hidden');
+}
+
+function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
+
+function saveUser() {
+    const name = document.getElementById('uName').value.trim();
+    const username = document.getElementById('uUsername').value.trim();
+    const role = document.getElementById('uRole').value;
+    const pin = document.getElementById('uPin').value;
+    if (!name || !username) { alert('Nama dan username wajib diisi.'); return; }
+    if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) { alert('PIN harus 4 digit angka.'); return; }
+
+    const users = getUsers();
+    const editId = document.getElementById('editUserId').value;
+    if (editId) {
+        const idx = users.findIndex(u => u.id === editId);
+        if (idx >= 0) {
+            users[idx] = { ...users[idx], name, username, role };
+            if (pin) users[idx].pin = pin;
+        }
+        if (typeof AuditLog !== 'undefined') AuditLog.add('user_edit', 'User "' + name + '" (' + role + ') diperbarui');
+    } else {
+        if (users.find(u => u.username === username)) { alert('Username sudah digunakan.'); return; }
+        users.push({ id: 'usr_' + Date.now(), name, username, role, pin: pin || '', createdAt: new Date().toISOString() });
+        if (typeof AuditLog !== 'undefined') AuditLog.add('user_add', 'User baru "' + name + '" (' + role + ') ditambahkan');
+    }
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    closeUserModal();
+    renderUsers();
+    showToast('User berhasil disimpan!');
+}
+
+function deleteUser(id) {
+    const u = getUsers().find(x => x.id === id);
+    if (!confirm('Hapus user "' + (u?.name || id) + '"?')) return;
+    localStorage.setItem(USERS_KEY, JSON.stringify(getUsers().filter(x => x.id !== id)));
+    if (typeof AuditLog !== 'undefined') AuditLog.add('user_delete', 'User "' + (u?.name || id) + '" dihapus');
+    renderUsers();
+    showToast('User dihapus');
+}
+
+// ── Notifikasi ────────────────────────────────────────────────
+const NOTIF_DEFS = [
+    { id:'stock_alert',    label:'Alert Stok Minimum',           desc:'Notif ketika stok bahan habis' },
+    { id:'order_new',      label:'Pesanan Baru Masuk',           desc:'Notif setiap ada order baru' },
+    { id:'daily_report',   label:'Laporan Harian',               desc:'Ringkasan revenue dikirim tiap hari' },
+    { id:'booking_remind', label:'Reminder Reservasi',           desc:'Ingatkan booking 1 jam sebelumnya' },
+    { id:'low_revenue',    label:'Alert Revenue Rendah',         desc:'Notif jika revenue harian di bawah target' },
+    { id:'system_error',   label:'Error Sistem',                 desc:'Alert jika ada masalah sistem' },
+];
+
+function loadNotifications() {
+    const saved = JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}');
+    document.getElementById('notifList').innerHTML = NOTIF_DEFS.map(n => `
+        <div class="setting-row">
+            <div>
+                <p class="font-semibold text-sm">${n.label}</p>
+                <p class="text-xs text-white/40 mt-0.5">${n.desc}</p>
+            </div>
+            <label class="toggle">
+                <input type="checkbox" id="notif_${n.id}" ${saved[n.id] !== false ? 'checked' : ''}>
+                <span class="t-slider"></span>
+            </label>
+        </div>
+    `).join('');
+}
+
+function saveNotifications() {
+    const saved = {};
+    NOTIF_DEFS.forEach(n => { saved[n.id] = document.getElementById('notif_' + n.id).checked; });
+    localStorage.setItem(NOTIF_KEY, JSON.stringify(saved));
+    if (typeof AuditLog !== 'undefined') AuditLog.add('notifications_save', 'Pengaturan notifikasi disimpan');
+    showToast('Notifikasi disimpan!');
+}
+
+// ── Integrasi ─────────────────────────────────────────────────
+const INTEGRATIONS = [
+    { id:'midtrans', label:'Midtrans Payment', desc:'Payment gateway utama', icon:'credit_card', color:'blue' },
+    { id:'supabase', label:'Supabase Cloud',   desc:'Cloud sync & backup database', icon:'cloud', color:'emerald' },
+    { id:'wa_biz',   label:'WhatsApp Business', desc:'Notifikasi & broadcast WA', icon:'chat', color:'emerald' },
+    { id:'claude',   label:'Claude AI (Anthropic)', desc:'Asisten AI untuk analitik & rekomendasi', icon:'auto_awesome', color:'purple' },
+];
+
+function renderIntegrations() {
+    const cfg = JSON.parse(localStorage.getItem('lunomi_integrations') || '{}');
+    document.getElementById('integrationList').innerHTML = INTEGRATIONS.map(i => {
+        const connected = !!(cfg[i.id]?.apiKey);
+        const colorCls = { blue:'text-blue-400', emerald:'text-emerald-400', purple:'text-purple-400' }[i.color] || 'text-white/60';
+        const statusCls = connected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-white/40';
+        const statusLabel = connected ? 'Terhubung' : 'Belum';
+        return `
+        <div class="glass-card rounded-xl p-4 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined ${colorCls}">${i.icon}</span>
+                <div>
+                    <p class="font-semibold text-sm">${i.label}</p>
+                    <p class="text-xs text-white/40">${i.desc}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="px-2 py-1 rounded-md ${statusCls} text-[10px] font-bold uppercase">${statusLabel}</span>
+                <button onclick="configIntegration('${i.id}','${i.label}')" class="text-xs text-white/40 hover:text-white transition px-2 py-1 glass-card rounded-lg">
+                    ${connected ? 'Edit' : 'Setup'}
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function configIntegration(id, label) {
+    const cfg = JSON.parse(localStorage.getItem('lunomi_integrations') || '{}');
+    const current = cfg[id] || {};
+    const apiKey = prompt('API Key untuk ' + label + ':', current.apiKey || '');
+    if (apiKey === null) return;
+    cfg[id] = { apiKey: apiKey.trim(), updatedAt: new Date().toISOString() };
+    localStorage.setItem('lunomi_integrations', JSON.stringify(cfg));
+    if (typeof AuditLog !== 'undefined') AuditLog.add('integration_config', label + ' API key ' + (apiKey.trim() ? 'diperbarui' : 'dihapus'));
+    renderIntegrations();
+    showToast(label + ' konfigurasi disimpan');
+}
+
+// ── Backup ────────────────────────────────────────────────────
+function loadBackupHistory() {
+    const hist = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
+    const lastEl = document.getElementById('lastBackupTime');
+    if (hist.length) {
+        const last = hist[hist.length - 1];
+        lastEl.textContent = new Date(last.ts).toLocaleString('id-ID');
+    }
+    const container = document.getElementById('backupHistory');
+    if (!hist.length) { container.innerHTML = '<p class="text-sm text-white/30 text-center py-4">Belum ada riwayat backup</p>'; return; }
+    container.innerHTML = [...hist].reverse().slice(0, 10).map(h => `
+        <div class="glass-card rounded-xl px-4 py-3 flex justify-between items-center text-sm">
+            <span class="text-white/60">${new Date(h.ts).toLocaleString('id-ID')}</span>
+            <span class="text-white/40 text-xs">${h.sizeKB} KB</span>
+            <button onclick="downloadBackup('${h.ts}')" class="text-indigo-400 hover:text-indigo-300 text-xs font-semibold transition flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">download</span> Unduh
+            </button>
+        </div>
+    `).join('');
+}
+
+function getAllData() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('lunomi_')) {
+            try { data[k] = JSON.parse(localStorage.getItem(k)); }
+            catch { data[k] = localStorage.getItem(k); }
+        }
+    }
+    return data;
+}
+
+function backupNow() {
+    const data = getAllData();
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    a.href = url;
+    a.download = 'lunomi-backup-' + ts + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    const sizeKB = (new Blob([json]).size / 1024).toFixed(1);
+    const hist = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
+    hist.push({ ts: new Date().toISOString(), sizeKB, data: json });
+    if (hist.length > 10) hist.shift();
+    localStorage.setItem(BACKUP_KEY, JSON.stringify(hist));
+    if (typeof AuditLog !== 'undefined') AuditLog.add('backup', 'Backup dibuat — ' + sizeKB + ' KB');
+    loadBackupHistory();
+    showToast('Backup berhasil diunduh!');
+}
+
+function downloadBackup(ts) {
+    const hist = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
+    const entry = hist.find(h => h.ts === ts);
+    if (!entry) { showToast('File tidak ditemukan'); return; }
+    const blob = new Blob([entry.data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'lunomi-backup-' + ts.slice(0,19).replace(/:/g,'-') + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function restoreBackup(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!confirm('Restore akan menimpa semua data saat ini. Lanjutkan?')) { input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const data = JSON.parse(e.target.result);
+            Object.entries(data).forEach(([k, v]) => {
+                if (k.startsWith('lunomi_')) localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
             });
-            document.getElementById('tab-' + tab).classList.add('bg-blue-100', 'text-blue-600');
-            document.getElementById('tab-' + tab).classList.remove('text-gray-700', 'hover:bg-gray-100');
-            // Update content
-            document.querySelectorAll('[id^="content-"]').forEach(c => c.style.display = 'none');
-            document.getElementById('content-' + tab).style.display = 'block';
-        }
-        function saveSetting(section) {
-            alert('✓ Pengaturan ' + section + ' telah disimpan');
-        }
-        function openAddUser() {
-            alert('Modal tambah user - Coming soon!');
-        }
-        function changePassword() {
-            alert('Modal ubah password - Coming soon!');
-        }
-        function setupAI() {
-            alert('Modal setup Claude API - Coming soon!\n\nNanti akan minta:\n- API Key\n- Model selection\n- Configuration');
-        }
-        function backupNow() {
-            alert('✓ Backup dimulai...\n\nProses backup sedang berjalan, tunggu beberapa menit');
-        }
-        function restoreBackup() {
-            alert('Modal restore backup - Coming soon!');
-        }
-        function logout() {
-            localStorage.removeItem('lunomi_session');
-            window.location.href = 'index.html';
-        }
-        function checkSession() {
-            const s = localStorage.getItem('lunomi_session');
-            if (!s) { window.location.href = 'index.html'; return; }
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-            checkSession();
-        });
-    </script>
+            if (typeof AuditLog !== 'undefined') AuditLog.add('restore', 'Data direstore dari file backup');
+            showToast('Restore berhasil! Memuat ulang...');
+            setTimeout(() => window.location.reload(), 1500);
+        } catch { alert('File backup tidak valid.'); }
+        input.value = '';
+    };
+    reader.readAsText(file);
+}
+
+function clearAllData() {
+    if (!confirm('HAPUS SEMUA TRANSAKSI? Tindakan ini tidak bisa dibatalkan!')) return;
+    if (!confirm('Konfirmasi sekali lagi — hapus semua data transaksi?')) return;
+    ['lunomi_transactions','lunomi_kds_orders','lunomi_refunds','lunomi_online_orders'].forEach(k => localStorage.removeItem(k));
+    if (typeof AuditLog !== 'undefined') AuditLog.add('danger_clear_transactions', 'Semua data transaksi dihapus');
+    showToast('Data transaksi dihapus');
+}
+
+function factoryReset() {
+    if (!confirm('⚠️ FACTORY RESET akan menghapus SEMUA data Lunomi. Ini tidak bisa dibatalkan!')) return;
+    if (prompt('Ketik HAPUS untuk konfirmasi:') !== 'HAPUS') return;
+    Object.keys(localStorage).filter(k => k.startsWith('lunomi_')).forEach(k => localStorage.removeItem(k));
+    showToast('Reset selesai. Mengalihkan...');
+    setTimeout(() => window.location.href = 'index.html', 1500);
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.style.opacity = '1';
+    setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+// ── Init ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    try { const s = localStorage.getItem('lunomi_session'); if (!s) { window.location.href = 'index.html'; return; } }
+    catch(e) { window.location.href = 'index.html'; return; }
+    loadGeneral();
+    renderUsers();
+    renderRBAC();
+    loadNotifications();
+    renderIntegrations();
+    loadBackupHistory();
+});
+</script>
 </body>
 </html>
