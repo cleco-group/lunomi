@@ -274,6 +274,7 @@
                 createdAt: new Date().toISOString()
             });
             localStorage.setItem('lunomi_registrations', JSON.stringify(regs));
+            if(typeof AuditLog!=='undefined') AuditLog.add('outlet_register',`Registrasi baru: ${formData.name} — outlet ${formData.outlet.name}`);
             document.getElementById('suc_outlet').textContent = formData.outlet.name;
             const emailCells = document.getElementById('suc_email').querySelectorAll('span');
             if(emailCells[1]) emailCells[1].textContent = formData.email;
