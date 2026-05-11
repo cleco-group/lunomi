@@ -2,3 +2,5 @@ node_modules/
 package-lock.json
 Tools/
 graphify-out/cache/
+__pycache__/
+*.pyc
