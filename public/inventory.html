@@ -125,7 +125,10 @@
 <div id="toast" class="toast toast-success"></div>
 
 <script>
-    let items = [
+    let items = [];
+    let editingId = null;
+
+    const DEFAULT_ITEMS = [
         {id:1, name:'Nasi (Beras)',    cat:'Bahan Makanan', stock:45, max:60,  unit:'kg'},
         {id:2, name:'Ayam Fillet',     cat:'Bahan Makanan', stock:12, max:30,  unit:'kg'},
         {id:3, name:'Mie Kuning',      cat:'Bahan Makanan', stock:8,  max:20,  unit:'kg'},
@@ -135,7 +138,13 @@
         {id:7, name:'Minyak Goreng',   cat:'Bumbu',         stock:18, max:25,  unit:'liter'},
         {id:8, name:'Kecap Manis',     cat:'Bumbu',         stock:7,  max:20,  unit:'botol'},
     ];
-    let editingId = null;
+
+    function loadItems(){
+        const stored = localStorage.getItem('lunomi_raw_stock_list');
+        if(stored){ items = JSON.parse(stored); }
+        else { items = DEFAULT_ITEMS; saveItems(); }
+    }
+    function saveItems(){ localStorage.setItem('lunomi_raw_stock_list', JSON.stringify(items)); }
 
     function getStatus(s, m){
         const r = s/m;
@@ -229,16 +238,22 @@
         if(editingId){
             const it = items.find(x=>x.id===editingId);
             Object.assign(it,{name,cat,stock,max,unit});
+            AuditLog.add('inventory_edit', `Edit stok: ${name} → ${stock} ${unit}`);
             showToast('Item berhasil diupdate');
         } else {
             items.unshift({id:Date.now(),name,cat,stock,max,unit});
+            AuditLog.add('inventory_add', `Tambah item: ${name} ${stock} ${unit}`);
             showToast('Item berhasil ditambahkan');
         }
+        saveItems();
         closeModal(); renderTable();
     }
     function deleteItem(id){
+        const it = items.find(x=>x.id===id);
         if(!confirm('Hapus item ini?')) return;
         items = items.filter(x=>x.id!==id);
+        if(it) AuditLog.add('inventory_delete', `Hapus item: ${it.name}`);
+        saveItems();
         renderTable(); showToast('Item dihapus');
     }
 
@@ -249,12 +264,11 @@
     }
 
     document.addEventListener('DOMContentLoaded',()=>{
-        try{
-            const s = localStorage.getItem('lunomi_session');
-            if(!s){window.location.href='index.html';return;}
-            const outlet = JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-            if(outlet) document.getElementById('outletLabel').textContent=outlet.name;
-        }catch(e){window.location.href='index.html';}
+        const s=SessionManager.get('session');
+        if(!s){window.location.href='index.html';return;}
+        const outlet=SessionManager.get('outlet');
+        if(outlet) document.getElementById('outletLabel').textContent=outlet.name;
+        loadItems();
         renderTable();
     });
 </script>
