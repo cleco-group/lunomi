@@ -6,23 +6,22 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import POS from './pages/POS';
 import Kitchen from './pages/Kitchen';
+import Inventory from './pages/Inventory';
+import Customer from './pages/Customer';
+import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
 import AdminTools from './pages/AdminTools';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useSupabaseAuth();
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#020617' }}>
+        <div className="text-white/60 text-sm animate-pulse">Memuat...</div>
       </div>
     );
   }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
+  if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
@@ -33,42 +32,18 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pos"
-              element={
-                <ProtectedRoute>
-                  <POS />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/kitchen"
-              element={
-                <ProtectedRoute>
-                  <Kitchen />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminTools />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/pos" element={<ProtectedRoute><POS /></ProtectedRoute>} />
+            <Route path="/kitchen" element={<ProtectedRoute><Kitchen /></ProtectedRoute>} />
+            <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+            <Route path="/customer" element={<ProtectedRoute><Customer /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminTools /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>
-        <Toaster position="top-right" />
+        <Toaster position="top-right" toastOptions={{ style: { background: 'rgba(15,23,42,.95)', color: '#fff', border: '1px solid rgba(255,255,255,.1)', backdropFilter: 'blur(12px)' } }} />
       </IndustryProvider>
     </SupabaseAuthProvider>
   );
