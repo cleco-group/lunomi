@@ -26,6 +26,9 @@ import Payment from './pages/Payment';
 import Shift from './pages/Shift';
 import Attendance from './pages/Attendance';
 import HR from './pages/HR';
+import Stockopname from './pages/Stockopname';
+import Recipe from './pages/Recipe';
+import Tax from './pages/Tax';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useSupabaseAuth();
@@ -68,6 +71,9 @@ function App() {
             <Route path="/shift" element={<ProtectedRoute><Shift /></ProtectedRoute>} />
             <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
             <Route path="/hr" element={<ProtectedRoute><HR /></ProtectedRoute>} />
+            <Route path="/stockopname" element={<ProtectedRoute><Stockopname /></ProtectedRoute>} />
+            <Route path="/recipe" element={<ProtectedRoute><Recipe /></ProtectedRoute>} />
+            <Route path="/tax" element={<ProtectedRoute><Tax /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminTools /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

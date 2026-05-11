@@ -36,6 +36,8 @@ const NAV: NavGroup[] = [
     items: [
       { path: '/product', label: 'Master Menu' },
       { path: '/inventory', label: 'Stok Barang' },
+      { path: '/recipe', label: 'Resep Menu' },
+      { path: '/stockopname', label: 'Stok Opname' },
       { path: '/supplier', label: 'Manajemen Supplier' },
       { path: '/purchase', label: 'Pembelian Barang' },
     ],
