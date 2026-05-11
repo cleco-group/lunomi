@@ -6,8 +6,8 @@ interface Product {
   name: string;
   category: string;
   price: number;
-  type: string;
-  is_active: boolean;
+  type?: string;
+  is_active?: boolean;
 }
 
 interface ProductGridProps {
@@ -26,17 +26,44 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
 
   const loadProducts = async () => {
     try {
+      // Try Supabase first
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('company_id', '00000000-0000-0000-0000-000000000001')
         .eq('is_active', true);
       
-      if (error) throw error;
-      
-      setProducts(data || []);
+      if (data && data.length > 0) {
+        setProducts(data);
+      } else {
+        // Fallback to localStorage
+        const stored = localStorage.getItem('lunomi_products');
+        if (stored) {
+          const localProducts = JSON.parse(stored);
+          setProducts(localProducts);
+        } else {
+          // Create demo products if none exist
+          const demoProducts: Product[] = [
+            { id: '1', name: 'Nasi Goreng Spesial', category: 'Makanan', price: 25000 },
+            { id: '2', name: 'Mie Goreng', category: 'Makanan', price: 20000 },
+            { id: '3', name: 'Ayam Bakar Madu', category: 'Makanan', price: 35000 },
+            { id: '4', name: 'Es Teh Manis', category: 'Minuman', price: 5000 },
+            { id: '5', name: 'Kopi Hitam', category: 'Minuman', price: 8000 },
+            { id: '6', name: 'Jus Jeruk', category: 'Minuman', price: 12000 },
+            { id: '7', name: 'Soto Ayam', category: 'Makanan', price: 18000 },
+            { id: '8', name: 'Gado-Gado', category: 'Makanan', price: 15000 },
+          ];
+          setProducts(demoProducts);
+          localStorage.setItem('lunomi_products', JSON.stringify(demoProducts));
+        }
+      }
     } catch (error) {
       console.error('Error loading products:', error);
+      // Fallback to localStorage on error
+      const stored = localStorage.getItem('lunomi_products');
+      if (stored) {
+        setProducts(JSON.parse(stored));
+      }
     } finally {
       setLoading(false);
     }
@@ -127,6 +154,9 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
       {filteredProducts.length === 0 && (
         <div className="text-center py-12">
           <p className="text-white/60 text-lg">Tidak ada produk ditemukan</p>
+          <p className="text-white/40 text-sm mt-2">
+            Tambahkan produk di menu Master Menu
+          </p>
         </div>
       )}
     </div>

@@ -47,6 +47,7 @@ const NAV: NavGroup[] = [
       { path: '/loyalty', label: 'Loyalty Program' },
       { path: '/analytics', label: 'Analytics' },
       { path: '/expense', label: 'Pengeluaran Operasional' },
+      { path: '/refund', label: 'Proses Retur' },
     ],
   },
 ];

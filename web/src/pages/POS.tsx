@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import ProductGrid from '../components/pos/ProductGrid';
 import ShoppingCart from '../components/pos/ShoppingCart';
@@ -10,6 +11,7 @@ export default function POS() {
   const { user, signOut } = useSupabaseAuth();
   const { addItem } = useCartStore();
   const [showCheckout, setShowCheckout] = useState(false);
+  const navigate = useNavigate();
 
   const handleAddToCart = (product: any) => {
     addItem(product);
@@ -32,11 +34,20 @@ export default function POS() {
                 backdropFilter: 'blur(20px)',
                 borderColor: 'rgba(255,255,255,0.08)' 
               }}>
-        <div>
-          <h1 className="text-2xl font-bold text-white">POS Terminal</h1>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
-            Cleco Pii - {user?.email}
-          </p>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="text-white opacity-50 hover:opacity-100 transition text-2xl"
+            title="Back to Dashboard"
+          >
+            ←
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-white">POS Terminal</h1>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              Cleco Pii - {user?.email}
+            </p>
+          </div>
         </div>
         <button
           onClick={signOut}

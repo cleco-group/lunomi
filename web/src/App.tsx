@@ -20,6 +20,7 @@ import Outlet from './pages/Outlet';
 import Supplier from './pages/Supplier';
 import Expense from './pages/Expense';
 import Purchase from './pages/Purchase';
+import Refund from './pages/Refund';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useSupabaseAuth();
@@ -56,6 +57,7 @@ function App() {
             <Route path="/supplier" element={<ProtectedRoute><Supplier /></ProtectedRoute>} />
             <Route path="/expense" element={<ProtectedRoute><Expense /></ProtectedRoute>} />
             <Route path="/purchase" element={<ProtectedRoute><Purchase /></ProtectedRoute>} />
+            <Route path="/refund" element={<ProtectedRoute><Refund /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminTools /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
