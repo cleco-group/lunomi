@@ -98,11 +98,15 @@
             localStorage.setItem('lunomi_outlet', JSON.stringify(outlet));
             localStorage.setItem('lunomi_config', JSON.stringify(config));
 
+            if(typeof AuditLog!=='undefined') AuditLog.add('settings_save',`Pengaturan disimpan — ${outlet.name||'Outlet'} PPN:${config.tax}% SC:${config.service}%`);
             alert('Pengaturan berhasil disimpan!');
             window.location.reload();
         }
 
-        document.addEventListener('DOMContentLoaded', loadSettings);
+        document.addEventListener('DOMContentLoaded', ()=>{
+            try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}}catch(e){window.location.href='index.html';return;}
+            loadSettings();
+        });
     </script>
 </body>
 </html>

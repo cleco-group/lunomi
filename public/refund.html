@@ -3,36 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunomi — Proses Retur</title>
+    <title>Proses Retur — Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>*{font-family:'Plus Jakarta Sans',sans-serif;}body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%);color:white;overflow-x:hidden;}.glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}.glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}</style>
+    <style>
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(239,68,68,.2) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(99,102,241,.08) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.35);}
+        .input-glass:focus{outline:none;border-color:rgba(239,68,68,.6);box-shadow:0 0 0 3px rgba(239,68,68,.12);}
+        .trx-row{cursor:pointer;transition:all .2s;border-left:3px solid transparent;}
+        .trx-row:hover{background:rgba(255,255,255,.06);}
+        .trx-row.selected{background:rgba(239,68,68,.08);border-left-color:rgba(239,68,68,.5);}
+        .step-dot{width:1.75rem;height:1.75rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;}
+        .step-active{background:rgba(239,68,68,.25);border:2px solid #ef4444;color:#fca5a5;}
+        .step-done{background:linear-gradient(135deg,#ef4444,#dc2626);color:white;}
+        .step-pending{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);color:rgba(255,255,255,.3);}
+        .method-btn{padding:.6rem;border-radius:.75rem;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;border:1px solid;text-align:center;}
+        .method-btn.sel{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);color:#fca5a5;}
+        .method-btn:not(.sel){background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.5);}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
+    </style>
 </head>
 <body>
 <nav class="glass-nav sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
         <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">↩️</div>
-        <div><div class="font-extrabold text-white text-sm">Proses Retur</div><div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">Semua Outlet</div></div>
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#ef4444,#dc2626)">↩️</div>
+        <div>
+            <div class="font-extrabold text-white text-sm">Proses Retur</div>
+            <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">-</div>
+        </div>
     </div>
 </nav>
-<div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <div class="text-6xl mb-6">↩️</div>
-    <h1 class="text-2xl font-extrabold text-white mb-2">Proses Retur</h1>
-    <p class="mb-8 max-w-md mx-auto" style="color:rgba(255,255,255,.5)">Kelola retur dan refund transaksi dengan mudah.</p>
-    <div class="glass-card rounded-2xl p-6 max-w-sm mx-auto text-left">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(255,255,255,.35)">Fitur yang akan hadir</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.6)"><li>✦ Retur produk dari transaksi</li><li>✦ Refund tunai & e-wallet</li><li>✦ Laporan retur per periode</li><li>✦ Approval retur manager</li></ul>
+
+<div class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Step indicator -->
+    <div class="flex items-center gap-2 mb-6">
+        <div class="flex items-center gap-1.5">
+            <div id="dot1" class="step-dot step-active">1</div>
+            <span id="lbl1" class="text-xs font-bold text-red-400">Cari Transaksi</span>
+        </div>
+        <div class="flex-1 h-0.5 mx-1" id="line1" style="background:rgba(255,255,255,.1)"></div>
+        <div class="flex items-center gap-1.5">
+            <div id="dot2" class="step-dot step-pending">2</div>
+            <span id="lbl2" class="text-xs font-bold text-white/30">Pilih Item</span>
+        </div>
+        <div class="flex-1 h-0.5 mx-1" id="line2" style="background:rgba(255,255,255,.1)"></div>
+        <div class="flex items-center gap-1.5">
+            <div id="dot3" class="step-dot step-pending">3</div>
+            <span id="lbl3" class="text-xs font-bold text-white/30">Konfirmasi</span>
+        </div>
     </div>
-    <button onclick="window.location.href='dashboard.html'" class="mt-8 px-6 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">← Kembali ke Dashboard</button>
+
+    <!-- Step 1 -->
+    <div id="step1">
+        <div class="glass-card rounded-2xl p-5 mb-4">
+            <h3 class="font-bold mb-3 text-sm">Cari Transaksi</h3>
+            <div class="flex gap-3">
+                <input id="searchTrx" type="text" placeholder="Cari No. Transaksi, nama pelanggan…" class="input-glass flex-1 px-3 py-2.5 rounded-xl text-sm" oninput="searchTransactions()">
+                <input id="searchDate" type="date" class="input-glass px-3 py-2.5 rounded-xl text-sm" onchange="searchTransactions()">
+            </div>
+        </div>
+        <div id="trxResults" class="glass-card rounded-2xl overflow-hidden">
+            <p class="py-12 text-center text-white/25 text-sm">Ketik untuk mencari transaksi</p>
+        </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" class="hidden">
+        <div class="glass-card rounded-2xl p-5 mb-4">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h3 class="font-bold text-sm">Pilih Item Retur</h3>
+                    <p class="text-xs text-white/40 mt-0.5" id="selectedTrxInfo">-</p>
+                </div>
+                <button onclick="goStep1()" class="text-xs text-white/40 hover:text-white">← Ganti</button>
+            </div>
+            <div id="itemsList" class="space-y-2 mb-4"></div>
+            <div>
+                <label class="text-xs font-semibold text-white/40 mb-1.5 block">Alasan Retur *</label>
+                <select id="returnReason" class="input-glass w-full px-3 py-2.5 rounded-xl text-sm">
+                    <option value="">Pilih alasan…</option>
+                    <option value="salah_item">Salah item / pesanan</option>
+                    <option value="kualitas">Kualitas tidak sesuai</option>
+                    <option value="tidak_sesuai">Tidak sesuai deskripsi</option>
+                    <option value="perubahan">Perubahan keputusan</option>
+                    <option value="lainnya">Lainnya</option>
+                </select>
+            </div>
+            <div id="otherReasonDiv" class="mt-2 hidden">
+                <input id="otherReason" type="text" placeholder="Jelaskan alasan…" class="input-glass w-full px-3 py-2 rounded-xl text-sm">
+            </div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 mb-4 flex justify-between items-center">
+            <span class="text-sm text-white/50 font-semibold">Total Refund:</span>
+            <span id="refundTotal" class="text-xl font-black text-red-400">Rp 0</span>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="goStep1()" class="flex-1 py-3 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)">← Kembali</button>
+            <button onclick="goStep3()" class="flex-1 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#ef4444,#dc2626)">Review →</button>
+        </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="step3" class="hidden">
+        <div class="glass-card rounded-2xl p-5 mb-4">
+            <h3 class="font-bold text-sm mb-4">Konfirmasi Retur</h3>
+            <div id="confirmSummary" class="space-y-3 mb-4"></div>
+            <div>
+                <label class="text-xs font-semibold text-white/40 mb-2 block">Metode Refund *</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="method-btn sel" data-method="cash" onclick="selectMethod(this)">💵 Tunai</div>
+                    <div class="method-btn" data-method="transfer" onclick="selectMethod(this)">🏦 Transfer</div>
+                    <div class="method-btn" data-method="store_credit" onclick="selectMethod(this)">🎁 Kredit Toko</div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <label class="text-xs font-semibold text-white/40 mb-1 block">Catatan (opsional)</label>
+                <textarea id="refundNotes" class="input-glass w-full px-3 py-2 rounded-xl text-sm h-14" placeholder="Catatan proses retur…"></textarea>
+            </div>
+        </div>
+        <div id="step3Err" class="hidden mb-3 px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5"></div>
+        <div class="flex gap-3">
+            <button onclick="goStep2back()" class="flex-1 py-3 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)">← Edit</button>
+            <button onclick="submitRefund()" id="submitBtn" class="flex-1 py-3 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#ef4444,#dc2626)">Proses Retur</button>
+        </div>
+    </div>
+
+    <!-- History -->
+    <div class="mt-8">
+        <h3 class="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">Riwayat Retur</h3>
+        <div id="refundHistory" class="glass-card rounded-2xl overflow-hidden"></div>
+    </div>
 </div>
+
 <script>
+const REFUNDS_KEY='lunomi_refunds';
+let selectedTrx=null, selectedItems={}, selectedMethod='cash';
+
+function getRefunds(){return JSON.parse(localStorage.getItem(REFUNDS_KEY)||'[]');}
+function saveRefunds(arr){localStorage.setItem(REFUNDS_KEY,JSON.stringify(arr));}
+function rp(n){return 'Rp '+Math.round(n).toLocaleString('id-ID');}
+
+function setStep(n){
+    [1,2,3].forEach(i=>{
+        document.getElementById('step'+i).classList.toggle('hidden',i!==n);
+        const dot=document.getElementById('dot'+i);
+        const lbl=document.getElementById('lbl'+i);
+        if(i<n){dot.className='step-dot step-done';dot.textContent='✓';lbl.className='text-xs font-bold text-red-400';}
+        else if(i===n){dot.className='step-dot step-active';dot.textContent=i;lbl.className='text-xs font-bold text-red-400';}
+        else{dot.className='step-dot step-pending';dot.textContent=i;lbl.className='text-xs font-bold text-white/30';}
+    });
+    [1,2].forEach(i=>document.getElementById('line'+i).style.background=i<n?'linear-gradient(90deg,#ef4444,#dc2626)':'rgba(255,255,255,.1)');
+}
+
+function searchTransactions(){
+    const q=document.getElementById('searchTrx').value.trim().toLowerCase();
+    const df=document.getElementById('searchDate').value;
+    const el=document.getElementById('trxResults');
+    if(!q&&!df){el.innerHTML=`<p class="py-12 text-center text-white/25 text-sm">Ketik untuk mencari transaksi</p>`;return;}
+    let trxs=LunomiDB.getTransactions();
+    if(df) trxs=trxs.filter(t=>t.createdAt&&t.createdAt.slice(0,10)===df);
+    if(q) trxs=trxs.filter(t=>((t.id||'')+(t.customerName||'')+(t.invoiceNumber||'')).toLowerCase().includes(q));
+    trxs.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+    trxs=trxs.slice(0,20);
+    if(!trxs.length){el.innerHTML=`<p class="py-12 text-center text-white/25 text-sm">Transaksi tidak ditemukan</p>`;return;}
+    el.innerHTML=trxs.map(t=>{
+        const ds=t.createdAt?new Date(t.createdAt).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-';
+        return `<div class="trx-row px-5 py-4 border-b border-white/5" onclick="selectTransaction('${t.id}')">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="font-bold text-sm">${t.customerName||'Pelanggan'}</div>
+                    <div class="text-xs text-white/40">${t.invoiceNumber||t.id} &bull; ${ds}</div>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-sm">${rp(t.total||0)}</div>
+                    <div class="text-xs text-white/40">${(t.items||[]).length} item</div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function selectTransaction(id){
+    selectedTrx=LunomiDB.getTransactions().find(t=>t.id===id);
+    if(!selectedTrx) return;
+    selectedItems={};
+    goStep2();
+}
+
+function goStep1(){selectedTrx=null;selectedItems={};setStep(1);}
+
+function goStep2(){
+    if(!selectedTrx) return;
+    const ds=selectedTrx.createdAt?new Date(selectedTrx.createdAt).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):'-';
+    document.getElementById('selectedTrxInfo').textContent=`${selectedTrx.invoiceNumber||selectedTrx.id} — ${ds} — ${rp(selectedTrx.total||0)}`;
+    const items=selectedTrx.items||[];
+    if(!items.length){
+        document.getElementById('itemsList').innerHTML=`<p class="text-xs text-white/40 py-3 text-center">Tidak ada detail item pada transaksi ini</p>`;
+    } else {
+        document.getElementById('itemsList').innerHTML=items.map((item,idx)=>`
+            <div class="flex items-center gap-3 py-2.5 border-b border-white/5">
+                <input type="checkbox" id="item_${idx}" class="w-4 h-4 accent-red-500 flex-shrink-0" onchange="toggleItem(${idx})" ${selectedItems[idx]?'checked':''}>
+                <div class="flex-1">
+                    <div class="text-sm font-semibold">${item.name}</div>
+                    <div class="text-xs text-white/40">${rp(item.price||0)} × ${item.qty||1} = ${rp((item.price||0)*(item.qty||1))}</div>
+                </div>
+                <div id="qtyWrap_${idx}" style="${selectedItems[idx]?'':'display:none'}">
+                    <input type="number" id="qty_${idx}" min="1" max="${item.qty||1}" value="${selectedItems[idx]?.qty||item.qty||1}"
+                        class="input-glass w-14 px-2 py-1 rounded-lg text-xs text-center" onchange="updateQty(${idx})">
+                </div>
+            </div>`).join('');
+    }
+    setStep(2);
+    updateRefundTotal();
+}
+
+function toggleItem(idx){
+    const checked=document.getElementById('item_'+idx).checked;
+    const item=(selectedTrx.items||[])[idx];
+    if(checked){selectedItems[idx]={...item,qty:item.qty||1};document.getElementById('qtyWrap_'+idx).style.display='';}
+    else{delete selectedItems[idx];document.getElementById('qtyWrap_'+idx).style.display='none';}
+    updateRefundTotal();
+}
+
+function updateQty(idx){
+    const max=(selectedTrx.items||[])[idx]?.qty||1;
+    const v=Math.min(parseInt(document.getElementById('qty_'+idx).value)||1,max);
+    document.getElementById('qty_'+idx).value=v;
+    if(selectedItems[idx]) selectedItems[idx].qty=v;
+    updateRefundTotal();
+}
+
+function updateRefundTotal(){
+    const total=Object.values(selectedItems).reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+    document.getElementById('refundTotal').textContent=rp(total);
+}
+
+function goStep3(){
+    const reason=document.getElementById('returnReason').value;
+    if(!reason){alert('Pilih alasan retur');return;}
+    if(!Object.keys(selectedItems).length){alert('Pilih minimal 1 item untuk diretur');return;}
+    const items=Object.values(selectedItems);
+    let total=0; items.forEach(i=>total+=(i.price||0)*(i.qty||1));
+    const RLABELS={salah_item:'Salah item/pesanan',kualitas:'Kualitas tidak sesuai',tidak_sesuai:'Tidak sesuai deskripsi',perubahan:'Perubahan keputusan',lainnya:'Lainnya'};
+    document.getElementById('confirmSummary').innerHTML=`
+        <div class="glass-card rounded-xl p-4 space-y-2 text-sm">
+            <div class="flex justify-between"><span class="text-white/50">Transaksi</span><span class="font-semibold">${selectedTrx.invoiceNumber||selectedTrx.id}</span></div>
+            <div class="flex justify-between"><span class="text-white/50">Pelanggan</span><span class="font-semibold">${selectedTrx.customerName||'Pelanggan'}</span></div>
+            <div class="flex justify-between"><span class="text-white/50">Alasan</span><span class="font-semibold">${RLABELS[reason]||reason}</span></div>
+        </div>
+        <div class="glass-card rounded-xl p-4">
+            <p class="text-xs font-bold text-white/40 mb-2">Item Diretur</p>
+            ${items.map(i=>`<div class="flex justify-between text-sm py-1"><span>${i.name} ×${i.qty}</span><span>${rp((i.price||0)*(i.qty||1))}</span></div>`).join('')}
+            <div class="border-t border-white/10 mt-2 pt-2 flex justify-between font-bold">
+                <span class="text-red-400">Total Refund</span>
+                <span class="text-red-400 text-lg">${rp(total)}</span>
+            </div>
+        </div>`;
+    setStep(3);
+}
+
+function goStep2back(){setStep(2);}
+
+function selectMethod(el){
+    document.querySelectorAll('.method-btn').forEach(b=>b.classList.remove('sel'));
+    el.classList.add('sel');
+    selectedMethod=el.dataset.method;
+}
+
+function submitRefund(){
+    const errEl=document.getElementById('step3Err');
+    if(!selectedMethod){errEl.textContent='Pilih metode refund';errEl.classList.remove('hidden');return;}
+    errEl.classList.add('hidden');
+    const btn=document.getElementById('submitBtn');
+    btn.disabled=true; btn.textContent='Memproses…';
+    const reason=document.getElementById('returnReason').value;
+    const notes=document.getElementById('refundNotes').value.trim();
+    const items=Object.values(selectedItems);
+    let total=0; items.forEach(i=>total+=(i.price||0)*(i.qty||1));
+    const session=SessionManager.get('session');
+    const outlet=SessionManager.get('outlet');
+    const staff=session?.name||'Staff';
+    const record={
+        id:'RFN-'+Date.now(),
+        trxId:selectedTrx.id,
+        invoiceNumber:selectedTrx.invoiceNumber||selectedTrx.id,
+        customerName:selectedTrx.customerName||'Pelanggan',
+        items,reason,notes,
+        refundTotal:total,
+        refundMethod:selectedMethod,
+        staff,outlet:outlet?.name||'',
+        createdAt:new Date().toISOString()
+    };
+    const refunds=getRefunds();
+    refunds.unshift(record);
+    saveRefunds(refunds);
+    const MLABELS={cash:'Tunai',transfer:'Transfer',store_credit:'Kredit Toko'};
+    AuditLog.add('refund',`${staff} retur ${rp(total)} — ${record.invoiceNumber} via ${MLABELS[selectedMethod]||selectedMethod}`);
+    setTimeout(()=>{
+        alert(`Retur berhasil diproses!\n\nTotal Refund: ${rp(total)}\nMetode: ${MLABELS[selectedMethod]||selectedMethod}`);
+        selectedTrx=null; selectedItems={}; selectedMethod='cash';
+        document.getElementById('searchTrx').value='';
+        document.getElementById('searchDate').value='';
+        renderHistory();
+        setStep(1);
+        btn.disabled=false; btn.textContent='Proses Retur';
+    },700);
+}
+
+function renderHistory(){
+    const refunds=getRefunds().slice(0,10);
+    const el=document.getElementById('refundHistory');
+    if(!refunds.length){el.innerHTML=`<p class="py-8 text-center text-white/25 text-sm">Belum ada riwayat retur</p>`;return;}
+    const MLABELS={cash:'Tunai',transfer:'Transfer',store_credit:'Kredit Toko'};
+    el.innerHTML=refunds.map(r=>{
+        const ds=new Date(r.createdAt).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+        return `<div class="px-5 py-4 border-b border-white/5 flex justify-between items-center">
+            <div>
+                <div class="font-bold text-sm">${r.customerName} <span class="text-xs text-white/40 font-normal">— ${r.invoiceNumber}</span></div>
+                <div class="text-xs text-white/40">${ds} &bull; ${MLABELS[r.refundMethod]||r.refundMethod} &bull; ${r.staff}</div>
+            </div>
+            <div class="font-bold text-red-400">${rp(r.refundTotal)}</div>
+        </div>`;
+    }).join('');
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
-    try{const s=localStorage.getItem('lunomi_session');if(!s){window.location.href='index.html';return;}
-    const o=JSON.parse(localStorage.getItem('lunomi_outlet')||'null');
-    if(o)document.getElementById('outletLabel').textContent=o.name;}
-    catch(e){window.location.href='index.html';}
+    document.getElementById('returnReason').addEventListener('change',e=>{
+        document.getElementById('otherReasonDiv').classList.toggle('hidden',e.target.value!=='lainnya');
+    });
+    try{
+        const s=SessionManager.get('session');
+        if(!s){window.location.href='index.html';return;}
+        const outlet=SessionManager.get('outlet');
+        document.getElementById('outletLabel').textContent=outlet?.name||'Semua Outlet';
+    } catch(e){window.location.href='index.html';}
+    renderHistory();
+    document.querySelector('.method-btn')?.classList.add('sel');
 });
 </script>
 </body>

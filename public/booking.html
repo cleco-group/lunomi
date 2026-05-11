@@ -3,112 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Online - Lunomi</title>
+    <title>Booking Online — Lunomi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../assets/js/lunomi-core.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #020617; color: white; min-height: 100vh; }
-        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        *{font-family:'Plus Jakarta Sans',sans-serif;}
+        body{min-height:100vh;background:#020617;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(59,130,246,.15) 0%,transparent 60%);color:white;overflow-x:hidden;}
+        .glass-nav{background:rgba(2,6,23,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+        .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);}
+        .input-glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:white;}
+        .input-glass::placeholder{color:rgba(255,255,255,.35);}
+        .input-glass:focus{outline:none;border-color:rgba(99,102,241,.7);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .tab-btn{padding:.45rem 1rem;border-radius:.75rem;font-size:.72rem;font-weight:700;transition:all .2s;cursor:pointer;border:1px solid transparent;}
+        .tab-btn.active{background:rgba(99,102,241,.25);color:#a5b4fc;border-color:rgba(99,102,241,.35);}
+        .tab-btn:not(.active){color:rgba(255,255,255,.4);}
+        .badge{font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:9999px;}
+        .badge-pending{background:rgba(245,158,11,.2);color:#fcd34d;}
+        .badge-confirmed{background:rgba(34,197,94,.2);color:#6ee7b7;}
+        .badge-done{background:rgba(99,102,241,.2);color:#a5b4fc;}
+        .badge-cancelled{background:rgba(239,68,68,.2);color:#fca5a5;}
+        @media(max-width:768px){input,select,textarea{font-size:16px!important;}}
     </style>
 </head>
-<body class="p-4 sm:p-8">
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-2xl font-extrabold">Manajemen Booking Online</h1>
-                <p class="text-sm text-white/50">Kelola reservasi jasa dan janji temu pelanggan</p>
-            </div>
-            <div class="flex gap-3">
-                <button onclick="window.location.href='dashboard.html'" class="px-4 py-2 rounded-xl glass-card text-sm font-semibold">Kembali</button>
-                <button class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold transition">Lihat Landing Page</button>
-            </div>
+<body>
+<nav class="glass-nav sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+        <button onclick="window.location.href='dashboard.html'" class="text-white opacity-50 hover:opacity-100 transition text-lg">←</button>
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">📅</div>
+        <div>
+            <div class="font-extrabold text-white text-sm">Manajemen Booking</div>
+            <div class="text-xs" id="outletLabel" style="color:rgba(255,255,255,.4)">-</div>
         </div>
+        <button onclick="openAdd()" class="ml-auto px-4 py-2 rounded-xl text-xs font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">+ Tambah Booking</button>
+    </div>
+</nav>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Booking Stats -->
-            <div class="lg:col-span-1 space-y-6">
-                <div class="glass-card p-6 rounded-3xl">
-                    <h4 class="text-xs font-bold text-white/40 uppercase mb-4">Status Hari Ini</h4>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm">Total Booking</span>
-                            <span class="font-black text-lg">24</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-emerald-400">Selesai</span>
-                            <span class="font-black text-lg text-emerald-400">18</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-amber-400">Menunggu</span>
-                            <span class="font-black text-lg text-amber-400">6</span>
-                        </div>
-                    </div>
-                </div>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="statsRow"></div>
 
-                <div class="glass-card p-6 rounded-3xl bg-indigo-600/10 border-indigo-500/30">
-                    <h4 class="text-sm font-bold mb-2">Link Booking Anda</h4>
-                    <p class="text-[10px] text-white/50 mb-4">Bagikan link ini ke pelanggan atau pasang di Bio Instagram</p>
-                    <div class="flex gap-2">
-                        <input type="text" readonly value="lunomi.id/b/outlet-pusat" class="bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs flex-1 font-mono">
-                        <button class="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition">
-                            <span class="material-symbols-outlined text-sm">content_copy</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Booking List -->
-            <div class="lg:col-span-2">
-                <div class="glass-card rounded-3xl overflow-hidden">
-                    <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                        <h4 class="font-bold">Jadwal Booking Mendatang</h4>
-                        <div class="flex gap-2">
-                            <button class="p-2 glass-card rounded-lg"><span class="material-symbols-outlined text-sm">filter_list</span></button>
-                            <button class="p-2 glass-card rounded-lg"><span class="material-symbols-outlined text-sm">search</span></button>
-                        </div>
-                    </div>
-                    <div class="divide-y divide-white/5">
-                        <!-- Item 1 -->
-                        <div class="p-6 flex items-center justify-between hover:bg-white/5 transition">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex flex-col items-center justify-center">
-                                    <span class="text-[10px] font-bold uppercase">Mei</span>
-                                    <span class="text-lg font-black">04</span>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-sm">Budi Santoso</h5>
-                                    <p class="text-xs text-white/40">Potong Rambut + Wash • 14:00 WIB</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="px-2 py-1 rounded-md bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase">Menunggu</span>
-                                <button class="p-2 hover:bg-white/10 rounded-full transition"><span class="material-symbols-outlined text-sm">more_vert</span></button>
-                            </div>
-                        </div>
-                        <!-- Item 2 -->
-                        <div class="p-6 flex items-center justify-between hover:bg-white/5 transition">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex flex-col items-center justify-center">
-                                    <span class="text-[10px] font-bold uppercase">Mei</span>
-                                    <span class="text-lg font-black">04</span>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-sm">Ani Wijaya</h5>
-                                    <p class="text-xs text-white/40">Facial Treatment • 15:30 WIB</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="px-2 py-1 rounded-md bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase">Menunggu</span>
-                                <button class="p-2 hover:bg-white/10 rounded-full transition"><span class="material-symbols-outlined text-sm">more_vert</span></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Booking link -->
+    <div class="glass-card rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div class="flex-1">
+            <p class="text-xs font-bold text-white/40 uppercase mb-0.5">Link Booking Anda</p>
+            <p class="text-xs text-white/50">Bagikan ke pelanggan atau pasang di Bio Instagram</p>
+        </div>
+        <div class="flex gap-2 w-full sm:w-auto">
+            <input id="bookingLink" type="text" readonly value="lunomi.id/b/outlet" class="input-glass px-3 py-2 rounded-xl text-xs font-mono flex-1 sm:w-48">
+            <button onclick="copyLink()" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap" style="background:rgba(99,102,241,.2);color:#a5b4fc;border:1px solid rgba(99,102,241,.3)">Salin</button>
         </div>
     </div>
+
+    <!-- Tabs + List -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="p-4 border-b border-white/5 flex flex-wrap gap-2 items-center">
+            <button class="tab-btn active" onclick="setTab('all',this)">Semua</button>
+            <button class="tab-btn" onclick="setTab('today',this)">Hari Ini</button>
+            <button class="tab-btn" onclick="setTab('pending',this)">Menunggu</button>
+            <button class="tab-btn" onclick="setTab('confirmed',this)">Dikonfirmasi</button>
+            <button class="tab-btn" onclick="setTab('done',this)">Selesai</button>
+            <input id="searchBox" type="text" placeholder="Cari nama / layanan..." class="input-glass ml-auto px-3 py-1.5 rounded-xl text-xs w-44" oninput="render()">
+        </div>
+        <div id="bookingList" class="divide-y divide-white/5 min-h-[180px]"></div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="addModal" style="display:none;background:rgba(0,0,0,.7);backdrop-filter:blur(8px)" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="rounded-2xl p-6 w-full max-w-md shadow-2xl" style="background:#0f172a;border:1px solid rgba(255,255,255,.1)">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold" id="modalTitle">Tambah Booking</h3>
+            <button onclick="closeAdd()" class="text-white/40 hover:text-white text-xl leading-none">✕</button>
+        </div>
+        <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="col-span-2">
+                    <label class="text-xs font-semibold text-white/40 mb-1 block">Nama Pelanggan *</label>
+                    <input id="bName" type="text" class="input-glass w-full px-3 py-2 rounded-xl text-sm" placeholder="Nama pelanggan">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-white/40 mb-1 block">No. HP</label>
+                    <input id="bPhone" type="tel" class="input-glass w-full px-3 py-2 rounded-xl text-sm" placeholder="08xxxxxxxxxx">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-white/40 mb-1 block">Jumlah Tamu</label>
+                    <input id="bGuests" type="number" min="1" max="50" value="1" class="input-glass w-full px-3 py-2 rounded-xl text-sm">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-xs font-semibold text-white/40 mb-1 block">Layanan *</label>
+                    <input id="bService" type="text" class="input-glass w-full px-3 py-2 rounded-xl text-sm" placeholder="Contoh: Potong Rambut + Cuci">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-white/40 mb-1 block">Tanggal *</label>
+                    <input id="bDate" type="date" class="input-glass w-full px-3 py-2 rounded-xl text-sm">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-white/40 mb-1 block">Jam *</label>
+                    <input id="bTime" type="time" class="input-glass w-full px-3 py-2 rounded-xl text-sm">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-xs font-semibold text-white/40 mb-1 block">Catatan</label>
+                    <textarea id="bNotes" class="input-glass w-full px-3 py-2 rounded-xl text-sm h-16" placeholder="Catatan tambahan..."></textarea>
+                </div>
+            </div>
+        </div>
+        <div id="addErr" class="hidden mt-3 px-3 py-2 rounded-xl text-xs" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5"></div>
+        <div class="flex gap-3 mt-4">
+            <button onclick="closeAdd()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)">Batal</button>
+            <button onclick="saveBooking()" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'lunomi_bookings';
+let currentTab = 'all', editId = null;
+const MONTH_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+
+function getBookings(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
+function saveBookings(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+function getToday(){ return new Date().toISOString().slice(0,10); }
+
+function statusBadge(st){
+    const m = {pending:'<span class="badge badge-pending">Menunggu</span>',confirmed:'<span class="badge badge-confirmed">Dikonfirmasi</span>',done:'<span class="badge badge-done">Selesai</span>',cancelled:'<span class="badge badge-cancelled">Dibatalkan</span>'};
+    return m[st]||`<span class="badge">${st}</span>`;
+}
+
+function renderStats(){
+    const all = getBookings(), today = getToday();
+    const td = all.filter(b=>b.date===today);
+    const stats = [
+        {label:'Total Hari Ini',val:td.length,color:'#a5b4fc'},
+        {label:'Dikonfirmasi',val:td.filter(b=>b.status==='confirmed').length,color:'#6ee7b7'},
+        {label:'Menunggu',val:td.filter(b=>b.status==='pending').length,color:'#fcd34d'},
+        {label:'Dibatalkan',val:td.filter(b=>b.status==='cancelled').length,color:'#fca5a5'},
+    ];
+    document.getElementById('statsRow').innerHTML = stats.map(s=>`
+        <div class="glass-card rounded-2xl p-4">
+            <p class="text-xs text-white/40 mb-1">${s.label}</p>
+            <p class="text-2xl font-black" style="color:${s.color}">${s.val}</p>
+        </div>`).join('');
+}
+
+function setTab(tab,btn){
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+}
+
+function render(){
+    renderStats();
+    const search = (document.getElementById('searchBox')?.value||'').toLowerCase();
+    const today = getToday();
+    let bookings = getBookings();
+    if(currentTab==='today') bookings = bookings.filter(b=>b.date===today);
+    else if(currentTab==='pending') bookings = bookings.filter(b=>b.status==='pending');
+    else if(currentTab==='confirmed') bookings = bookings.filter(b=>b.status==='confirmed');
+    else if(currentTab==='done') bookings = bookings.filter(b=>b.status==='done');
+    if(search) bookings = bookings.filter(b=>(b.name+b.service).toLowerCase().includes(search));
+    bookings.sort((a,b)=>a.date===b.date?a.time.localeCompare(b.time):b.date.localeCompare(a.date));
+
+    const el = document.getElementById('bookingList');
+    if(!bookings.length){ el.innerHTML=`<div class="py-14 text-center text-white/25 text-sm">Tidak ada booking ditemukan</div>`; return; }
+
+    el.innerHTML = bookings.map(b=>{
+        const [y,m,d] = b.date.split('-');
+        const dateLabel = `${d} ${MONTH_ID[parseInt(m)-1]} ${y}`;
+        const waBtn = b.phone?`<button onclick="sendWA('${b.id}')" class="px-2 py-1 rounded-lg text-[10px] font-bold" style="background:rgba(37,211,102,.12);color:#25d366;border:1px solid rgba(37,211,102,.22)">WA</button>`:'';
+        const confirmBtn = b.status==='pending'?`<button onclick="updateStatus('${b.id}','confirmed')" class="px-2 py-1 rounded-lg text-[10px] font-bold" style="background:rgba(34,197,94,.12);color:#6ee7b7;border:1px solid rgba(34,197,94,.22)">Konfirmasi</button>`:'';
+        const doneBtn = b.status==='confirmed'?`<button onclick="updateStatus('${b.id}','done')" class="px-2 py-1 rounded-lg text-[10px] font-bold" style="background:rgba(99,102,241,.12);color:#a5b4fc;border:1px solid rgba(99,102,241,.22)">Selesai</button>`:'';
+        const cancelBtn = (b.status!=='done'&&b.status!=='cancelled')?`<button onclick="updateStatus('${b.id}','cancelled')" class="px-2 py-1 rounded-lg text-[10px] font-bold" style="background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.2)">Batalkan</button>`:'';
+        return `<div class="p-4 hover:bg-white/5 transition flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,.15);color:#a5b4fc">
+                <span class="text-[9px] font-bold">${MONTH_ID[parseInt(m)-1]}</span>
+                <span class="text-lg font-black leading-none">${d}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold text-sm">${b.name}</span>
+                    ${statusBadge(b.status)}
+                    ${b.guests>1?`<span class="text-xs text-white/35">${b.guests} tamu</span>`:''}
+                </div>
+                <p class="text-xs text-white/45 mt-0.5">${b.service} &bull; ${b.time} WIB &bull; ${dateLabel}</p>
+                ${b.notes?`<p class="text-xs text-white/25 italic mt-0.5">"${b.notes}"</p>`:''}
+            </div>
+            <div class="flex gap-1.5 flex-wrap items-center">
+                ${waBtn}${confirmBtn}${doneBtn}${cancelBtn}
+                <button onclick="openEdit('${b.id}')" class="px-2 py-1 rounded-lg text-[10px] font-bold" style="background:rgba(255,255,255,.05);color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.1)">Edit</button>
+                <button onclick="deleteBooking('${b.id}')" class="px-2 py-1 rounded-lg text-[10px] font-bold" style="background:rgba(239,68,68,.06);color:rgba(239,68,68,.5);border:1px solid rgba(239,68,68,.12)">✕</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openAdd(){
+    editId=null;
+    document.getElementById('modalTitle').textContent='Tambah Booking';
+    ['bName','bPhone','bService','bNotes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('bDate').value=getToday();
+    document.getElementById('bTime').value='10:00';
+    document.getElementById('bGuests').value='1';
+    document.getElementById('addErr').classList.add('hidden');
+    document.getElementById('addModal').style.display='flex';
+}
+
+function openEdit(id){
+    const b = getBookings().find(x=>x.id===id);
+    if(!b) return;
+    editId=id;
+    document.getElementById('modalTitle').textContent='Edit Booking';
+    document.getElementById('bName').value=b.name;
+    document.getElementById('bPhone').value=b.phone||'';
+    document.getElementById('bService').value=b.service;
+    document.getElementById('bDate').value=b.date;
+    document.getElementById('bTime').value=b.time;
+    document.getElementById('bGuests').value=b.guests||1;
+    document.getElementById('bNotes').value=b.notes||'';
+    document.getElementById('addErr').classList.add('hidden');
+    document.getElementById('addModal').style.display='flex';
+}
+
+function closeAdd(){ document.getElementById('addModal').style.display='none'; editId=null; }
+
+function saveBooking(){
+    const name=document.getElementById('bName').value.trim();
+    const phone=document.getElementById('bPhone').value.trim();
+    const service=document.getElementById('bService').value.trim();
+    const date=document.getElementById('bDate').value;
+    const time=document.getElementById('bTime').value;
+    const guests=parseInt(document.getElementById('bGuests').value)||1;
+    const notes=document.getElementById('bNotes').value.trim();
+    const errEl=document.getElementById('addErr');
+    if(!name){errEl.textContent='Nama pelanggan wajib diisi.';errEl.classList.remove('hidden');return;}
+    if(!service){errEl.textContent='Layanan wajib diisi.';errEl.classList.remove('hidden');return;}
+    if(!date||!time){errEl.textContent='Tanggal dan jam wajib diisi.';errEl.classList.remove('hidden');return;}
+    errEl.classList.add('hidden');
+
+    const session=SessionManager.get('session');
+    const outlet=SessionManager.get('outlet');
+    const staff=session?.name||'Staff';
+    const bookings=getBookings();
+
+    if(editId){
+        const idx=bookings.findIndex(x=>x.id===editId);
+        if(idx>=0){
+            bookings[idx]={...bookings[idx],name,phone,service,date,time,guests,notes,updatedAt:new Date().toISOString()};
+            AuditLog.add('booking_edit',`${staff} edit booking ${name} — ${service} ${date} ${time}`);
+        }
+    } else {
+        bookings.unshift({id:'BKG-'+Date.now(),name,phone,service,date,time,guests,notes,status:'pending',outlet:outlet?.name||'',createdAt:new Date().toISOString()});
+        AuditLog.add('booking_add',`${staff} tambah booking ${name} — ${service} ${date} ${time}`);
+    }
+    saveBookings(bookings);
+    closeAdd();
+    render();
+}
+
+function updateStatus(id,newStatus){
+    const bookings=getBookings();
+    const b=bookings.find(x=>x.id===id);
+    if(!b) return;
+    b.status=newStatus; b.updatedAt=new Date().toISOString();
+    saveBookings(bookings);
+    const staff=SessionManager.get('session')?.name||'Staff';
+    const label={confirmed:'dikonfirmasi',done:'selesai',cancelled:'dibatalkan'}[newStatus]||newStatus;
+    AuditLog.add('booking_status',`${staff} ${label} booking ${b.name}`);
+    render();
+}
+
+function deleteBooking(id){
+    if(!confirm('Hapus booking ini?')) return;
+    saveBookings(getBookings().filter(x=>x.id!==id));
+    AuditLog.add('booking_delete',`Booking #${id} dihapus`);
+    render();
+}
+
+function sendWA(id){
+    const b=getBookings().find(x=>x.id===id);
+    if(!b||!b.phone) return;
+    const outlet=JSON.parse(localStorage.getItem('lunomi_outlet')||'{}');
+    const msg=`Halo *${b.name}*! 😊\n\nKonfirmasi booking Anda di *${outlet.name||'Outlet Kami'}*:\n\n📌 Layanan: ${b.service}\n📅 Tanggal: ${b.date}\n⏰ Jam: ${b.time} WIB\n👥 Tamu: ${b.guests}\n\nTerima kasih telah booking! Sampai jumpa 🙏`;
+    window.open(`https://wa.me/${b.phone.replace(/^0/,'62')}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function copyLink(){
+    const link=document.getElementById('bookingLink').value;
+    navigator.clipboard.writeText(link).then(()=>{
+        const btn=event.target; btn.textContent='Tersalin!';
+        setTimeout(()=>btn.textContent='Salin',2000);
+    }).catch(()=>alert('Link: '+link));
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    try{
+        const s=SessionManager.get('session');
+        if(!s){window.location.href='index.html';return;}
+        const outlet=SessionManager.get('outlet');
+        document.getElementById('outletLabel').textContent=outlet?.name||'Semua Outlet';
+        if(outlet) document.getElementById('bookingLink').value=`lunomi.id/b/${outlet.id||'outlet'}`;
+    } catch(e){window.location.href='index.html';}
+    render();
+});
+</script>
 </body>
 </html>
