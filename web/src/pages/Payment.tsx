@@ -154,7 +154,7 @@ export default function Payment() {
   return (
     <div className="flex min-h-screen" style={{ background: '#020617', backgroundImage: 'radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.2) 0%,transparent 60%),radial-gradient(ellipse 60% 45% at 90% 100%,rgba(16,185,129,.12) 0%,transparent 60%)' }}>
       <Sidebar onLogout={signOut} />
-      <main className="flex-1 min-h-screen" style={{ marginLeft: '256px' }}>
+      <main className="flex-1 min-h-screen lg:ml-64">
         <header className="sticky top-0 z-40 px-8 py-4 flex items-center justify-between" style={{ background: 'rgba(2,6,23,.7)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
           <div>
             <h1 className="text-xl font-black text-white">Payment Gateway</h1>

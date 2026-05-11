@@ -182,7 +182,7 @@ export default function Dashboard() {
     }}>
       <Sidebar onLogout={logout} />
 
-      <main className="flex-1 min-h-screen" style={{ marginLeft: '256px' }}>
+      <main className="flex-1 min-h-screen lg:ml-64">
         <header className="sticky top-0 z-50 px-8 py-4 flex items-center justify-between"
                 style={{ 
                   background: 'rgba(2,6,23,0.7)', 

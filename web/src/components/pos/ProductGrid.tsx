@@ -40,7 +40,16 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
         const stored = localStorage.getItem('lunomi_products');
         if (stored) {
           const localProducts = JSON.parse(stored);
-          setProducts(localProducts);
+          // Normalize field names from Product page (cat → category, avail → is_active)
+          const normalized = localProducts
+            .filter((p: any) => p.avail !== false && p.is_active !== false)
+            .map((p: any) => ({
+              id: String(p.id),
+              name: p.name,
+              category: p.category || p.cat || 'Lainnya',
+              price: p.price,
+            }));
+          setProducts(normalized);
         } else {
           // Create demo products if none exist
           const demoProducts: Product[] = [
@@ -62,7 +71,10 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
       // Fallback to localStorage on error
       const stored = localStorage.getItem('lunomi_products');
       if (stored) {
-        setProducts(JSON.parse(stored));
+        const raw = JSON.parse(stored);
+        setProducts(raw.filter((p: any) => p.avail !== false && p.is_active !== false).map((p: any) => ({
+          id: String(p.id), name: p.name, category: p.category || p.cat || 'Lainnya', price: p.price,
+        })));
       }
     } finally {
       setLoading(false);

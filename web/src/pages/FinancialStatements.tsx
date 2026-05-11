@@ -215,7 +215,7 @@ export default function FinancialStatements() {
     >
       <Sidebar onLogout={signOut} />
 
-      <main className="flex-1 min-h-screen" style={{ marginLeft: '256px' }}>
+      <main className="flex-1 min-h-screen lg:ml-64">
         {/* Sticky header */}
         <header
           className="sticky top-0 z-40 px-8 py-4 flex items-center justify-between"

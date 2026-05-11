@@ -130,7 +130,7 @@ export default function WhatsApp() {
       }}
     >
       <Sidebar onLogout={signOut} />
-      <main className="flex-1 min-h-screen" style={{ marginLeft: '256px' }}>
+      <main className="flex-1 min-h-screen lg:ml-64">
         {/* Sticky Header */}
         <header
           className="sticky top-0 z-40 flex items-center justify-between px-8 py-4"
