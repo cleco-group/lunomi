@@ -80,21 +80,21 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="text-white text-xl">Loading products...</div>
+        <div className="text-white text-base md:text-xl">Loading products...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
+    <div className="flex-1 p-3 md:p-6 overflow-auto">
       {/* Search & Filter */}
-      <div className="mb-6 flex gap-4">
+      <div className="mb-4 md:mb-6 flex flex-col sm:flex-row gap-2 md:gap-4">
         <input
           type="text"
           placeholder="Cari produk..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 px-4 py-3 rounded-xl text-white"
+          className="flex-1 px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl text-sm md:text-base text-white"
           style={{
             background: 'rgba(255,255,255,0.1)',
             border: '1px solid rgba(255,255,255,0.2)'
@@ -103,7 +103,7 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-6 py-3 rounded-xl text-white font-semibold"
+          className="px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl text-sm md:text-base text-white font-semibold"
           style={{
             background: 'rgba(255,255,255,0.1)',
             border: '1px solid rgba(255,255,255,0.2)'
@@ -118,33 +118,33 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
         {filteredProducts.map(product => (
           <div
             key={product.id}
             onClick={() => onAddToCart(product)}
-            className="p-5 rounded-xl cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
+            className="p-3 md:p-5 rounded-lg md:rounded-xl cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
             style={{
               background: 'rgba(13,59,74,0.5)',
               backdropFilter: 'blur(16px)',
               border: '1px solid rgba(201,168,76,0.2)'
             }}
           >
-            <div className="mb-3">
-              <h3 className="font-bold text-white text-lg mb-1">{product.name}</h3>
+            <div className="mb-2 md:mb-3">
+              <h3 className="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 line-clamp-2">{product.name}</h3>
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 {product.category}
               </p>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold" style={{ color: '#C9A84C' }}>
+              <p className="text-lg md:text-2xl font-bold" style={{ color: '#C9A84C' }}>
                 Rp {product.price.toLocaleString('id-ID')}
               </p>
               <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center"
+                className="w-8 md:w-10 h-8 md:h-10 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ background: 'rgba(201,168,76,0.2)' }}
               >
-                <span className="text-xl">+</span>
+                <span className="text-lg md:text-xl">+</span>
               </div>
             </div>
           </div>
@@ -152,9 +152,9 @@ export default function ProductGrid({ onAddToCart }: ProductGridProps) {
       </div>
 
       {filteredProducts.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-white/60 text-lg">Tidak ada produk ditemukan</p>
-          <p className="text-white/40 text-sm mt-2">
+        <div className="text-center py-8 md:py-12">
+          <p className="text-white/60 text-base md:text-lg">Tidak ada produk ditemukan</p>
+          <p className="text-white/40 text-xs md:text-sm mt-2">
             Tambahkan produk di menu Master Menu
           </p>
         </div>

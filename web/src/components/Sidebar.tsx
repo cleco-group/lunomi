@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   onLogout: () => void;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
 
 interface NavItem {
@@ -52,7 +54,7 @@ const NAV: NavGroup[] = [
   },
 ];
 
-export default function Sidebar({ onLogout }: SidebarProps) {
+export default function Sidebar({ onLogout, isOpen = true, onToggle }: SidebarProps) {
   const location = useLocation();
   const [openMenus, setOpenMenus] = useState<string[]>(['ops', 'inventory', 'customer']);
 
@@ -71,15 +73,25 @@ export default function Sidebar({ onLogout }: SidebarProps) {
   });
 
   return (
-    <aside
-      className="w-64 h-screen fixed left-0 top-0 flex flex-col z-30"
-      style={{
-        background: 'rgba(2,6,23,.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRight: '1px solid rgba(255,255,255,.07)',
-      }}
-    >
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 md:hidden"
+          onClick={onToggle}
+        />
+      )}
+      
+      <aside
+        className="w-64 h-screen fixed left-0 top-0 flex flex-col z-30 transition-transform duration-300 md:translate-x-0"
+        style={{
+          background: 'rgba(2,6,23,.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderRight: '1px solid rgba(255,255,255,.07)',
+          transform: !isOpen ? 'translateX(-100%)' : 'translateX(0)',
+        }}
+      >
       {/* Logo */}
       <div className="px-6 py-5 border-b" style={{ borderColor: 'rgba(255,255,255,.07)' }}>
         <h1 className="text-2xl font-black" style={{ color: '#C9A84C', letterSpacing: '-0.5px' }}>LUNOMI</h1>
@@ -153,5 +165,6 @@ export default function Sidebar({ onLogout }: SidebarProps) {
         </button>
       </div>
     </aside>
+    </>
   );
 }

@@ -49,6 +49,7 @@ export default function Dashboard() {
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [salesData, setSalesData] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -180,80 +181,88 @@ export default function Dashboard() {
       background: '#061820',
       backgroundImage: 'radial-gradient(ellipse 70% 50% at 10% 0%, rgba(13,59,74,0.6) 0%, transparent 60%), radial-gradient(ellipse 60% 45% at 90% 100%, rgba(201,168,76,0.08) 0%, transparent 60%)'
     }}>
-      <Sidebar onLogout={logout} />
+      <Sidebar onLogout={logout} isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
-      <main className="flex-1 min-h-screen" style={{ marginLeft: '256px' }}>
-        <header className="sticky top-0 z-50 px-8 py-4 flex items-center justify-between"
+      <main className="flex-1 min-h-screen md:ml-64">
+        <header className="sticky top-0 z-50 px-4 md:px-8 py-4 flex items-center justify-between"
                 style={{ 
                   background: 'rgba(2,6,23,0.7)', 
                   backdropFilter: 'blur(20px)',
                   borderBottom: '1px solid rgba(255,255,255,0.08)' 
                 }}>
-          <h1 className="text-xl font-bold text-white">Dashboard Utama</h1>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-white/10 transition-colors"
+          >
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-bold text-white flex-1 md:flex-none md:ml-0 ml-4">Dashboard Utama</h1>
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="text-right hidden md:block">
               <p className="text-sm font-bold text-white">{user?.email}</p>
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Owner Access</p>
             </div>
-            <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white"
+            <div className="w-8 md:w-10 h-8 md:h-10 rounded-full flex items-center justify-center font-bold text-white text-sm md:text-base"
                  style={{ background: '#6366f1' }}>
               {user?.email?.charAt(0).toUpperCase()}
             </div>
           </div>
         </header>
 
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* Metric Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="p-6 rounded-2xl transition-transform hover:-translate-y-1"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+            <div className="p-4 md:p-6 rounded-2xl transition-transform hover:-translate-y-1"
                  style={{ background: 'rgba(13,59,74,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Penjualan Hari Ini</p>
-              <h3 className="text-2xl font-bold text-white">
+              <p className="text-xs md:text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Penjualan Hari Ini</p>
+              <h3 className="text-xl md:text-2xl font-bold text-white">
                 Rp {metrics.totalRevenue.toLocaleString('id-ID')}
               </h3>
               <p className="text-xs mt-2 text-green-400">Real-time data</p>
             </div>
             
-            <div className="p-6 rounded-2xl transition-transform hover:-translate-y-1"
+            <div className="p-4 md:p-6 rounded-2xl transition-transform hover:-translate-y-1"
                  style={{ background: 'rgba(13,59,74,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Transaksi</p>
-              <h3 className="text-2xl font-bold text-white">{metrics.totalOrders}</h3>
+              <p className="text-xs md:text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Transaksi</p>
+              <h3 className="text-xl md:text-2xl font-bold text-white">{metrics.totalOrders}</h3>
               <p className="text-xs mt-2 text-green-400">Hari ini</p>
             </div>
             
-            <div className="p-6 rounded-2xl transition-transform hover:-translate-y-1"
+            <div className="p-4 md:p-6 rounded-2xl transition-transform hover:-translate-y-1"
                  style={{ background: 'rgba(13,59,74,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Rata-rata Order</p>
-              <h3 className="text-2xl font-bold text-white">
+              <p className="text-xs md:text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Rata-rata Order</p>
+              <h3 className="text-xl md:text-2xl font-bold text-white">
                 Rp {Math.round(metrics.averageOrder).toLocaleString('id-ID')}
               </h3>
               <p className="text-xs mt-2 text-white/50">Per transaksi</p>
             </div>
             
-            <div className="p-6 rounded-2xl transition-transform hover:-translate-y-1"
+            <div className="p-4 md:p-6 rounded-2xl transition-transform hover:-translate-y-1"
                  style={{ background: 'rgba(13,59,74,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Customer</p>
-              <h3 className="text-2xl font-bold text-white">{metrics.newCustomers}</h3>
+              <p className="text-xs md:text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Customer</p>
+              <h3 className="text-xl md:text-2xl font-bold text-white">{metrics.newCustomers}</h3>
               <p className="text-xs mt-2 text-white/50">Terdaftar</p>
             </div>
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="p-6 rounded-2xl min-h-[300px]" 
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+            <div className="p-4 md:p-6 rounded-2xl min-h-[300px]" 
                  style={{ background: 'rgba(13,59,74,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <h3 className="font-bold mb-4 text-white">Grafik Penjualan (7 Hari Terakhir)</h3>
+              <h3 className="font-bold mb-4 text-sm md:text-base text-white">Grafik Penjualan (7 Hari Terakhir)</h3>
               <Line data={chartData} options={chartOptions} />
             </div>
 
-            <div className="p-6 rounded-2xl min-h-[300px]" 
+            <div className="p-4 md:p-6 rounded-2xl min-h-[300px]" 
                  style={{ background: 'rgba(13,59,74,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <h3 className="font-bold mb-4 text-white">Produk Terlaris</h3>
+              <h3 className="font-bold mb-4 text-sm md:text-base text-white">Produk Terlaris</h3>
               <div className="space-y-4">
                 {topProducts.map((product, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-white">
-                    <span>{product.name}</span>
-                    <span className="font-bold">{product.quantity} porsi</span>
+                  <div key={idx} className="flex justify-between items-center text-white text-sm md:text-base">
+                    <span className="truncate">{product.name}</span>
+                    <span className="font-bold ml-2">{product.quantity} porsi</span>
                   </div>
                 ))}
               </div>
