@@ -24,6 +24,7 @@ const NAV: NavGroup[] = [
       { path: '/pos', label: 'POS Kasir' },
       { path: '/kitchen', label: 'Kitchen Display' },
       { path: '/booking', label: 'Manajemen Booking' },
+      { path: '/tables', label: 'Manajemen Meja' },
     ],
   },
   {
