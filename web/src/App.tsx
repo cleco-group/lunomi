@@ -35,6 +35,9 @@ import Online from './pages/Online';
 import Keuangan from './pages/Keuangan';
 import Printer from './pages/Printer';
 import Security from './pages/Security';
+import Audit from './pages/Audit';
+import FinancialStatements from './pages/FinancialStatements';
+import StaffSchedule from './pages/StaffSchedule';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useSupabaseAuth();
@@ -86,6 +89,9 @@ function App() {
             <Route path="/keuangan" element={<ProtectedRoute><Keuangan /></ProtectedRoute>} />
             <Route path="/printer" element={<ProtectedRoute><Printer /></ProtectedRoute>} />
             <Route path="/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
+            <Route path="/audit" element={<ProtectedRoute><Audit /></ProtectedRoute>} />
+            <Route path="/financial-statements" element={<ProtectedRoute><FinancialStatements /></ProtectedRoute>} />
+            <Route path="/staff-schedule" element={<ProtectedRoute><StaffSchedule /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminTools /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

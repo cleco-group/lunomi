@@ -48,6 +48,7 @@ const NAV: NavGroup[] = [
     items: [
       { path: '/hr', label: 'Data Karyawan' },
       { path: '/attendance', label: 'Absensi' },
+      { path: '/staff-schedule', label: 'Jadwal Karyawan' },
     ],
   },
   {
@@ -73,6 +74,8 @@ const NAV: NavGroup[] = [
       { path: '/whatsapp', label: 'Integrasi WhatsApp' },
       { path: '/printer', label: 'Konfigurasi Printer' },
       { path: '/security', label: 'Keamanan' },
+      { path: '/audit', label: 'Audit Log' },
+      { path: '/financial-statements', label: 'Laporan Keuangan' },
     ],
   },
 ];
