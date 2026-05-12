@@ -22,6 +22,22 @@ import Expense from './pages/Expense';
 import Purchase from './pages/Purchase';
 import Refund from './pages/Refund';
 import Register from './pages/Register';
+import Payment from './pages/Payment';
+import Shift from './pages/Shift';
+import Attendance from './pages/Attendance';
+import HR from './pages/HR';
+import Stockopname from './pages/Stockopname';
+import Recipe from './pages/Recipe';
+import Tax from './pages/Tax';
+import TaxReport from './pages/TaxReport';
+import WhatsApp from './pages/WhatsApp';
+import Online from './pages/Online';
+import Keuangan from './pages/Keuangan';
+import Printer from './pages/Printer';
+import Security from './pages/Security';
+import Audit from './pages/Audit';
+import FinancialStatements from './pages/FinancialStatements';
+import StaffSchedule from './pages/StaffSchedule';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useSupabaseAuth();
@@ -60,6 +76,22 @@ function App() {
             <Route path="/expense" element={<ProtectedRoute><Expense /></ProtectedRoute>} />
             <Route path="/purchase" element={<ProtectedRoute><Purchase /></ProtectedRoute>} />
             <Route path="/refund" element={<ProtectedRoute><Refund /></ProtectedRoute>} />
+            <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+            <Route path="/shift" element={<ProtectedRoute><Shift /></ProtectedRoute>} />
+            <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+            <Route path="/hr" element={<ProtectedRoute><HR /></ProtectedRoute>} />
+            <Route path="/stockopname" element={<ProtectedRoute><Stockopname /></ProtectedRoute>} />
+            <Route path="/recipe" element={<ProtectedRoute><Recipe /></ProtectedRoute>} />
+            <Route path="/tax" element={<ProtectedRoute><Tax /></ProtectedRoute>} />
+            <Route path="/tax-report" element={<ProtectedRoute><TaxReport /></ProtectedRoute>} />
+            <Route path="/whatsapp" element={<ProtectedRoute><WhatsApp /></ProtectedRoute>} />
+            <Route path="/online" element={<ProtectedRoute><Online /></ProtectedRoute>} />
+            <Route path="/keuangan" element={<ProtectedRoute><Keuangan /></ProtectedRoute>} />
+            <Route path="/printer" element={<ProtectedRoute><Printer /></ProtectedRoute>} />
+            <Route path="/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
+            <Route path="/audit" element={<ProtectedRoute><Audit /></ProtectedRoute>} />
+            <Route path="/financial-statements" element={<ProtectedRoute><FinancialStatements /></ProtectedRoute>} />
+            <Route path="/staff-schedule" element={<ProtectedRoute><StaffSchedule /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminTools /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
